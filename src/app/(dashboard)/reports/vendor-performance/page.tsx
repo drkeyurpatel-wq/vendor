@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { cn, formatDate } from '@/lib/utils'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
-import { ArrowLeft, BarChart3, TrendingUp } from 'lucide-react'
+import { ArrowLeft, BarChart3, TrendingUp, TrendingDown, Award, AlertTriangle, Search, Calendar } from 'lucide-react'
+import { format, subMonths, startOfMonth } from 'date-fns'
 
 function scoreColor(score: number): string {
   if (score >= 80) return 'text-green-700 bg-green-100'
@@ -9,55 +11,111 @@ function scoreColor(score: number): string {
   return 'text-red-700 bg-red-100'
 }
 
-function scoreBg(score: number): string {
+function scoreBgClass(score: number): string {
   if (score >= 80) return 'bg-green-500'
   if (score >= 60) return 'bg-yellow-500'
   return 'bg-red-500'
 }
 
-export default async function VendorPerformancePage() {
-  const supabase = await createClient()
+function ScoreBar({ score, label }: { score: number | null; label: string }) {
+  const value = score ?? 0
+  return (
+    <div className="flex items-center gap-2" title={`${label}: ${value.toFixed(1)}`}>
+      <div className="w-16 bg-gray-100 rounded-full h-2">
+        <div
+          className={cn('h-2 rounded-full transition-all', scoreBgClass(value))}
+          style={{ width: `${Math.min(value, 100)}%` }}
+        />
+      </div>
+      <span className="text-xs font-semibold text-gray-600 w-8 text-right">
+        {value.toFixed(0)}
+      </span>
+    </div>
+  )
+}
 
-  const { data: performanceData, error } = await supabase
+export default async function VendorPerformancePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string; q?: string }>
+}) {
+  const params = await searchParams
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('*, centre:centres(*)')
+    .eq('id', user.id)
+    .single()
+
+  // Determine the selected month filter (default: current month)
+  const selectedMonth = params.month || format(startOfMonth(new Date()), 'yyyy-MM-dd')
+  const previousMonth = format(subMonths(new Date(selectedMonth), 1), 'yyyy-MM-01')
+
+  // Build query for current month performance data
+  let query = supabase
     .from('vendor_performance')
     .select(`
       id,
       vendor_id,
       month,
-      score,
-      on_time_delivery_pct,
-      quality_rating,
-      rejection_pct,
-      vendor:vendors(vendor_code, legal_name, status)
+      delivery_score,
+      quality_score,
+      price_score,
+      service_score,
+      overall_score,
+      notes,
+      created_at,
+      vendor:vendors(id, vendor_code, legal_name, status)
     `)
-    .order('month', { ascending: false })
-    .order('score', { ascending: false })
+    .eq('month', selectedMonth)
+    .order('overall_score', { ascending: false })
 
-  const records = performanceData ?? []
+  const { data: currentData } = await query
 
-  // Compute summary stats
-  const vendorMap = new Map<string, { name: string; code: string; avgScore: number; count: number }>()
-  records.forEach((r: any) => {
-    const key = r.vendor_id
-    const existing = vendorMap.get(key)
-    if (existing) {
-      existing.avgScore = (existing.avgScore * existing.count + (r.score ?? 0)) / (existing.count + 1)
-      existing.count += 1
-    } else {
-      vendorMap.set(key, {
-        name: r.vendor?.legal_name ?? 'Unknown',
-        code: r.vendor?.vendor_code ?? '',
-        avgScore: r.score ?? 0,
-        count: 1,
-      })
-    }
+  // Query previous month data for trend comparison
+  const { data: prevData } = await supabase
+    .from('vendor_performance')
+    .select('vendor_id, overall_score')
+    .eq('month', previousMonth)
+
+  // Build previous month score map
+  const prevScoreMap = new Map<string, number>()
+  prevData?.forEach((row: any) => {
+    prevScoreMap.set(row.vendor_id, row.overall_score ?? 0)
   })
 
-  const totalVendors = vendorMap.size
-  const avgScore = records.length > 0
-    ? Math.round(records.reduce((s: number, r: any) => s + (r.score ?? 0), 0) / records.length)
+  // Apply vendor search filter client-side
+  let records = currentData ?? []
+  if (params.q) {
+    const searchLower = params.q.toLowerCase()
+    records = records.filter((r: any) =>
+      r.vendor?.legal_name?.toLowerCase().includes(searchLower) ||
+      r.vendor?.vendor_code?.toLowerCase().includes(searchLower)
+    )
+  }
+
+  // Get all distinct months for the month picker
+  const { data: allMonths } = await supabase
+    .from('vendor_performance')
+    .select('month')
+    .order('month', { ascending: false })
+
+  const uniqueMonths = Array.from(new Set((allMonths ?? []).map((m: any) => m.month)))
+
+  // Compute summary stats
+  const totalVendors = records.length
+  const avgOverall = totalVendors > 0
+    ? Math.round(records.reduce((s: number, r: any) => s + (r.overall_score ?? 0), 0) / totalVendors)
     : 0
-  const topPerformers = Array.from(vendorMap.values()).filter(v => v.avgScore >= 80).length
+
+  // Top performer
+  const topPerformer = records.length > 0 ? records[0] : null
+
+  // Vendors below threshold (<60)
+  const belowThreshold = records.filter((r: any) => (r.overall_score ?? 0) < 60).length
 
   return (
     <div>
@@ -70,38 +128,106 @@ export default async function VendorPerformancePage() {
 
       <div className="page-header">
         <div>
-          <h1 className="page-title">Vendor Performance</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Monthly performance scorecards for all vendors
+          <h1 className="page-title">Vendor Performance Scorecards</h1>
+          <p className="page-subtitle">
+            Monthly performance tracking across delivery, quality, price, and service
           </p>
         </div>
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="stat-card border-l-4 border-[#1B3A6B]">
           <div className="flex items-center gap-2 mb-1">
             <BarChart3 size={18} className="text-[#1B3A6B]" />
-            <span className="text-sm text-gray-500">Vendors Tracked</span>
+            <span className="text-sm text-gray-500">Avg Overall Score</span>
           </div>
-          <div className="text-2xl font-bold text-[#1B3A6B]">{totalVendors}</div>
+          <div className={cn(
+            'text-2xl font-bold',
+            avgOverall >= 80 ? 'text-green-600' : avgOverall >= 60 ? 'text-yellow-600' : 'text-red-600'
+          )}>
+            {avgOverall}/100
+          </div>
+          <div className="text-xs text-gray-400 mt-1">{totalVendors} vendors evaluated</div>
         </div>
+
         <div className="stat-card border-l-4 border-[#0D7E8A]">
           <div className="flex items-center gap-2 mb-1">
-            <TrendingUp size={18} className="text-[#0D7E8A]" />
-            <span className="text-sm text-gray-500">Avg Score</span>
+            <Award size={18} className="text-[#0D7E8A]" />
+            <span className="text-sm text-gray-500">Top Performer</span>
           </div>
-          <div className={cn('text-2xl font-bold', avgScore >= 80 ? 'text-green-600' : avgScore >= 60 ? 'text-yellow-600' : 'text-red-600')}>
-            {avgScore}/100
-          </div>
+          {topPerformer ? (
+            <>
+              <div className="text-lg font-bold text-[#0D7E8A] truncate">
+                {(topPerformer as any).vendor?.legal_name ?? 'Unknown'}
+              </div>
+              <div className="text-xs text-gray-400 mt-1">
+                Score: {((topPerformer as any).overall_score ?? 0).toFixed(1)}
+              </div>
+            </>
+          ) : (
+            <div className="text-sm text-gray-400">No data</div>
+          )}
         </div>
+
         <div className="stat-card border-l-4 border-green-500">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm text-gray-500">Top Performers (80+)</span>
+            <TrendingUp size={18} className="text-green-500" />
+            <span className="text-sm text-gray-500">Above 80 (Excellent)</span>
           </div>
-          <div className="text-2xl font-bold text-green-600">{topPerformers}</div>
+          <div className="text-2xl font-bold text-green-600">
+            {records.filter((r: any) => (r.overall_score ?? 0) >= 80).length}
+          </div>
           <div className="text-xs text-gray-400 mt-1">out of {totalVendors} vendors</div>
         </div>
+
+        <div className="stat-card border-l-4 border-red-500">
+          <div className="flex items-center gap-2 mb-1">
+            <AlertTriangle size={18} className="text-red-500" />
+            <span className="text-sm text-gray-500">Below 60 (At Risk)</span>
+          </div>
+          <div className="text-2xl font-bold text-red-600">{belowThreshold}</div>
+          <div className="text-xs text-gray-400 mt-1">need attention</div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="card p-4 mb-6">
+        <form className="flex flex-col sm:flex-row gap-3" method="GET">
+          <div className="flex items-center gap-2 flex-1">
+            <Search size={16} className="text-gray-400" />
+            <input
+              type="text"
+              name="q"
+              placeholder="Search vendor name or code..."
+              defaultValue={params.q || ''}
+              className="form-input flex-1"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar size={16} className="text-gray-400" />
+            <select
+              name="month"
+              defaultValue={selectedMonth}
+              className="form-select"
+            >
+              {uniqueMonths.length > 0 ? (
+                uniqueMonths.map((m: string) => (
+                  <option key={m} value={m}>
+                    {format(new Date(m), 'MMMM yyyy')}
+                  </option>
+                ))
+              ) : (
+                <option value={selectedMonth}>
+                  {format(new Date(selectedMonth), 'MMMM yyyy')}
+                </option>
+              )}
+            </select>
+          </div>
+          <button type="submit" className="btn-primary">
+            Apply Filters
+          </button>
+        </form>
       </div>
 
       {/* Performance Table */}
@@ -109,7 +235,10 @@ export default async function VendorPerformancePage() {
         <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
           <BarChart3 size={16} className="text-[#0D7E8A]" />
           <h2 className="font-semibold text-gray-900">Performance Scorecards</h2>
-          <span className="text-xs text-gray-400 ml-auto">{records.length} records</span>
+          <span className="text-xs text-gray-400 ml-2">
+            {format(new Date(selectedMonth), 'MMMM yyyy')}
+          </span>
+          <span className="text-xs text-gray-400 ml-auto">{records.length} vendors</span>
         </div>
 
         {records.length > 0 ? (
@@ -118,89 +247,78 @@ export default async function VendorPerformancePage() {
               <thead>
                 <tr>
                   <th>Vendor</th>
-                  <th>Month</th>
-                  <th>Score</th>
-                  <th>On-Time Delivery %</th>
-                  <th>Quality Rating</th>
-                  <th>Rejection %</th>
+                  <th>Delivery (30%)</th>
+                  <th>Quality (30%)</th>
+                  <th>Price (20%)</th>
+                  <th>Service (20%)</th>
+                  <th>Overall</th>
+                  <th>Trend</th>
                 </tr>
               </thead>
               <tbody>
-                {records.map((row: any) => (
-                  <tr key={row.id}>
-                    <td>
-                      <div>
-                        <Link
-                          href={`/vendors/${row.vendor_id}`}
-                          className="text-sm font-semibold text-[#1B3A6B] hover:underline"
-                        >
-                          {row.vendor?.legal_name ?? 'Unknown'}
-                        </Link>
-                        <div className="text-xs text-gray-400 font-mono">
-                          {row.vendor?.vendor_code}
+                {records.map((row: any) => {
+                  const prevScore = prevScoreMap.get(row.vendor_id)
+                  const overall = row.overall_score ?? 0
+                  const trendDiff = prevScore !== undefined ? overall - prevScore : null
+
+                  return (
+                    <tr key={row.id}>
+                      <td>
+                        <div>
+                          <Link
+                            href={`/vendors/${row.vendor_id}`}
+                            className="text-sm font-semibold text-[#1B3A6B] hover:underline"
+                          >
+                            {row.vendor?.legal_name ?? 'Unknown'}
+                          </Link>
+                          <div className="text-xs text-gray-400 font-mono">
+                            {row.vendor?.vendor_code}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="text-sm text-gray-700 font-medium">
-                      {row.month}
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 bg-gray-100 rounded-full h-2">
-                          <div
-                            className={cn('h-2 rounded-full transition-all', scoreBg(row.score ?? 0))}
-                            style={{ width: `${Math.min(row.score ?? 0, 100)}%` }}
-                          />
-                        </div>
-                        <span className={cn('badge text-xs font-bold', scoreColor(row.score ?? 0))}>
-                          {row.score ?? 0}
+                      </td>
+                      <td>
+                        <ScoreBar score={row.delivery_score} label="Delivery" />
+                      </td>
+                      <td>
+                        <ScoreBar score={row.quality_score} label="Quality" />
+                      </td>
+                      <td>
+                        <ScoreBar score={row.price_score} label="Price" />
+                      </td>
+                      <td>
+                        <ScoreBar score={row.service_score} label="Service" />
+                      </td>
+                      <td>
+                        <span className={cn('badge text-xs font-bold px-2.5 py-1', scoreColor(overall))}>
+                          {overall.toFixed(1)}
                         </span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={cn(
-                        'text-sm font-semibold',
-                        (row.on_time_delivery_pct ?? 0) >= 90
-                          ? 'text-green-600'
-                          : (row.on_time_delivery_pct ?? 0) >= 75
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
-                      )}>
-                        {row.on_time_delivery_pct != null
-                          ? `${row.on_time_delivery_pct.toFixed(1)}%`
-                          : '—'}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={cn(
-                        'text-sm font-semibold',
-                        (row.quality_rating ?? 0) >= 4
-                          ? 'text-green-600'
-                          : (row.quality_rating ?? 0) >= 3
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
-                      )}>
-                        {row.quality_rating != null
-                          ? `${row.quality_rating.toFixed(1)}/5`
-                          : '—'}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={cn(
-                        'text-sm font-semibold',
-                        (row.rejection_pct ?? 0) <= 2
-                          ? 'text-green-600'
-                          : (row.rejection_pct ?? 0) <= 5
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
-                      )}>
-                        {row.rejection_pct != null
-                          ? `${row.rejection_pct.toFixed(1)}%`
-                          : '—'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td>
+                        {trendDiff !== null ? (
+                          <div className="flex items-center gap-1">
+                            {trendDiff > 0 ? (
+                              <TrendingUp size={14} className="text-green-500" />
+                            ) : trendDiff < 0 ? (
+                              <TrendingDown size={14} className="text-red-500" />
+                            ) : (
+                              <span className="text-gray-400 text-xs">--</span>
+                            )}
+                            {trendDiff !== 0 && (
+                              <span className={cn(
+                                'text-xs font-semibold',
+                                trendDiff > 0 ? 'text-green-600' : 'text-red-600'
+                              )}>
+                                {trendDiff > 0 ? '+' : ''}{trendDiff.toFixed(1)}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">New</span>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -208,13 +326,28 @@ export default async function VendorPerformancePage() {
           <div className="p-12 text-center">
             <BarChart3 size={40} className="mx-auto mb-3 text-gray-300" />
             <h3 className="text-lg font-semibold text-gray-500 mb-1">
-              No performance data recorded yet
+              No performance data for this period
             </h3>
             <p className="text-sm text-gray-400">
-              Performance scores will appear here once vendor evaluations are submitted.
+              Performance scores will appear here once vendor evaluations are calculated.
+              {uniqueMonths.length > 0 && ' Try selecting a different month.'}
             </p>
           </div>
         )}
+      </div>
+
+      {/* Score Legend */}
+      <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-gray-500">
+        <span className="font-medium">Score Legend:</span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded-full bg-green-500" /> 80+ Excellent
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded-full bg-yellow-500" /> 60-79 Satisfactory
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded-full bg-red-500" /> Below 60 At Risk
+        </span>
       </div>
     </div>
   )
