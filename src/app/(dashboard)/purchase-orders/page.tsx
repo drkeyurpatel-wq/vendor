@@ -2,13 +2,19 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { cn, formatLakhs, formatDate, PO_STATUS_COLORS } from '@/lib/utils'
 import { Plus, ShoppingCart } from 'lucide-react'
+import SearchInput from '@/components/ui/SearchInput'
+import Pagination from '@/components/ui/Pagination'
+import DateRangeFilter from '@/components/ui/DateRangeFilter'
+
+const PAGE_SIZE = 50
 
 export default async function PurchaseOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; centre?: string }>
+  searchParams: Promise<{ status?: string; centre?: string; q?: string; page?: string; from?: string; to?: string }>
 }) {
   const params = await searchParams
+  const currentPage = Math.max(1, parseInt(params.page || '1'))
   const supabase = await createClient()
 
   const { data: profile } = await supabase
@@ -25,8 +31,12 @@ export default async function PurchaseOrdersPage({
 
   if (params.status) query = query.eq('status', params.status)
   if (params.centre) query = query.eq('centre_id', params.centre)
+  if (params.q) query = query.or(`po_number.ilike.%${params.q}%,vendor.legal_name.ilike.%${params.q}%`)
+  if (params.from) query = query.gte('po_date', params.from)
+  if (params.to) query = query.lte('po_date', params.to)
 
-  const { data: pos, count } = await query.limit(50)
+  const from = (currentPage - 1) * PAGE_SIZE
+  const { data: pos, count } = await query.range(from, from + PAGE_SIZE - 1)
 
   const { data: centres } = await supabase.from('centres').select('id,code,name').eq('is_active', true)
 
@@ -44,6 +54,11 @@ export default async function PurchaseOrdersPage({
         </Link>
       </div>
 
+      {/* Search */}
+      <div className="mb-4">
+        <SearchInput placeholder="Search PO number or vendor..." />
+      </div>
+
       {/* Status filter tabs */}
       <div className="flex gap-2 mb-5 overflow-x-auto pb-1 flex-wrap">
         <Link href="/purchase-orders"
@@ -58,6 +73,11 @@ export default async function PurchaseOrdersPage({
             {s.replace(/_/g, ' ')}
           </Link>
         ))}
+      </div>
+
+      {/* Date range filter */}
+      <div className="mb-4">
+        <DateRangeFilter />
       </div>
 
       {/* Centre filter */}
@@ -82,6 +102,7 @@ export default async function PurchaseOrdersPage({
 
       <div className="card overflow-hidden">
         {pos && pos.length > 0 ? (
+          <>
           <div className="overflow-x-auto">
             <table className="data-table">
               <thead>
@@ -126,6 +147,8 @@ export default async function PurchaseOrdersPage({
               </tbody>
             </table>
           </div>
+          <Pagination totalCount={count ?? 0} pageSize={PAGE_SIZE} currentPage={currentPage} />
+          </>
         ) : (
           <div className="empty-state">
             <ShoppingCart size={40} className="mb-3 text-gray-300" />

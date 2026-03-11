@@ -464,6 +464,23 @@ create table if not exists activity_log (
 );
 
 -- ============================================================
+-- INVOICE LINE ITEMS (for 3-way matching)
+-- ============================================================
+create table if not exists invoice_items (
+  id uuid primary key default gen_random_uuid(),
+  invoice_id uuid not null references invoices(id) on delete cascade,
+  po_item_id uuid references purchase_order_items(id),
+  grn_item_id uuid references grn_items(id),
+  item_id uuid not null references items(id),
+  description text,
+  qty numeric(15,3) not null,
+  rate numeric(15,2) not null,
+  gst_percent numeric(5,2) default 0,
+  gst_amount numeric(15,2) default 0,
+  total_amount numeric(15,2) not null
+);
+
+-- ============================================================
 -- SEQUENCES for auto-numbering
 -- ============================================================
 create sequence if not exists vendor_code_seq start 1;
@@ -473,6 +490,35 @@ create sequence if not exists grn_number_seq start 1;
 create sequence if not exists indent_number_seq start 1;
 create sequence if not exists invoice_ref_seq start 1;
 create sequence if not exists batch_number_seq start 1;
+
+-- ============================================================
+-- FUNCTION: Atomic sequence number generator
+-- ============================================================
+create or replace function next_sequence_number(
+  seq_name text,
+  seq_type text,
+  centre_code text default 'XXX'
+)
+returns text as $$
+declare
+  seq_val bigint;
+  ym text;
+begin
+  execute format('select nextval(%L)', seq_name) into seq_val;
+  ym := to_char(now(), 'YYMM');
+
+  case seq_type
+    when 'vendor' then return 'H1V-' || lpad(seq_val::text, 4, '0');
+    when 'item' then return 'H1I-' || lpad(seq_val::text, 5, '0');
+    when 'po' then return 'H1-' || centre_code || '-PO-' || ym || '-' || lpad(seq_val::text, 3, '0');
+    when 'grn' then return 'H1-' || centre_code || '-GRN-' || ym || '-' || lpad(seq_val::text, 3, '0');
+    when 'indent' then return 'H1-' || centre_code || '-IND-' || ym || '-' || lpad(seq_val::text, 3, '0');
+    when 'invoice' then return 'H1-' || centre_code || '-INV-' || ym || '-' || lpad(seq_val::text, 3, '0');
+    when 'batch' then return 'H1-PAY-' || ym || '-' || lpad(seq_val::text, 3, '0');
+    else return seq_val::text;
+  end case;
+end;
+$$ language plpgsql security definer;
 
 -- ============================================================
 -- ROW LEVEL SECURITY
@@ -629,6 +675,105 @@ create policy "rate_contract_read" on rate_contracts for select
     centre_id is null
   );
 
+-- Vendor documents
+create policy "vendor_docs_read" on vendor_documents for select
+  using (get_my_role() in ('group_admin','group_cao','unit_cao','unit_purchase_manager','finance_staff'));
+
+create policy "vendor_docs_insert" on vendor_documents for insert
+  with check (get_my_role() in ('group_admin','group_cao','unit_cao','unit_purchase_manager'));
+
+create policy "vendor_docs_delete" on vendor_documents for delete
+  using (get_my_role() in ('group_admin','group_cao'));
+
+-- Invoice items
+alter table invoice_items enable row level security;
+
+create policy "invoice_items_read" on invoice_items for select
+  using (exists (
+    select 1 from invoices where invoices.id = invoice_items.invoice_id
+  ));
+
+create policy "invoice_items_insert" on invoice_items for insert
+  with check (get_my_role() in ('group_admin','group_cao','unit_cao','finance_staff'));
+
+-- Purchase order items (read follows PO access)
+alter table purchase_order_items enable row level security;
+
+create policy "po_items_read" on purchase_order_items for select
+  using (exists (
+    select 1 from purchase_orders where purchase_orders.id = purchase_order_items.po_id
+  ));
+
+create policy "po_items_insert" on purchase_order_items for insert
+  with check (auth.uid() is not null);
+
+create policy "po_items_delete" on purchase_order_items for delete
+  using (auth.uid() is not null);
+
+-- GRN items
+alter table grn_items enable row level security;
+
+create policy "grn_items_read" on grn_items for select
+  using (exists (
+    select 1 from grns where grns.id = grn_items.grn_id
+  ));
+
+create policy "grn_items_insert" on grn_items for insert
+  with check (auth.uid() is not null);
+
+-- PO approvals
+alter table po_approvals enable row level security;
+
+create policy "po_approvals_read" on po_approvals for select
+  using (exists (
+    select 1 from purchase_orders where purchase_orders.id = po_approvals.po_id
+  ));
+
+create policy "po_approvals_insert" on po_approvals for insert
+  with check (auth.uid() is not null);
+
+create policy "po_approvals_update" on po_approvals for update
+  using (auth.uid() is not null);
+
+-- Payment batch items
+alter table payment_batch_items enable row level security;
+
+create policy "batch_items_read" on payment_batch_items for select
+  using (exists (
+    select 1 from payment_batches where payment_batches.id = payment_batch_items.batch_id
+  ));
+
+create policy "batch_items_insert" on payment_batch_items for insert
+  with check (get_my_role() in ('group_admin','group_cao','unit_cao','finance_staff'));
+
+-- Rate contract items
+alter table rate_contract_items enable row level security;
+
+create policy "rate_contract_items_read" on rate_contract_items for select
+  using (exists (
+    select 1 from rate_contracts where rate_contracts.id = rate_contract_items.contract_id
+  ));
+
+-- Purchase indent items
+alter table purchase_indent_items enable row level security;
+
+create policy "indent_items_read" on purchase_indent_items for select
+  using (exists (
+    select 1 from purchase_indents where purchase_indents.id = purchase_indent_items.indent_id
+  ));
+
+create policy "indent_items_insert" on purchase_indent_items for insert
+  with check (auth.uid() is not null);
+
+-- Vendor items mapping
+alter table vendor_items enable row level security;
+
+create policy "vendor_items_read" on vendor_items for select
+  using (true);
+
+create policy "vendor_items_insert" on vendor_items for insert
+  with check (get_my_role() in ('group_admin','group_cao','unit_cao','unit_purchase_manager'));
+
 -- ============================================================
 -- TRIGGERS: auto-update updated_at
 -- ============================================================
@@ -690,3 +835,62 @@ create index if not exists idx_stock_centre_item on item_centre_stock(centre_id,
 create index if not exists idx_stock_ledger_item on stock_ledger(item_id, centre_id);
 create index if not exists idx_activity_user on activity_log(user_id);
 create index if not exists idx_activity_entity on activity_log(entity_type, entity_id);
+create index if not exists idx_invoice_items_invoice on invoice_items(invoice_id);
+create index if not exists idx_po_items_po on purchase_order_items(po_id);
+create index if not exists idx_grn_items_grn on grn_items(grn_id);
+
+-- ============================================================
+-- FUNCTION: Update stock from GRN (called after GRN verification)
+-- ============================================================
+create or replace function update_stock_from_grn(p_grn_id uuid, p_user_id uuid)
+returns void as $$
+declare
+  r record;
+  v_centre_id uuid;
+  v_grn_number text;
+  v_current numeric;
+begin
+  select centre_id, grn_number into v_centre_id, v_grn_number
+    from grns where id = p_grn_id;
+
+  for r in
+    select item_id, accepted_qty, rate
+    from grn_items
+    where grn_id = p_grn_id and accepted_qty > 0
+  loop
+    -- Upsert stock
+    insert into item_centre_stock (item_id, centre_id, current_stock, last_grn_date, last_grn_rate)
+    values (r.item_id, v_centre_id, r.accepted_qty, current_date, r.rate)
+    on conflict (item_id, centre_id) do update set
+      current_stock = item_centre_stock.current_stock + r.accepted_qty,
+      last_grn_date = current_date,
+      last_grn_rate = r.rate,
+      updated_at = now();
+
+    -- Get updated balance
+    select current_stock into v_current
+      from item_centre_stock
+      where item_id = r.item_id and centre_id = v_centre_id;
+
+    -- Write to stock ledger
+    insert into stock_ledger (centre_id, item_id, transaction_type, quantity, balance_after, reference_id, reference_number, created_by)
+    values (v_centre_id, r.item_id, 'grn', r.accepted_qty, v_current, p_grn_id, v_grn_number, p_user_id);
+  end loop;
+end;
+$$ language plpgsql security definer;
+
+-- ============================================================
+-- STORAGE: vendor-documents bucket
+-- ============================================================
+-- Run this in Supabase Dashboard > Storage or via:
+-- insert into storage.buckets (id, name, public) values ('vendor-documents', 'vendor-documents', false);
+--
+-- Storage policies (run in SQL Editor):
+-- create policy "vendor_docs_upload" on storage.objects for insert
+--   with check (bucket_id = 'vendor-documents' and auth.uid() is not null);
+-- create policy "vendor_docs_download" on storage.objects for select
+--   using (bucket_id = 'vendor-documents' and auth.uid() is not null);
+-- create policy "vendor_docs_remove" on storage.objects for delete
+--   using (bucket_id = 'vendor-documents' and (
+--     select role from user_profiles where id = auth.uid()
+--   ) in ('group_admin','group_cao'));

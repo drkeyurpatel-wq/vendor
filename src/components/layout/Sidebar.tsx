@@ -21,6 +21,11 @@ interface NavItem {
   roles?: string[]
 }
 
+const VENDOR_NAV: NavItem[] = [
+  { label: 'Dashboard', href: '/', icon: <LayoutDashboard size={18} /> },
+  { label: 'My Portal', href: '/vendor-portal', icon: <Package size={18} />, roles: ['vendor'] },
+]
+
 const NAV: NavItem[] = [
   { label: 'Dashboard', href: '/', icon: <LayoutDashboard size={18} /> },
   {
@@ -37,6 +42,7 @@ const NAV: NavItem[] = [
       { label: 'Item Master', href: '/items' },
       { label: 'Add Item', href: '/items/new' },
       { label: 'Stock Levels', href: '/items/stock' },
+      { label: 'Consumption Import', href: '/items/consumption' },
     ]
   },
   {
@@ -58,11 +64,20 @@ const NAV: NavItem[] = [
     label: 'Finance', icon: <CreditCard size={18} />,
     children: [
       { label: 'Invoices', href: '/finance/invoices' },
+      { label: 'New Invoice', href: '/finance/invoices/new' },
       { label: 'Credit Period', href: '/finance/credit' },
       { label: 'Payment Batches', href: '/finance/payments' },
+      { label: 'New Batch', href: '/finance/payments/new' },
     ]
   },
-  { label: 'Reports', href: '/reports', icon: <BarChart2 size={18} /> },
+  {
+    label: 'Reports', icon: <BarChart2 size={18} />,
+    children: [
+      { label: 'Overview', href: '/reports' },
+      { label: 'AI Analytics', href: '/analytics' },
+      { label: 'Vendor Performance', href: '/reports/vendor-performance' },
+    ]
+  },
   {
     label: 'Settings', icon: <Settings size={18} />,
     roles: ['group_admin', 'group_cao'],
@@ -70,6 +85,7 @@ const NAV: NavItem[] = [
       { label: 'Centres', href: '/settings/centres' },
       { label: 'Users', href: '/settings/users' },
       { label: 'Approval Matrix', href: '/settings/approvals' },
+      { label: 'Rate Contracts', href: '/settings/rate-contracts' },
     ]
   },
 ]
@@ -96,7 +112,9 @@ export default function Sidebar({ user }: SidebarProps) {
     router.push('/login')
   }
 
-  const filteredNav = NAV.filter(item =>
+  // Vendor users get a simplified nav
+  const baseNav = user.role === 'vendor' ? VENDOR_NAV : NAV
+  const filteredNav = baseNav.filter(item =>
     !item.roles || item.roles.includes(user.role)
   )
 

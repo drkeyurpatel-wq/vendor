@@ -79,13 +79,16 @@ export default function NewVendorPage() {
 
     setLoading(true)
 
-    // Get next sequence
-    const { count } = await supabase
-      .from('vendors')
-      .select('*', { count: 'exact', head: true })
-
-    const seq = (count ?? 0) + 1
-    const vendor_code = `H1V-${String(seq).padStart(4, '0')}`
+    // Use atomic DB sequence for race-safe numbering
+    let vendor_code: string
+    try {
+      const seqRes = await fetch('/api/sequence?type=vendor')
+      const seqData = await seqRes.json()
+      vendor_code = seqData.number
+    } catch {
+      const { count } = await supabase.from('vendors').select('*', { count: 'exact', head: true })
+      vendor_code = `H1V-${String((count ?? 0) + 1).padStart(4, '0')}`
+    }
 
     const { data, error } = await supabase.from('vendors').insert({
       vendor_code,
