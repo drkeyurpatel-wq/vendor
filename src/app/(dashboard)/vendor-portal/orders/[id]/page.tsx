@@ -97,7 +97,14 @@ export default async function VendorPODetailPage({
             className="btn-secondary text-sm flex items-center gap-2"
           >
             <Download size={16} />
-            Download PO
+            Download PDF
+          </a>
+          <a
+            href={`/api/docx/po?id=${po.id}`}
+            className="btn-secondary text-sm flex items-center gap-2"
+          >
+            <FileText size={16} />
+            Download Word
           </a>
           {canAcknowledge && (
             <AcknowledgePOButton poId={po.id} />
