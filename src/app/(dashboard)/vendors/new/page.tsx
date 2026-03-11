@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import FieldError from '@/components/ui/FieldError'
 
 const STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -91,6 +92,49 @@ export default function NewVendorPage() {
   const [selectedCentres, setSelectedCentres] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState('basic')
   const [form, setForm] = useState<FormState>(defaultForm)
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
+  const [touched, setTouched] = useState<Set<string>>(new Set())
+
+  function touch(field: string) {
+    setTouched(prev => new Set(prev).add(field))
+  }
+
+  function validateField(field: keyof FormState, value: string): string | undefined {
+    switch (field) {
+      case 'legal_name':
+        if (!value.trim()) return 'Legal name is required'
+        if (value.trim().length < 3) return 'Legal name must be at least 3 characters'
+        return undefined
+      case 'gstin':
+        if (value.trim() && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/i.test(value.trim()))
+          return 'Invalid GSTIN format (e.g. 24AABCU9603R1ZM)'
+        return undefined
+      case 'pan':
+        if (value.trim() && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(value.trim()))
+          return 'Invalid PAN format (e.g. AABCU9603R)'
+        return undefined
+      case 'pincode':
+        if (value.trim() && !/^[1-9][0-9]{5}$/.test(value.trim()))
+          return 'Invalid pincode (must be 6 digits)'
+        return undefined
+      case 'primary_contact_email':
+      case 'secondary_contact_email':
+        if (value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()))
+          return 'Invalid email address'
+        return undefined
+      case 'primary_contact_phone':
+      case 'secondary_contact_phone':
+        if (value.trim() && !/^[\d+\-\s()]{10,15}$/.test(value.trim()))
+          return 'Invalid phone number'
+        return undefined
+      case 'bank_ifsc':
+        if (value.trim() && !/^[A-Z]{4}0[A-Z0-9]{6}$/i.test(value.trim()))
+          return 'Invalid IFSC code (e.g. SBIN0001234)'
+        return undefined
+      default:
+        return undefined
+    }
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -109,6 +153,15 @@ export default function NewVendorPage() {
 
   function update(field: keyof FormState, value: string | boolean) {
     setForm(prev => ({ ...prev, [field]: value }))
+    if (typeof value === 'string') {
+      const err = validateField(field, value)
+      setErrors(prev => {
+        const next = { ...prev }
+        if (err) next[field] = err
+        else delete next[field]
+        return next
+      })
+    }
   }
 
   function toggleCentre(id: string) {
@@ -119,16 +172,28 @@ export default function NewVendorPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.legal_name.trim()) { toast.error('Legal name is required'); return }
 
-    // GSTIN validation
-    const gstin = form.gstin.trim().toUpperCase()
-    if (gstin && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(gstin)) {
-      toast.error('Invalid GSTIN format'); return
+    // Validate all fields
+    const fieldTabMap: Record<string, string> = {
+      legal_name: 'basic', gstin: 'compliance', pan: 'compliance',
+      pincode: 'contact', primary_contact_email: 'contact', primary_contact_phone: 'contact',
+      secondary_contact_email: 'contact', secondary_contact_phone: 'contact',
+      bank_ifsc: 'banking',
     }
-    const pan = form.pan.trim().toUpperCase()
-    if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
-      toast.error('Invalid PAN format'); return
+    const newErrors: Partial<Record<keyof FormState, string>> = {}
+    for (const field of Object.keys(fieldTabMap) as (keyof FormState)[]) {
+      const err = validateField(field, form[field] as string)
+      if (err) newErrors[field] = err
+    }
+    setErrors(newErrors)
+    setTouched(new Set(Object.keys(fieldTabMap)))
+
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorField = Object.keys(newErrors)[0]
+      const targetTab = fieldTabMap[firstErrorField]
+      if (targetTab) setActiveTab(targetTab)
+      toast.error('Please fix the highlighted errors')
+      return
     }
 
     setLoading(true)
@@ -150,8 +215,8 @@ export default function NewVendorPage() {
       category_id: form.category_id || null,
       vendor_type: form.vendor_type,
       // Compliance
-      gstin: gstin || null,
-      pan: pan || null,
+      gstin: form.gstin.trim().toUpperCase() || null,
+      pan: form.pan.trim().toUpperCase() || null,
       drug_license_no: form.drug_license_no.trim() || null,
       fssai_no: form.fssai_no.trim() || null,
       drug_license_expiry: form.drug_license_expiry || null,
@@ -225,16 +290,29 @@ export default function NewVendorPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-4 border-b border-gray-200 overflow-x-auto" role="tablist" aria-label="Vendor form sections">
-        {TABS.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            aria-controls={`tabpanel-${tab.id}`}
-            id={`tab-${tab.id}`}
-            className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-              activeTab === tab.id ? 'border-[#0D7E8A] text-[#0D7E8A]' : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}>{tab.label}</button>
-        ))}
+        {TABS.map(tab => {
+          const tabFieldMap: Record<string, string[]> = {
+            basic: ['legal_name'],
+            compliance: ['gstin', 'pan'],
+            contact: ['primary_contact_phone', 'primary_contact_email', 'secondary_contact_email', 'secondary_contact_phone', 'pincode'],
+            banking: ['bank_ifsc'],
+          }
+          const tabFields = tabFieldMap[tab.id] || []
+          const hasError = tabFields.some(f => errors[f as keyof FormState])
+          return (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={`tabpanel-${tab.id}`}
+              id={`tab-${tab.id}`}
+              className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors flex items-center gap-1.5 ${
+                activeTab === tab.id ? 'border-[#0D7E8A] text-[#0D7E8A]' : hasError ? 'border-red-400 text-red-500' : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}>
+              {tab.label}
+              {hasError && <span className="w-1.5 h-1.5 rounded-full bg-red-500" />}
+            </button>
+          )
+        })}
       </div>
 
       <form onSubmit={handleSubmit} aria-label="Add new vendor form">
@@ -248,7 +326,8 @@ export default function NewVendorPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div className="md:col-span-2">
                   <label htmlFor="legal_name" className="form-label">Legal Name * <span className="text-gray-400 font-normal">(as per GST certificate)</span></label>
-                  <input id="legal_name" className="form-input" value={form.legal_name} onChange={e => update('legal_name', e.target.value)} required aria-required="true" />
+                  <input id="legal_name" className="form-input" value={form.legal_name} onChange={e => update('legal_name', e.target.value)} onBlur={() => touch('legal_name')} required aria-required="true" aria-invalid={touched.has('legal_name') && !!errors.legal_name} />
+                  <FieldError message={errors.legal_name} show={touched.has('legal_name')} />
                 </div>
                 <div>
                   <label htmlFor="trade_name" className="form-label">Trade / Brand Name</label>
@@ -287,13 +366,15 @@ export default function NewVendorPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   <div>
                     <label htmlFor="gstin" className="form-label">GSTIN</label>
-                    <input id="gstin" className="form-input uppercase" value={form.gstin} onChange={e => update('gstin', e.target.value)} maxLength={15} placeholder="24AABCU9603R1ZM" aria-describedby="gstin-hint" />
+                    <input id="gstin" className="form-input uppercase" value={form.gstin} onChange={e => update('gstin', e.target.value)} onBlur={() => touch('gstin')} maxLength={15} placeholder="24AABCU9603R1ZM" aria-describedby="gstin-hint" aria-invalid={touched.has('gstin') && !!errors.gstin} />
                     <span id="gstin-hint" className="sr-only">15-character GST Identification Number</span>
+                    <FieldError message={errors.gstin} show={touched.has('gstin')} />
                   </div>
                   <div>
                     <label htmlFor="pan" className="form-label">PAN</label>
-                    <input id="pan" className="form-input uppercase" value={form.pan} onChange={e => update('pan', e.target.value)} maxLength={10} placeholder="AABCU9603R" aria-describedby="pan-hint" />
+                    <input id="pan" className="form-input uppercase" value={form.pan} onChange={e => update('pan', e.target.value)} onBlur={() => touch('pan')} maxLength={10} placeholder="AABCU9603R" aria-describedby="pan-hint" aria-invalid={touched.has('pan') && !!errors.pan} />
                     <span id="pan-hint" className="sr-only">10-character Permanent Account Number</span>
+                    <FieldError message={errors.pan} show={touched.has('pan')} />
                   </div>
                   <div>
                     <label htmlFor="gst_return_status" className="form-label">GST Filing Status</label>
@@ -367,8 +448,16 @@ export default function NewVendorPage() {
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   <div><label htmlFor="primary_contact_name" className="form-label">Name</label><input id="primary_contact_name" className="form-input" value={form.primary_contact_name} onChange={e => update('primary_contact_name', e.target.value)} /></div>
-                  <div><label htmlFor="primary_contact_phone" className="form-label">Phone</label><input id="primary_contact_phone" className="form-input" value={form.primary_contact_phone} onChange={e => update('primary_contact_phone', e.target.value)} placeholder="+91 98765 43210" /></div>
-                  <div><label htmlFor="primary_contact_email" className="form-label">Email</label><input id="primary_contact_email" type="email" className="form-input" value={form.primary_contact_email} onChange={e => update('primary_contact_email', e.target.value)} /></div>
+                  <div>
+                    <label htmlFor="primary_contact_phone" className="form-label">Phone</label>
+                    <input id="primary_contact_phone" className="form-input" value={form.primary_contact_phone} onChange={e => update('primary_contact_phone', e.target.value)} onBlur={() => touch('primary_contact_phone')} placeholder="+91 98765 43210" aria-invalid={touched.has('primary_contact_phone') && !!errors.primary_contact_phone} />
+                    <FieldError message={errors.primary_contact_phone} show={touched.has('primary_contact_phone')} />
+                  </div>
+                  <div>
+                    <label htmlFor="primary_contact_email" className="form-label">Email</label>
+                    <input id="primary_contact_email" type="email" className="form-input" value={form.primary_contact_email} onChange={e => update('primary_contact_email', e.target.value)} onBlur={() => touch('primary_contact_email')} aria-invalid={touched.has('primary_contact_email') && !!errors.primary_contact_email} />
+                    <FieldError message={errors.primary_contact_email} show={touched.has('primary_contact_email')} />
+                  </div>
                 </div>
               </fieldset>
             </div>
@@ -394,7 +483,11 @@ export default function NewVendorPage() {
                     {STATES.map(s => <option key={s}>{s}</option>)}
                   </select>
                 </div>
-                <div><label className="form-label">Pincode</label><input className="form-input" value={form.pincode} onChange={e => update('pincode', e.target.value)} maxLength={6} /></div>
+                <div>
+                  <label className="form-label">Pincode</label>
+                  <input className="form-input" value={form.pincode} onChange={e => update('pincode', e.target.value)} onBlur={() => touch('pincode')} maxLength={6} aria-invalid={touched.has('pincode') && !!errors.pincode} />
+                  <FieldError message={errors.pincode} show={touched.has('pincode')} />
+                </div>
               </div>
             </div>
           </div>
@@ -419,7 +512,11 @@ export default function NewVendorPage() {
                   </select>
                 </div>
                 <div><label htmlFor="bank_account_no" className="form-label">Account Number</label><input id="bank_account_no" className="form-input" value={form.bank_account_no} onChange={e => update('bank_account_no', e.target.value)} /></div>
-                <div><label htmlFor="bank_ifsc" className="form-label">IFSC Code</label><input id="bank_ifsc" className="form-input uppercase" value={form.bank_ifsc} onChange={e => update('bank_ifsc', e.target.value)} maxLength={11} /></div>
+                <div>
+                  <label htmlFor="bank_ifsc" className="form-label">IFSC Code</label>
+                  <input id="bank_ifsc" className="form-input uppercase" value={form.bank_ifsc} onChange={e => update('bank_ifsc', e.target.value)} onBlur={() => touch('bank_ifsc')} maxLength={11} aria-invalid={touched.has('bank_ifsc') && !!errors.bank_ifsc} />
+                  <FieldError message={errors.bank_ifsc} show={touched.has('bank_ifsc')} />
+                </div>
               </div>
             </fieldset>
             <div className="mt-4 p-3 bg-yellow-50 rounded-lg text-xs text-yellow-800">

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, FileText } from 'lucide-react'
 import toast from 'react-hot-toast'
+import FieldError from '@/components/ui/FieldError'
 import { format } from 'date-fns'
 
 interface GRNOption {
@@ -33,6 +34,7 @@ export default function NewInvoicePage() {
   const [totalAmount, setTotalAmount] = useState('')
   const [gstAmount, setGstAmount] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     async function load() {
@@ -90,23 +92,19 @@ export default function NewInvoicePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    if (!selectedGRN) {
-      toast.error('Please select a GRN')
-      return
-    }
-    if (!vendorInvoiceNo.trim()) {
-      toast.error('Vendor invoice number is required')
-      return
-    }
-    if (!vendorInvoiceDate) {
-      toast.error('Vendor invoice date is required')
-      return
-    }
-    if (!totalAmount || parseFloat(totalAmount) <= 0) {
-      toast.error('Total amount must be greater than zero')
+    const errs: Record<string, string> = {}
+    if (!selectedGRN) errs.grn = 'Please select a GRN'
+    if (!vendorInvoiceNo.trim()) errs.vendorInvoiceNo = 'Vendor invoice number is required'
+    if (!vendorInvoiceDate) errs.vendorInvoiceDate = 'Invoice date is required'
+    if (!totalAmount || parseFloat(totalAmount) <= 0) errs.totalAmount = 'Amount must be greater than zero'
+    setFieldErrors(errs)
+    if (Object.keys(errs).length > 0) {
+      toast.error('Please fix the highlighted errors')
       return
     }
 
+    // TypeScript narrowing: selectedGRN is guaranteed non-null after validation
+    if (!selectedGRN) return
     setLoading(true)
 
     // Credit check: verify vendor is not over credit limit or has overdue invoices
@@ -234,7 +232,8 @@ export default function NewInvoicePage() {
               <select
                 className="form-select"
                 value={selectedGRN?.id || ''}
-                onChange={e => handleGRNSelect(e.target.value)}
+                onChange={e => { handleGRNSelect(e.target.value); setFieldErrors(prev => { const n = {...prev}; delete n.grn; return n }) }}
+                aria-invalid={!!fieldErrors.grn}
               >
                 <option value="">Select a GRN...</option>
                 {grns.map(grn => (
@@ -243,6 +242,7 @@ export default function NewInvoicePage() {
                   </option>
                 ))}
               </select>
+              <FieldError message={fieldErrors.grn} />
             </div>
           )}
 
@@ -273,10 +273,12 @@ export default function NewInvoicePage() {
               <input
                 className="form-input"
                 value={vendorInvoiceNo}
-                onChange={e => setVendorInvoiceNo(e.target.value)}
+                onChange={e => { setVendorInvoiceNo(e.target.value); setFieldErrors(prev => { const n = {...prev}; delete n.vendorInvoiceNo; return n }) }}
                 placeholder="Vendor's invoice number"
                 required
+                aria-invalid={!!fieldErrors.vendorInvoiceNo}
               />
+              <FieldError message={fieldErrors.vendorInvoiceNo} />
             </div>
             <div>
               <label className="form-label">Vendor Invoice Date *</label>
@@ -284,9 +286,11 @@ export default function NewInvoicePage() {
                 type="date"
                 className="form-input"
                 value={vendorInvoiceDate}
-                onChange={e => setVendorInvoiceDate(e.target.value)}
+                onChange={e => { setVendorInvoiceDate(e.target.value); setFieldErrors(prev => { const n = {...prev}; delete n.vendorInvoiceDate; return n }) }}
                 required
+                aria-invalid={!!fieldErrors.vendorInvoiceDate}
               />
+              <FieldError message={fieldErrors.vendorInvoiceDate} />
             </div>
             <div>
               <label className="form-label">Total Amount (Rs) *</label>
@@ -296,10 +300,12 @@ export default function NewInvoicePage() {
                 min="0"
                 className="form-input"
                 value={totalAmount}
-                onChange={e => setTotalAmount(e.target.value)}
+                onChange={e => { setTotalAmount(e.target.value); setFieldErrors(prev => { const n = {...prev}; delete n.totalAmount; return n }) }}
                 placeholder="0.00"
                 required
+                aria-invalid={!!fieldErrors.totalAmount}
               />
+              <FieldError message={fieldErrors.totalAmount} />
             </div>
             <div>
               <label className="form-label">GST Amount (Rs)</label>

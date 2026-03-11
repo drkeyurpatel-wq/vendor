@@ -1,9 +1,10 @@
 'use client'
 
-import { Search, Menu, Command } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { UserProfile } from '@/types/database'
 import { formatDate } from '@/lib/utils'
 import RealtimeNotificationBell from '@/components/ui/RealtimeNotificationBell'
+import GlobalSearch from '@/components/ui/GlobalSearch'
 
 interface TopBarProps {
   user: UserProfile
@@ -25,17 +26,7 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
 
       {/* Search */}
       <div className="flex-1 max-w-lg">
-        <div className="relative group">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#0D7E8A] transition-colors" />
-          <input
-            type="text"
-            placeholder="Search vendors, POs, items..."
-            className="w-full pl-10 pr-12 py-2 bg-gray-50/80 border border-gray-200/80 rounded-xl text-sm focus:outline-none focus:border-[#0D7E8A]/40 focus:bg-white focus:shadow-md focus:shadow-[#0D7E8A]/5 transition-all placeholder:text-gray-400"
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 text-gray-400">
-            <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] font-mono border border-gray-200">/</kbd>
-          </div>
-        </div>
+        <GlobalSearch />
       </div>
 
       <div className="flex items-center gap-2 ml-auto">
