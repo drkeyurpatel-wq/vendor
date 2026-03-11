@@ -86,6 +86,7 @@ const NAV: NavItem[] = [
       { label: 'Users', href: '/settings/users' },
       { label: 'Approval Matrix', href: '/settings/approvals' },
       { label: 'Rate Contracts', href: '/settings/rate-contracts' },
+      { label: 'Data Import', href: '/settings/data-import' },
     ]
   },
 ]
