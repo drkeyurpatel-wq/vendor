@@ -1,17 +1,27 @@
 'use client'
 
-import { Bell, Search } from 'lucide-react'
+import { Search, Menu } from 'lucide-react'
 import { UserProfile } from '@/types/database'
 import { formatDate } from '@/lib/utils'
+import RealtimeNotificationBell from '@/components/ui/RealtimeNotificationBell'
 
 interface TopBarProps {
   user: UserProfile
   title?: string
+  onMenuClick?: () => void
 }
 
-export default function TopBar({ user, title }: TopBarProps) {
+export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
   return (
-    <header className="h-14 bg-white border-b border-gray-200 flex items-center px-6 gap-4 sticky top-0 z-10">
+    <header className="h-14 bg-white border-b border-gray-200 flex items-center px-4 lg:px-6 gap-3 sticky top-0 z-10">
+      {/* Mobile hamburger */}
+      <button
+        onClick={onMenuClick}
+        className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-colors flex-shrink-0"
+      >
+        <Menu size={20} />
+      </button>
+
       {/* Search */}
       <div className="flex-1 max-w-md">
         <div className="relative">
@@ -28,11 +38,8 @@ export default function TopBar({ user, title }: TopBarProps) {
         {/* Date */}
         <span className="text-sm text-gray-500 hidden md:block">{formatDate(new Date())}</span>
 
-        {/* Notifications */}
-        <button className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
-          <Bell size={17} />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-        </button>
+        {/* Notifications - Realtime */}
+        <RealtimeNotificationBell userId={user.id} />
 
         {/* User avatar */}
         <div className="flex items-center gap-2">

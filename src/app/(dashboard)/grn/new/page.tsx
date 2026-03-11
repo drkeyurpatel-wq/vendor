@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { generateGRNNumber, formatCurrency } from '@/lib/utils'
+import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
 
 interface GRNLineItem {
   po_item_id: string
@@ -65,6 +66,8 @@ export default function NewGRNPage() {
   const [vendorInvoiceDate, setVendorInvoiceDate] = useState('')
   const [vendorInvoiceAmount, setVendorInvoiceAmount] = useState('')
   const [notes, setNotes] = useState('')
+
+  const [highlightedItemIdx, setHighlightedItemIdx] = useState<number | null>(null)
 
   // Transport details
   const [dcNumber, setDcNumber] = useState('')
@@ -267,6 +270,21 @@ export default function NewGRNPage() {
   const hasShortOrExcess = lineItems.some(li => li.short_qty > 0 || li.excess_qty > 0)
   const hasRejections = lineItems.some(li => li.rejected_qty > 0)
   const hasDamaged = lineItems.some(li => li.damaged_qty > 0)
+
+  function handleBarcodeScan(code: string) {
+    const idx = lineItems.findIndex(li => li.item_code.toLowerCase() === code.toLowerCase())
+    if (idx >= 0) {
+      setHighlightedItemIdx(idx)
+      toast.success(`Found: ${lineItems[idx].generic_name} (${lineItems[idx].item_code})`)
+      // Clear highlight after 4 seconds
+      setTimeout(() => setHighlightedItemIdx(null), 4000)
+      // Scroll to the row
+      const row = document.getElementById(`grn-line-${idx}`)
+      if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    } else {
+      toast.error(`Item not found for barcode: ${code}`)
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -620,9 +638,12 @@ export default function NewGRNPage() {
         {/* Line Items */}
         {lineItems.length > 0 && (
           <div className="card p-6">
-            <h2 className="font-semibold mb-4 pb-3 border-b border-gray-100" style={{ color: '#1B3A6B' }}>
-              Receiving Items
-            </h2>
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+              <h2 className="font-semibold" style={{ color: '#1B3A6B' }}>
+                Receiving Items
+              </h2>
+              <BarcodeScanButton onScan={handleBarcodeScan} label="Scan Item" scanType="item" />
+            </div>
             <div className="overflow-x-auto">
               <table className="data-table">
                 <thead>
@@ -644,7 +665,7 @@ export default function NewGRNPage() {
                 </thead>
                 <tbody>
                   {lineItems.map((li, idx) => (
-                    <tr key={li.po_item_id} className={li.short_qty > 0 ? 'bg-yellow-50' : li.excess_qty > 0 ? 'bg-orange-50' : ''}>
+                    <tr key={li.po_item_id} id={`grn-line-${idx}`} className={`${highlightedItemIdx === idx ? 'ring-2 ring-[#0D7E8A] bg-[#E6F5F6]' : li.short_qty > 0 ? 'bg-yellow-50' : li.excess_qty > 0 ? 'bg-orange-50' : ''} transition-all duration-300`}>
                       <td>
                         <div className="font-medium text-gray-900 text-sm">{li.generic_name}</div>
                         <div className="font-mono text-xs text-gray-400">{li.item_code} | {li.unit}</div>
