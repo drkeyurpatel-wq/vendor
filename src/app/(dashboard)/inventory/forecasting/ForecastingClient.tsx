@@ -1,145 +1,162 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { cn, formatCurrency } from '@/lib/utils'
-import { Search, TrendingUp, BarChart2, ArrowDown, ArrowUp, Minus, Loader2 } from 'lucide-react'
-import type { DemandForecast } from '@/lib/forecasting'
+import { cn } from '@/lib/utils'
+import {
+  Search, Loader2, TrendingUp, BarChart2, Package, Calendar,
+  Target, ArrowRight, ShieldCheck
+} from 'lucide-react'
+import toast from 'react-hot-toast'
 
-interface ForecastingClientProps {
-  centreId: string
+interface ForecastData {
+  item: {
+    id: string
+    item_code: string
+    generic_name: string
+    brand_name: string | null
+    lead_time_days: number
+    default_rate: number | null
+  }
+  current_stock: number
+  stock_by_centre: Array<{
+    centre_id: string
+    current_stock: number
+    reorder_level: number
+    safety_stock: number
+    avg_daily_consumption: number | null
+    last_grn_date: string | null
+    last_grn_rate: number | null
+  }>
+  historical: Array<{ month: string; qty: number }>
+  forecast: Array<{
+    month: string
+    predicted_qty: number
+    confidence: 'high' | 'medium' | 'low'
+    method: string
+  }>
+  reorder: {
+    reorder_point: number
+    safety_stock: number
+    eoq: number
+    avg_daily_usage: number
+    days_of_stock: number | null
+    should_reorder: boolean
+  }
+  seasonal_indices: number[]
+  avg_monthly_consumption: number
 }
 
-export default function ForecastingClient({ centreId }: ForecastingClientProps) {
-  const [query, setQuery] = useState('')
-  const [items, setItems] = useState<any[]>([])
-  const [selectedItem, setSelectedItem] = useState<any>(null)
-  const [forecast, setForecast] = useState<DemandForecast | null>(null)
-  const [loading, setLoading] = useState(false)
+interface SearchResult {
+  id: string
+  item_code: string
+  generic_name: string
+  brand_name: string | null
+}
+
+export default function ForecastingClient({ centreId }: { centreId: string }) {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [searching, setSearching] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState<ForecastData | null>(null)
   const supabase = createClient()
 
-  async function searchItems(term: string) {
-    setQuery(term)
-    if (term.length < 2) { setItems([]); return }
-    setSearching(true)
-    const { data } = await supabase
-      .from('items')
-      .select('id, item_code, generic_name, brand_name')
-      .or(`generic_name.ilike.%${term}%,item_code.ilike.%${term}%,brand_name.ilike.%${term}%`)
-      .eq('is_active', true)
-      .limit(10)
-    setItems(data || [])
-    setSearching(false)
-  }
+  const searchItems = useCallback(
+    async (query: string) => {
+      if (query.length < 2) {
+        setSearchResults([])
+        return
+      }
+      setSearching(true)
+      const { data: items } = await supabase
+        .from('items')
+        .select('id, item_code, generic_name, brand_name')
+        .is('deleted_at', null)
+        .eq('is_active', true)
+        .or(`generic_name.ilike.%${query}%,item_code.ilike.%${query}%,brand_name.ilike.%${query}%`)
+        .limit(10)
 
-  async function loadForecast(item: any) {
-    setSelectedItem(item)
-    setItems([])
-    setQuery(item.generic_name)
+      setSearchResults(items || [])
+      setSearching(false)
+    },
+    [supabase]
+  )
+
+  const loadForecast = async (itemId: string) => {
     setLoading(true)
-
+    setSearchResults([])
     try {
-      // Fetch stock_ledger for last 12 months
-      const twelveMonthsAgo = new Date()
-      twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
-
-      let stockQuery = supabase
-        .from('stock_ledger')
-        .select('quantity, created_at')
-        .eq('item_id', item.id)
-        .eq('movement_type', 'issue')
-        .gte('created_at', twelveMonthsAgo.toISOString())
-        .order('created_at', { ascending: true })
-
-      if (centreId) {
-        stockQuery = stockQuery.eq('centre_id', centreId)
+      const url = `/api/forecasting?item_id=${itemId}${centreId ? `&centre_id=${centreId}` : ''}`
+      const res = await fetch(url)
+      if (!res.ok) {
+        throw new Error('Failed to load forecast data')
       }
-
-      const { data: ledger } = await stockQuery
-
-      // Aggregate by month
-      const monthlyMap = new Map<string, number>()
-      for (let i = 11; i >= 0; i--) {
-        const d = new Date()
-        d.setMonth(d.getMonth() - i)
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-        monthlyMap.set(key, 0)
-      }
-
-      ;(ledger || []).forEach(entry => {
-        const d = new Date(entry.created_at)
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-        monthlyMap.set(key, (monthlyMap.get(key) || 0) + Math.abs(entry.quantity))
-      })
-
-      const historical = Array.from(monthlyMap.entries())
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([month, qty]) => ({ month, qty }))
-
-      // Get current stock
-      let stockData: any = null
-      if (centreId) {
-        const { data } = await supabase
-          .from('item_centre_stock')
-          .select('current_stock, reorder_level, safety_stock')
-          .eq('item_id', item.id)
-          .eq('centre_id', centreId)
-          .single()
-        stockData = data
-      }
-
-      // Run forecasting locally
-      const { analyzeDemand } = await import('@/lib/forecasting')
-      const result = analyzeDemand(
-        historical,
-        stockData?.current_stock || 0,
-        item.lead_time_days || 14,
-        7,
-        500,
-        10
-      )
-      setForecast(result)
+      const result = await res.json()
+      setData(result)
+      setSearchQuery(result.item.generic_name)
     } catch (err) {
-      console.error('Forecasting error:', err)
+      toast.error('Failed to load forecast data')
     } finally {
       setLoading(false)
     }
   }
 
+  const confidenceColor = (c: string) => {
+    switch (c) {
+      case 'high': return 'bg-green-100 text-green-800'
+      case 'medium': return 'bg-yellow-100 text-yellow-800'
+      case 'low': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-600'
+    }
+  }
+
   const monthLabel = (m: string) => {
-    const [y, mo] = m.split('-')
+    const [year, month] = m.split('-')
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    return `${months[parseInt(mo) - 1]} ${y.slice(2)}`
+    return `${months[parseInt(month) - 1]} ${year}`
   }
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Item Search */}
-      <div className="card p-4">
-        <label className="form-label mb-2 block">Search Item for Forecast</label>
+      <div className="card p-4 mb-6">
+        <label className="form-label flex items-center gap-2 mb-2">
+          <Search size={14} />
+          Search Item for Forecast
+        </label>
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-3 text-gray-400" />
           <input
             type="text"
-            className="form-input pl-9 w-full max-w-md"
-            placeholder="Search by item name or code..."
-            value={query}
-            onChange={e => searchItems(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              searchItems(e.target.value)
+            }}
+            placeholder="Type item name, code, or brand..."
+            className="form-input"
           />
-          {searching && <Loader2 size={16} className="absolute right-3 top-3 text-gray-400 animate-spin" />}
-          {items.length > 0 && (
-            <div className="absolute z-10 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 w-full max-w-md max-h-60 overflow-y-auto">
-              {items.map(item => (
+          {searching && (
+            <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400" />
+          )}
+
+          {/* Search Results Dropdown */}
+          {searchResults.length > 0 && (
+            <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {searchResults.map(item => (
                 <button
                   key={item.id}
-                  className="w-full text-left px-4 py-2.5 hover:bg-[#EEF2F9] border-b border-gray-50 last:border-0"
-                  onClick={() => loadForecast(item)}
+                  onClick={() => loadForecast(item.id)}
+                  className="w-full text-left px-4 py-3 hover:bg-[#EEF2F9] transition-colors border-b border-gray-100 last:border-0"
                 >
-                  <div className="text-sm font-medium text-[#1B3A6B]">{item.generic_name}</div>
-                  <div className="text-xs text-gray-400 flex gap-3">
-                    <span className="font-mono">{item.item_code}</span>
-                    {item.brand_name && <span>{item.brand_name}</span>}
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{item.item_code}</span>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{item.generic_name}</div>
+                      {item.brand_name && (
+                        <div className="text-xs text-gray-400">{item.brand_name}</div>
+                      )}
+                    </div>
                   </div>
                 </button>
               ))}
@@ -150,142 +167,268 @@ export default function ForecastingClient({ centreId }: ForecastingClientProps) 
 
       {/* Loading State */}
       {loading && (
-        <div className="card p-12 text-center">
-          <Loader2 size={32} className="animate-spin text-[#0D7E8A] mx-auto mb-3" />
-          <p className="text-gray-500">Analyzing consumption patterns...</p>
+        <div className="card p-12 flex items-center justify-center">
+          <Loader2 size={32} className="animate-spin text-[#0D7E8A]" />
+          <span className="ml-3 text-gray-500">Analyzing consumption patterns...</span>
         </div>
       )}
 
       {/* Forecast Results */}
-      {forecast && selectedItem && !loading && (
-        <>
-          {/* Reorder Analysis Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+      {data && !loading && (
+        <div className="space-y-6">
+          {/* Item Header */}
+          <div className="card p-5">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <span className="font-mono text-sm bg-gray-100 px-2.5 py-1 rounded font-semibold">
+                    {data.item.item_code}
+                  </span>
+                  <h2 className="text-lg font-semibold text-[#1B3A6B]">{data.item.generic_name}</h2>
+                </div>
+                {data.item.brand_name && (
+                  <p className="text-sm text-gray-500">{data.item.brand_name}</p>
+                )}
+              </div>
+              {data.reorder.should_reorder && (
+                <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+                  <Target size={16} className="text-red-600" />
+                  <span className="text-sm font-medium text-red-700">Reorder Recommended</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Key Metrics */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
             <div className="stat-card">
-              <p className="text-xs text-gray-500 mb-1">Avg Monthly Usage</p>
-              <p className="text-xl font-bold text-[#1B3A6B]">{forecast.avg_monthly_consumption}</p>
+              <p className="text-xs text-gray-500 mb-1">Current Stock</p>
+              <p className="text-xl font-bold text-[#1B3A6B]">{data.current_stock}</p>
             </div>
             <div className="stat-card">
-              <p className="text-xs text-gray-500 mb-1">Avg Daily Usage</p>
-              <p className="text-xl font-bold text-[#1B3A6B]">{forecast.reorder.avg_daily_usage}</p>
+              <p className="text-xs text-gray-500 mb-1">Avg Monthly Use</p>
+              <p className="text-xl font-bold text-[#1B3A6B]">{data.avg_monthly_consumption}</p>
+            </div>
+            <div className="stat-card">
+              <p className="text-xs text-gray-500 mb-1">Avg Daily Use</p>
+              <p className="text-xl font-bold text-[#1B3A6B]">{data.reorder.avg_daily_usage}</p>
+            </div>
+            <div className="stat-card">
+              <p className="text-xs text-gray-500 mb-1">Days of Stock</p>
+              <p className={cn(
+                'text-xl font-bold',
+                data.reorder.days_of_stock !== null && data.reorder.days_of_stock <= 7 ? 'text-red-600' :
+                data.reorder.days_of_stock !== null && data.reorder.days_of_stock <= 14 ? 'text-yellow-600' : 'text-green-600'
+              )}>
+                {data.reorder.days_of_stock !== null ? `${data.reorder.days_of_stock}d` : 'N/A'}
+              </p>
             </div>
             <div className="stat-card">
               <p className="text-xs text-gray-500 mb-1">Reorder Point</p>
-              <p className="text-xl font-bold text-[#0D7E8A]">{forecast.reorder.reorder_point}</p>
-            </div>
-            <div className="stat-card">
-              <p className="text-xs text-gray-500 mb-1">Safety Stock</p>
-              <p className="text-xl font-bold text-yellow-600">{forecast.reorder.safety_stock}</p>
+              <p className="text-xl font-bold text-[#0D7E8A]">{data.reorder.reorder_point}</p>
             </div>
             <div className="stat-card">
               <p className="text-xs text-gray-500 mb-1">EOQ</p>
-              <p className="text-xl font-bold text-green-600">{forecast.reorder.eoq}</p>
+              <p className="text-xl font-bold text-[#0D7E8A]">{data.reorder.eoq}</p>
             </div>
           </div>
 
-          {forecast.reorder.should_reorder && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-              <ArrowDown className="text-red-600" size={20} />
+          {/* Safety & Lead Time */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="card p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[#E6F5F6] flex items-center justify-center">
+                <ShieldCheck size={20} className="text-[#0D7E8A]" />
+              </div>
               <div>
-                <p className="font-semibold text-red-700">Reorder Recommended</p>
-                <p className="text-sm text-red-600">
-                  {forecast.reorder.days_of_stock !== null
-                    ? `${forecast.reorder.days_of_stock} days of stock remaining. `
-                    : ''}
-                  Consider ordering {forecast.reorder.eoq} units.
+                <p className="text-xs text-gray-500">Safety Stock</p>
+                <p className="text-lg font-semibold text-[#1B3A6B]">{data.reorder.safety_stock} units</p>
+              </div>
+            </div>
+            <div className="card p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-[#EEF2F9] flex items-center justify-center">
+                <Calendar size={20} className="text-[#1B3A6B]" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Lead Time</p>
+                <p className="text-lg font-semibold text-[#1B3A6B]">{data.item.lead_time_days} days</p>
+              </div>
+            </div>
+            <div className="card p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                <BarChart2 size={20} className="text-green-600" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Forecast Method</p>
+                <p className="text-lg font-semibold text-[#1B3A6B] capitalize">
+                  {data.forecast[0]?.method?.replace(/_/g, ' ') || 'N/A'}
                 </p>
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Historical + Forecast Table */}
-          <div className="card overflow-hidden">
-            <div className="px-4 pt-4 pb-2">
-              <h3 className="font-semibold text-[#1B3A6B] flex items-center gap-2">
-                <BarChart2 size={18} />
-                Consumption History &amp; Forecast — {selectedItem.generic_name}
-              </h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Month</th>
-                    <th>Quantity</th>
-                    <th>Trend</th>
-                    <th>Type</th>
-                    <th>Confidence</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {forecast.historical.map((h, i) => {
-                    const prev = i > 0 ? forecast.historical[i - 1].qty : h.qty
-                    const diff = h.qty - prev
+          {/* Historical Consumption & Forecast */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Historical */}
+            <div className="card overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 bg-[#EEF2F9]">
+                <h3 className="text-sm font-semibold text-[#1B3A6B] flex items-center gap-2">
+                  <BarChart2 size={16} />
+                  Historical Consumption (Last 12 Months)
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Month</th>
+                      <th>Quantity</th>
+                      <th>Trend</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.historical.map((h, i) => {
+                      const prevQty = i > 0 ? data.historical[i - 1].qty : h.qty
+                      const change = h.qty - prevQty
+                      return (
+                        <tr key={h.month}>
+                          <td className="text-sm font-medium text-gray-700">{monthLabel(h.month)}</td>
+                          <td className="text-sm font-semibold text-[#1B3A6B]">{h.qty}</td>
+                          <td className="text-sm">
+                            {i > 0 && (
+                              <span className={cn(
+                                'font-medium',
+                                change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : 'text-gray-400'
+                              )}>
+                                {change > 0 ? '+' : ''}{change}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              {/* Simple bar visualization */}
+              <div className="px-4 py-3 border-t border-gray-100">
+                <div className="flex items-end gap-1 h-16">
+                  {data.historical.map((h) => {
+                    const maxQty = Math.max(...data.historical.map(x => x.qty), 1)
+                    const height = (h.qty / maxQty) * 100
                     return (
-                      <tr key={h.month}>
-                        <td className="font-medium text-sm">{monthLabel(h.month)}</td>
-                        <td className="text-sm font-semibold">{h.qty}</td>
-                        <td>
-                          {diff > 0 ? <ArrowUp size={14} className="text-green-500" /> :
-                           diff < 0 ? <ArrowDown size={14} className="text-red-500" /> :
-                           <Minus size={14} className="text-gray-400" />}
-                        </td>
-                        <td><span className="badge bg-gray-100 text-gray-700">Actual</span></td>
-                        <td>—</td>
-                      </tr>
+                      <div
+                        key={h.month}
+                        className="flex-1 bg-[#0D7E8A] rounded-t-sm min-h-[2px] transition-all hover:bg-[#1B3A6B]"
+                        style={{ height: `${height}%` }}
+                        title={`${monthLabel(h.month)}: ${h.qty}`}
+                      />
                     )
                   })}
-                  {forecast.forecast.map(f => (
-                    <tr key={f.month} className="bg-blue-50/50">
-                      <td className="font-medium text-sm text-[#0D7E8A]">{monthLabel(f.month)}</td>
-                      <td className="text-sm font-semibold text-[#0D7E8A]">{f.predicted_qty}</td>
-                      <td><TrendingUp size={14} className="text-[#0D7E8A]" /></td>
-                      <td><span className="badge bg-blue-100 text-blue-700">Forecast</span></td>
-                      <td>
-                        <span className={cn('badge',
-                          f.confidence === 'high' ? 'bg-green-100 text-green-700' :
-                          f.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-red-100 text-red-700'
-                        )}>
-                          {f.confidence}
-                        </span>
-                      </td>
+                </div>
+              </div>
+            </div>
+
+            {/* Forecast */}
+            <div className="card overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 bg-[#E6F5F6]">
+                <h3 className="text-sm font-semibold text-[#0D7E8A] flex items-center gap-2">
+                  <TrendingUp size={16} />
+                  Forecast (Next 3 Months)
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Month</th>
+                      <th>Predicted Qty</th>
+                      <th>Confidence</th>
+                      <th>Method</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {data.forecast.map(f => (
+                      <tr key={f.month}>
+                        <td className="text-sm font-medium text-gray-700">{monthLabel(f.month)}</td>
+                        <td className="text-sm font-bold text-[#1B3A6B]">{f.predicted_qty}</td>
+                        <td>
+                          <span className={cn('badge', confidenceColor(f.confidence))}>
+                            {f.confidence}
+                          </span>
+                        </td>
+                        <td className="text-xs text-gray-500 capitalize">{f.method.replace(/_/g, ' ')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Seasonal Indices */}
+              <div className="px-4 py-3 border-t border-gray-100">
+                <p className="text-xs text-gray-500 mb-2">Seasonal Pattern (12-month index)</p>
+                <div className="flex items-end gap-1 h-12">
+                  {data.seasonal_indices.map((idx, i) => {
+                    const months = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
+                    const maxIdx = Math.max(...data.seasonal_indices, 1)
+                    const height = (idx / maxIdx) * 100
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+                        <div
+                          className={cn(
+                            'w-full rounded-t-sm min-h-[2px] transition-all',
+                            idx >= 1.0 ? 'bg-[#0D7E8A]' : 'bg-gray-300'
+                          )}
+                          style={{ height: `${height}%` }}
+                          title={`${months[i]}: ${idx.toFixed(2)}`}
+                        />
+                        <span className="text-[9px] text-gray-400">{months[i]}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Seasonal Pattern */}
-          <div className="card p-4">
-            <h3 className="font-semibold text-[#1B3A6B] mb-3 flex items-center gap-2">
-              <TrendingUp size={18} />
-              Seasonal Pattern
-            </h3>
-            <div className="flex gap-1 items-end h-24">
-              {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((m, i) => {
-                const idx = forecast.seasonal_indices[i]
-                const height = Math.max(10, Math.min(100, idx * 50))
-                return (
-                  <div key={m} className="flex-1 flex flex-col items-center gap-1">
-                    <div
-                      className={cn(
-                        'w-full rounded-t transition-all',
-                        idx > 1.2 ? 'bg-[#0D7E8A]' : idx < 0.8 ? 'bg-red-400' : 'bg-[#1B3A6B]/30'
-                      )}
-                      style={{ height: `${height}%` }}
-                    />
-                    <span className="text-[10px] text-gray-500">{m}</span>
+          {/* Auto Generate Indent */}
+          {data.reorder.should_reorder && (
+            <div className="card p-5 bg-red-50 border-red-200">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                    <Target size={20} className="text-red-600" />
                   </div>
-                )
-              })}
+                  <div>
+                    <p className="font-semibold text-red-800">Stock Below Reorder Point</p>
+                    <p className="text-sm text-red-600">
+                      Current stock ({data.current_stock}) is below reorder point ({data.reorder.reorder_point}).
+                      Recommended order quantity: <strong>{data.reorder.eoq} units</strong> (EOQ).
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={`/purchase-orders/indents?auto_item=${data.item.id}${centreId ? `&centre_id=${centreId}` : ''}`}
+                  className="btn-danger flex items-center gap-2 whitespace-nowrap"
+                >
+                  <Package size={16} />
+                  Auto-Generate Indent
+                  <ArrowRight size={14} />
+                </a>
+              </div>
             </div>
-            <p className="text-xs text-gray-400 mt-2">
-              Bars show relative demand intensity. Teal = high demand months, Red = low demand months.
-            </p>
-          </div>
-        </>
+          )}
+        </div>
+      )}
+
+      {/* Empty state when no item selected */}
+      {!data && !loading && (
+        <div className="card p-12 text-center">
+          <TrendingUp size={48} className="mx-auto mb-4 text-gray-300" />
+          <p className="text-gray-500 font-medium">Select an item above to view demand forecast</p>
+          <p className="text-sm text-gray-400 mt-1">
+            Search by item name, code, or brand to analyze consumption patterns
+          </p>
+        </div>
       )}
     </div>
   )
