@@ -208,9 +208,9 @@ export default function ItemListClient({ items, categories }: ItemListClientProp
 
       {/* Category Update Modal */}
       {showCategoryModal && (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-[#1B3A6B] mb-4">Bulk Update Category</h3>
+            <h3 id="category-modal-title" className="text-lg font-semibold text-[#1B3A6B] mb-4">Bulk Update Category</h3>
             <p className="text-sm text-gray-600 mb-4">
               Select a category to assign to {selectedIds.length} item(s).
             </p>
@@ -242,9 +242,9 @@ export default function ItemListClient({ items, categories }: ItemListClientProp
 
       {/* Status Update Modal */}
       {showStatusModal && (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="status-modal-title">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-[#1B3A6B] mb-4">Bulk Update Status</h3>
+            <h3 id="status-modal-title" className="text-lg font-semibold text-[#1B3A6B] mb-4">Bulk Update Status</h3>
             <p className="text-sm text-gray-600 mb-4">
               Set the status for {selectedIds.length} item(s).
             </p>
