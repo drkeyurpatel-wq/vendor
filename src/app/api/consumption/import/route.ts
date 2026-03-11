@@ -172,12 +172,39 @@ export async function POST(req: NextRequest) {
   }
 
   // Auto-create purchase indents for items that hit reorder level
+  // Rule #7: L1 vendor auto-selection from rate contracts
   if (reorderNeeded.size > 0) {
     const centreGroups: Record<string, { item_id: string; centre_id: string; current_stock: number; reorder_level: number }[]> = {}
 
     Array.from(reorderNeeded.values()).forEach((item) => {
       if (!centreGroups[item.centre_id]) centreGroups[item.centre_id] = []
       centreGroups[item.centre_id].push(item)
+    })
+
+    // Fetch active rate contract items with L1 vendor ranking for all reorder items
+    const allItemIds = Array.from(reorderNeeded.values()).map(r => r.item_id)
+    const today = new Date().toISOString().split('T')[0]
+    const { data: contractItems } = await supabase
+      .from('rate_contract_items')
+      .select('item_id, rate, vendor_rank, rate_contract:rate_contracts!inner(vendor_id, status, valid_from, valid_to)')
+      .in('item_id', allItemIds)
+      .eq('rate_contract.status', 'active')
+      .lte('rate_contract.valid_from', today)
+      .gte('rate_contract.valid_to', today)
+      .order('vendor_rank', { ascending: true })
+
+    // Build map: item_id → { vendor_id, rate, rank }  (L1 = rank 1 preferred)
+    const l1VendorMap = new Map<string, { vendor_id: string; rate: number; rank: number }>()
+    contractItems?.forEach((ci: any) => {
+      const existing = l1VendorMap.get(ci.item_id)
+      const rank = ci.vendor_rank || 99
+      if (!existing || rank < existing.rank) {
+        l1VendorMap.set(ci.item_id, {
+          vendor_id: ci.rate_contract?.vendor_id,
+          rate: ci.rate,
+          rank,
+        })
+      }
     })
 
     for (const centreId of Object.keys(centreGroups)) {
@@ -200,23 +227,49 @@ export async function POST(req: NextRequest) {
         indentNumber = `H1-${centreCode}-IND-${ym}-${String(seq).padStart(3, '0')}`
       }
 
+      // Determine suggested vendor (L1 from rate contracts)
+      const vendorCounts = new Map<string, number>()
+      itemsList.forEach((item: { item_id: string; centre_id: string; current_stock: number; reorder_level: number }) => {
+        const l1 = l1VendorMap.get(item.item_id)
+        if (l1) {
+          vendorCounts.set(l1.vendor_id, (vendorCounts.get(l1.vendor_id) || 0) + 1)
+        }
+      })
+
+      // Pick the most common L1 vendor across indent items
+      let suggestedVendorId: string | null = null
+      let maxCount = 0
+      vendorCounts.forEach((count, vid) => {
+        if (count > maxCount) { maxCount = count; suggestedVendorId = vid }
+      })
+
+      const l1Notes = suggestedVendorId
+        ? `Auto-generated from eCW consumption import on ${new Date().toISOString().split('T')[0]}. L1 vendor auto-selected from active rate contracts.`
+        : `Auto-generated from eCW consumption import on ${new Date().toISOString().split('T')[0]}. No active rate contract found — manual vendor selection required.`
+
       const { data: indent } = await supabase.from('purchase_indents').insert({
         indent_number: indentNumber,
         centre_id: centreId,
         requested_by: user.id,
         status: 'submitted',
         priority: 'normal',
-        notes: `Auto-generated from eCW consumption import on ${new Date().toISOString().split('T')[0]}`,
+        suggested_vendor_id: suggestedVendorId,
+        notes: l1Notes,
       }).select().single()
 
       if (indent) {
-        const indentItems = itemsList.map((item: { item_id: string; centre_id: string; current_stock: number; reorder_level: number }) => ({
-          indent_id: indent.id,
-          item_id: item.item_id,
-          requested_qty: Math.max(1, item.reorder_level * 2 - item.current_stock),
-          unit: 'nos',
-          current_stock: item.current_stock,
-        }))
+        const indentItems = itemsList.map((item: { item_id: string; centre_id: string; current_stock: number; reorder_level: number }) => {
+          const l1 = l1VendorMap.get(item.item_id)
+          return {
+            indent_id: indent.id,
+            item_id: item.item_id,
+            requested_qty: Math.max(1, item.reorder_level * 2 - item.current_stock),
+            unit: 'nos',
+            current_stock: item.current_stock,
+            suggested_vendor_id: l1?.vendor_id || null,
+            suggested_rate: l1?.rate || null,
+          }
+        })
 
         await supabase.from('purchase_indent_items').insert(indentItems)
         result.indents_created++

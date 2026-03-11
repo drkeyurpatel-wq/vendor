@@ -63,6 +63,17 @@ export default function NewPOPage() {
     if (items.length === 0) { toast.error('Add at least one item'); return }
     if (items.some(i => i.rate <= 0)) { toast.error('All items must have a rate > 0'); return }
 
+    // Warn on rate contract violations (Rule #5)
+    const rateViolations = items.filter(i => i.rate_warning)
+    if (rateViolations.length > 0) {
+      const proceed = window.confirm(
+        `${rateViolations.length} item(s) have rates deviating from their contract rate by more than ±0.5%.\n\n` +
+        rateViolations.map(i => `• ${i.generic_name}: ₹${i.rate} vs contract ₹${i.contract_rate}`).join('\n') +
+        '\n\nThis PO will be flagged for higher-level approval. Continue?'
+      )
+      if (!proceed) return
+    }
+
     setLoading(true)
 
     const centreCode = centres.find(c => c.id === centreId)?.code || 'XXX'
@@ -97,6 +108,16 @@ export default function NewPOPage() {
       approverRole = 'group_admin'
     }
 
+    // If rate contract violated, force higher approval level
+    if (rateViolations.length > 0 && status === 'approved') {
+      status = 'pending_approval'
+      approverRole = 'unit_cao'
+    }
+
+    const rateNotes = rateViolations.length > 0
+      ? `[RATE CONTRACT OVERRIDE] ${rateViolations.map(i => `${i.generic_name}: ₹${i.rate} vs contract ₹${i.contract_rate}`).join('; ')}${notes.trim() ? ' | ' + notes.trim() : ''}`
+      : notes.trim() || null
+
     const { data: po, error } = await supabase.from('purchase_orders').insert({
       po_number: poNumber,
       centre_id: centreId,
@@ -108,7 +129,7 @@ export default function NewPOPage() {
       subtotal,
       gst_amount,
       total_amount,
-      notes: notes.trim() || null,
+      notes: rateNotes,
       created_by: profile?.id,
       current_approval_level: status === 'approved' ? 0 : 1,
     }).select().single()
@@ -203,7 +224,7 @@ export default function NewPOPage() {
         {/* Line Items */}
         <div className="card p-6">
           <h2 className="font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-100">Line Items</h2>
-          <POLineItems items={items} onChange={setItems} />
+          <POLineItems items={items} onChange={setItems} vendorId={vendor?.id} />
         </div>
 
         <div className="flex gap-3 pb-6">

@@ -74,6 +74,7 @@ const NAV: NavItem[] = [
     label: 'Reports', icon: <BarChart2 size={18} />,
     children: [
       { label: 'Overview', href: '/reports' },
+      { label: 'AI Analytics', href: '/analytics' },
       { label: 'Vendor Performance', href: '/reports/vendor-performance' },
     ]
   },
