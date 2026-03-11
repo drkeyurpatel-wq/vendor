@@ -109,6 +109,22 @@ export default function NewInvoicePage() {
 
     setLoading(true)
 
+    // Credit check: verify vendor is not over credit limit or has overdue invoices
+    try {
+      const creditRes = await fetch(`/api/credit/check?vendor_id=${selectedGRN.vendor_id}`)
+      const creditData = await creditRes.json()
+      if (creditData.blocked) {
+        toast.error(`Credit blocked: ${creditData.reason}`)
+        setLoading(false)
+        return
+      }
+      if (creditData.warning) {
+        toast(creditData.warning, { icon: '⚠️' })
+      }
+    } catch {
+      // Continue if credit check API is unavailable
+    }
+
     // Duplicate check: vendor_id + vendor_invoice_no
     const { data: duplicate } = await supabase
       .from('invoices')

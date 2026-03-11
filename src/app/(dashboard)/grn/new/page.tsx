@@ -182,44 +182,58 @@ export default function NewGRNPage() {
         await supabase.from('purchase_order_items')
           .update({ received_qty: newReceived })
           .eq('id', li.po_item_id)
+      }
+    }
 
-        // Update stock
-        const { data: existing } = await supabase
-          .from('item_centre_stock')
-          .select('id, current_stock')
-          .eq('item_id', li.item_id)
-          .eq('centre_id', selectedPO.centre_id || profile?.centre_id)
-          .single()
+    // Update stock via DB function (atomic, writes stock_ledger too)
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    const { error: stockError } = await supabase.rpc('update_stock_from_grn', {
+      p_grn_id: grn.id,
+      p_user_id: authUser?.id,
+    })
+    if (stockError) {
+      console.error('Stock update error:', stockError)
+      // Fallback: manual stock updates if function doesn't exist yet
+      const centreId = selectedPO.centre_id || profile?.centre_id
+      for (const li of lineItems) {
+        if (li.accepted_qty > 0) {
+          const { data: existing } = await supabase
+            .from('item_centre_stock')
+            .select('id, current_stock')
+            .eq('item_id', li.item_id)
+            .eq('centre_id', centreId)
+            .single()
 
-        if (existing) {
-          await supabase.from('item_centre_stock')
-            .update({
-              current_stock: existing.current_stock + li.accepted_qty,
+          if (existing) {
+            await supabase.from('item_centre_stock')
+              .update({
+                current_stock: existing.current_stock + li.accepted_qty,
+                last_grn_date: grnDate,
+              })
+              .eq('id', existing.id)
+          } else {
+            await supabase.from('item_centre_stock').insert({
+              item_id: li.item_id,
+              centre_id: centreId,
+              current_stock: li.accepted_qty,
+              reorder_level: 0,
+              max_level: 0,
               last_grn_date: grnDate,
             })
-            .eq('id', existing.id)
-        } else {
-          await supabase.from('item_centre_stock').insert({
+          }
+
+          await supabase.from('stock_ledger').insert({
             item_id: li.item_id,
-            centre_id: selectedPO.centre_id || profile?.centre_id,
-            current_stock: li.accepted_qty,
-            reorder_level: 0,
-            max_level: 0,
-            last_grn_date: grnDate,
+            centre_id: centreId,
+            transaction_type: 'grn',
+            quantity: li.accepted_qty,
+            balance_after: (existing?.current_stock || 0) + li.accepted_qty,
+            reference_id: grn.id,
+            reference_number: grnNumber,
+            notes: li.batch_no.trim() ? `Batch: ${li.batch_no.trim()}` : null,
+            created_by: authUser?.id,
           })
         }
-
-        // Write stock ledger
-        await supabase.from('stock_ledger').insert({
-          item_id: li.item_id,
-          centre_id: selectedPO.centre_id || profile?.centre_id,
-          transaction_type: 'grn_receipt',
-          quantity: li.accepted_qty,
-          balance_after: (existing?.current_stock || 0) + li.accepted_qty,
-          reference_type: 'grn',
-          reference_id: grn.id,
-          batch_no: li.batch_no.trim() || null,
-        })
       }
     }
 

@@ -95,12 +95,12 @@ export async function POST(request: NextRequest) {
   // Try to get invoice line items (if table exists)
   const { data: invoiceItems } = await supabase
     .from('invoice_items')
-    .select('item_id, quantity, rate')
+    .select('item_id, qty, rate')
     .eq('invoice_id', invoice_id)
 
   const invoiceItemsMap = new Map<string, { qty: number; rate: number }>()
   invoiceItems?.forEach((ii: any) => {
-    invoiceItemsMap.set(ii.item_id, { qty: ii.quantity, rate: ii.rate })
+    invoiceItemsMap.set(ii.item_id, { qty: ii.qty, rate: ii.rate })
   })
 
   // Build match results

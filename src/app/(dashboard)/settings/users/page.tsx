@@ -4,6 +4,7 @@ import { cn, formatDate } from '@/lib/utils'
 import { Shield } from 'lucide-react'
 import { ROLE_LABELS, isGroupLevel } from '@/types/database'
 import type { UserRole } from '@/types/database'
+import UserFormModal from './UserFormModal'
 
 const ROLE_COLORS: Record<string, string> = {
   group_admin: 'bg-purple-100 text-purple-800',
@@ -40,11 +41,14 @@ export default async function SettingsUsersPage() {
     )
   }
 
-  const { data: users } = await supabase
-    .from('user_profiles')
-    .select('*, centre:centres(code, name)')
-    .order('role')
-    .order('full_name')
+  const [{ data: users }, { data: centres }] = await Promise.all([
+    supabase
+      .from('user_profiles')
+      .select('*, centre:centres(code, name)')
+      .order('role')
+      .order('full_name'),
+    supabase.from('centres').select('id, code, name').eq('is_active', true).order('code'),
+  ])
 
   const roleGroups = new Map<string, any[]>()
   users?.forEach(u => {
@@ -60,6 +64,7 @@ export default async function SettingsUsersPage() {
           <h1 className="page-title">User Management</h1>
           <p className="page-subtitle">{users?.length ?? 0} users across all centres</p>
         </div>
+        <UserFormModal centres={centres ?? []} />
       </div>
 
       {/* Summary by role */}
@@ -86,6 +91,7 @@ export default async function SettingsUsersPage() {
                 <th>Phone</th>
                 <th>Status</th>
                 <th>Joined</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -112,6 +118,20 @@ export default async function SettingsUsersPage() {
                     </span>
                   </td>
                   <td className="text-sm text-gray-500">{formatDate(u.created_at)}</td>
+                  <td>
+                    <UserFormModal
+                      centres={centres ?? []}
+                      editUser={{
+                        id: u.id,
+                        full_name: u.full_name,
+                        email: u.email,
+                        phone: u.phone,
+                        role: u.role,
+                        centre_id: u.centre_id,
+                        is_active: u.is_active,
+                      }}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
