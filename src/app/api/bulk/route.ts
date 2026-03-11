@@ -178,13 +178,13 @@ export async function POST(request: NextRequest) {
       action: `bulk_${action}`,
       entity_type: body.entity_type || action,
       user_id: user.id,
-      details: JSON.stringify({
+      details: {
         total: ids.length,
         success,
         failed,
         errors: errors.slice(0, 10),
         updates,
-      }),
+      },
     })
 
     return NextResponse.json({ success, failed, errors })

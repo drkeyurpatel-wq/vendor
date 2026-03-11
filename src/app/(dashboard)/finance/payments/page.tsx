@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { cn, formatDate, formatLakhs } from '@/lib/utils'
-import { Wallet, Calendar, Plus } from 'lucide-react'
+import { Wallet, Calendar, Plus, Download } from 'lucide-react'
 
 const BATCH_STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
@@ -108,6 +108,7 @@ export default async function PaymentsPage({
                   <th>Payment Count</th>
                   <th>Status</th>
                   <th>Created</th>
+                  <th>Download</th>
                 </tr>
               </thead>
               <tbody>
@@ -123,6 +124,11 @@ export default async function PaymentsPage({
                       </span>
                     </td>
                     <td className="text-sm text-gray-600">{formatDate(batch.created_at)}</td>
+                    <td>
+                      <a href={`/api/pdf/payment-advice?id=${batch.id}`} target="_blank" className="text-[#0D7E8A] hover:underline text-xs flex items-center gap-1">
+                        <Download size={12} /> PDF
+                      </a>
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate, formatDateTime, formatLakhs } from '@/lib/utils'
-import { ArrowLeft, CheckCircle, AlertTriangle, Package, RotateCcw, ClipboardCheck } from 'lucide-react'
+import { ArrowLeft, CheckCircle, AlertTriangle, Package, RotateCcw, ClipboardCheck, Printer, Download } from 'lucide-react'
 
 const GRN_STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
@@ -98,7 +98,13 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+            <a href={`/api/pdf/grn?id=${id}`} target="_blank" className="btn-secondary flex items-center gap-1.5 text-sm">
+              <Printer size={15} /> PDF
+            </a>
+            <a href={`/api/docx/grn?id=${id}`} className="btn-secondary flex items-center gap-1.5 text-sm">
+              <Download size={15} /> Word
+            </a>
             {grn.status === 'verified' && (
               <div className="flex items-center gap-1.5 text-green-700 bg-green-50 px-3 py-1.5 rounded-lg text-sm font-medium">
                 <CheckCircle size={16} />

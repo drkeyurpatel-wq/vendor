@@ -87,6 +87,28 @@ export async function GET(req: NextRequest) {
       break
     }
 
+    case 'audit_log': {
+      let auditQuery = supabase
+        .from('activity_log')
+        .select('created_at, action, entity_type, entity_id, details, user:user_profiles(full_name, email)')
+        .order('created_at', { ascending: false })
+
+      const dateFrom = searchParams.get('date_from')
+      const dateTo = searchParams.get('date_to')
+      if (dateFrom) auditQuery = auditQuery.gte('created_at', `${dateFrom}T00:00:00`)
+      if (dateTo) auditQuery = auditQuery.lte('created_at', `${dateTo}T23:59:59`)
+
+      const { data: auditLogs } = await auditQuery.limit(5000)
+
+      csvContent = 'Timestamp,User,Email,Action,Entity Type,Entity ID,Details\n'
+      auditLogs?.forEach((log: any) => {
+        const detailStr = log.details ? JSON.stringify(log.details).replace(/"/g, '""') : ''
+        csvContent += `"${log.created_at}","${log.user?.full_name || 'System'}","${log.user?.email || ''}","${log.action}","${log.entity_type}","${log.entity_id || ''}","${detailStr}"\n`
+      })
+      filename = `audit-log-export-${new Date().toISOString().split('T')[0]}.csv`
+      break
+    }
+
     default:
       return NextResponse.json({ error: `Unknown export type: ${type}` }, { status: 400 })
   }

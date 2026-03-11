@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { Lock, Mail, ArrowRight } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -28,69 +29,88 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full">
       {/* Logo */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-4">
-          <span className="text-2xl font-bold text-[#1B3A6B]">H1</span>
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-2xl shadow-black/20 mb-5">
+          <span className="text-2xl font-extrabold text-[#1B3A6B] tracking-tight">H1</span>
         </div>
-        <h1 className="text-2xl font-bold text-white">Health1 VPMS</h1>
-        <p className="text-blue-200 text-sm mt-1">Vendor & Purchase Management System</p>
+        <h1 className="text-3xl font-bold text-white tracking-tight">Health1 VPMS</h1>
+        <p className="text-blue-300/60 text-sm mt-2 font-medium">Vendor & Purchase Management System</p>
       </div>
 
       {/* Card */}
-      <div className="bg-white rounded-2xl shadow-2xl p-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Sign in</h2>
+      <div className="bg-white/[0.95] backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/20 p-8 border border-white/20">
+        <h2 className="text-xl font-bold text-gray-900 mb-1">Welcome back</h2>
+        <p className="text-sm text-gray-400 mb-7">Sign in to your account to continue</p>
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="form-label">Email address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="form-input"
-              placeholder="you@health1.in"
-              required
-              autoComplete="email"
-            />
+            <label htmlFor="email" className="form-label">Email address</label>
+            <div className="relative">
+              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="form-input pl-10"
+                placeholder="you@health1.in"
+                required
+                autoComplete="email"
+              />
+            </div>
           </div>
           <div>
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="form-input"
-              placeholder="••••••••"
-              required
-              autoComplete="current-password"
-            />
+            <label htmlFor="password" className="form-label">Password</label>
+            <div className="relative">
+              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="form-input pl-10"
+                placeholder="Enter your password"
+                required
+                autoComplete="current-password"
+              />
+            </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
-              {error}
+            <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl flex items-start gap-2">
+              <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5 flex-shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full justify-center py-2.5 text-base"
+            className="btn-primary w-full justify-center py-3 text-base group"
           >
             {loading ? (
               <>
-                <div className="spinner !border-white !border-t-transparent" />
+                <div className="spinner !border-white/30 !border-t-white" />
                 Signing in...
               </>
-            ) : 'Sign in'}
+            ) : (
+              <>
+                Sign in
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+              </>
+            )}
           </button>
         </form>
 
-        <p className="text-xs text-gray-400 text-center mt-6">
-          Health1 Super Speciality Hospitals Pvt. Ltd. — Internal System
-        </p>
+        <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+          <p className="text-[11px] text-gray-400 leading-relaxed">
+            Health1 Super Speciality Hospitals Pvt. Ltd.
+            <br />
+            Internal System — Authorized Users Only
+          </p>
+        </div>
       </div>
     </div>
   )

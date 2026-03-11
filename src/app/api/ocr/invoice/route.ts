@@ -106,6 +106,14 @@ export async function POST(request: NextRequest) {
       }>,
     }
 
+    // Audit log
+    await supabase.from('activity_log').insert({
+      user_id: user.id,
+      action: 'invoice_uploaded',
+      entity_type: 'invoice',
+      details: { file_name: file.name, file_type: file.type, file_size: file.size },
+    })
+
     return NextResponse.json({
       extracted: true,
       confidence: 0.0, // 0 = simulated, no OCR performed

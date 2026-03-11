@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { cn, formatDate, formatLakhs, formatCurrency, PO_STATUS_COLORS } from '@/lib/utils'
-import { ArrowLeft, Edit, Printer, CheckCircle, Package, FileText, Truck } from 'lucide-react'
+import { ArrowLeft, Edit, Printer, CheckCircle, Package, FileText, Truck, Download } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function PODetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -62,7 +62,8 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
             {po.status === 'draft' && (
               <Link href={`/purchase-orders/${id}/edit`} className="btn-secondary flex items-center gap-1.5"><Edit size={15} /> Edit</Link>
             )}
-            <button className="btn-secondary flex items-center gap-1.5"><Printer size={15} /> Print</button>
+            <a href={`/api/pdf/po?id=${id}`} target="_blank" className="btn-secondary flex items-center gap-1.5"><Printer size={15} /> PDF</a>
+            <a href={`/api/docx/po?id=${id}`} className="btn-secondary flex items-center gap-1.5"><Download size={15} /> Word</a>
           </div>
         </div>
       </div>
