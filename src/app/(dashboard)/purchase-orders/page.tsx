@@ -5,6 +5,7 @@ import { Plus, ShoppingCart } from 'lucide-react'
 import SearchInput from '@/components/ui/SearchInput'
 import Pagination from '@/components/ui/Pagination'
 import DateRangeFilter from '@/components/ui/DateRangeFilter'
+import POListClient from './POListClient'
 
 const PAGE_SIZE = 50
 
@@ -103,50 +104,7 @@ export default async function PurchaseOrdersPage({
       <div className="card overflow-hidden">
         {pos && pos.length > 0 ? (
           <>
-          <div className="overflow-x-auto">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>PO Number</th>
-                  <th>Centre</th>
-                  <th>Vendor</th>
-                  <th>Date</th>
-                  <th>Expected Delivery</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pos.map((po: any) => (
-                  <tr key={po.id}>
-                    <td>
-                      <span className="font-mono text-xs font-semibold">{po.po_number}</span>
-                    </td>
-                    <td>
-                      <span className="badge bg-blue-50 text-blue-700">{po.centre?.code}</span>
-                    </td>
-                    <td className="text-sm font-medium text-gray-900">{po.vendor?.legal_name}</td>
-                    <td className="text-sm text-gray-600">{formatDate(po.po_date)}</td>
-                    <td className="text-sm text-gray-600">
-                      {po.expected_delivery_date ? formatDate(po.expected_delivery_date) : '—'}
-                    </td>
-                    <td className="text-sm font-semibold text-gray-900">{formatLakhs(po.total_amount)}</td>
-                    <td>
-                      <span className={cn('badge', PO_STATUS_COLORS[po.status as keyof typeof PO_STATUS_COLORS])}>
-                        {po.status.replace(/_/g, ' ')}
-                      </span>
-                    </td>
-                    <td>
-                      <Link href={`/purchase-orders/${po.id}`} className="text-xs text-[#0D7E8A] hover:underline font-medium">
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <POListClient pos={pos} userRole={profile?.role || 'store_staff'} />
           <Pagination totalCount={count ?? 0} pageSize={PAGE_SIZE} currentPage={currentPage} />
           </>
         ) : (

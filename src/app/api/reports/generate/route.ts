@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import * as XLSX from 'xlsx'
+import { rateLimit } from '@/lib/rate-limit'
+import { reportGenerateSchema } from '@/lib/validations'
 
 const NAVY: [number, number, number] = [27, 58, 107]
 const WHITE: [number, number, number] = [255, 255, 255]
@@ -17,12 +19,28 @@ function formatDate(d: string | null): string {
 }
 
 export async function POST(req: NextRequest) {
+  const rateLimitResult = await rateLimit(req, 30, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json()
-  const { report_type, format = 'pdf', filters = {} } = body
+  let rawBody: unknown
+  try {
+    rawBody = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const parsed = reportGenerateSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+  }
+
+  const { report_type, format, filters } = parsed.data
   const { centre_id, date_from, date_to, vendor_id } = filters
 
   switch (report_type) {

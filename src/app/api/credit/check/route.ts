@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/rate-limit'
+import { creditCheckSchema } from '@/lib/validations'
 
 /**
  * Credit period enforcement API
@@ -96,10 +98,22 @@ async function checkCredit(vendorId: string) {
 }
 
 export async function GET(req: NextRequest) {
+  const rateLimitResult = await rateLimit(req, 30, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const vendorId = req.nextUrl.searchParams.get('vendor_id')
   if (!vendorId) {
     return NextResponse.json({ error: 'vendor_id required' }, { status: 400 })
   }
+
+  // Validate UUID format
+  const parsed = creditCheckSchema.safeParse({ vendor_id: vendorId })
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid vendor_id format' }, { status: 400 })
+  }
+
   const result = await checkCredit(vendorId)
   if ('status' in result) {
     return NextResponse.json({ error: result.error }, { status: result.status })
@@ -108,11 +122,24 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { vendor_id } = await req.json()
-  if (!vendor_id) {
-    return NextResponse.json({ error: 'vendor_id required' }, { status: 400 })
+  const rateLimitResult = await rateLimit(req, 30, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
-  const result = await checkCredit(vendor_id)
+
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const parsed = creditCheckSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+  }
+
+  const result = await checkCredit(parsed.data.vendor_id)
   if ('status' in result) {
     return NextResponse.json({ error: result.error }, { status: result.status })
   }

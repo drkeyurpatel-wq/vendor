@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/rate-limit'
+import { tallySyncSchema } from '@/lib/validations'
 
 const COMPANY_NAME = 'Health1 Super Speciality Hospitals Pvt. Ltd.'
 
@@ -152,17 +154,29 @@ function parseTallyLedgerXml(xmlText: string): { name: string; parent: string; g
 }
 
 export async function POST(req: NextRequest) {
+  const rateLimitResult = await rateLimit(req, 10, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const body = await req.json()
-    const { action, xml_data } = body
-
-    if (!action) {
-      return NextResponse.json({ error: 'action is required' }, { status: 400 })
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
     }
+
+    const parsed = tallySyncSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+    }
+
+    const { action, xml_data } = parsed.data
 
     if (action === 'export_vendors') {
       const { data: vendors, error } = await supabase

@@ -82,6 +82,7 @@ const NAV: NavItem[] = [
       { label: 'Stock Levels', href: '/items/stock' },
       { label: 'Stock Transfers', href: '/inventory/transfers' },
       { label: 'Expiry Alerts', href: '/inventory/expiry-alerts' },
+      { label: 'Demand Forecasting', href: '/inventory/forecasting' },
     ]
   },
   {
@@ -100,6 +101,7 @@ const NAV: NavItem[] = [
       { label: 'Users', href: '/settings/users' },
       { label: 'Approval Matrix', href: '/settings/approvals' },
       { label: 'Rate Contracts', href: '/settings/rate-contracts' },
+      { label: 'Document Alerts', href: '/settings/document-alerts' },
       { label: 'Data Import', href: '/settings/data-import' },
       { label: 'Audit Log', href: '/settings/audit-log' },
     ]
@@ -151,11 +153,11 @@ export default function Sidebar({ user, mobileOpen, onMobileClose }: SidebarProp
         />
       )}
 
-      <div className={cn(
+      <aside className={cn(
         'w-60 min-h-screen bg-[#1B3A6B] flex flex-col flex-shrink-0 z-50 transition-transform duration-200',
         'fixed lg:static lg:translate-x-0',
         mobileOpen ? 'translate-x-0' : '-translate-x-full'
-      )}>
+      )} role="complementary" aria-label="Sidebar navigation">
         {/* Logo + mobile close */}
         <div className="px-5 py-5 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -166,8 +168,8 @@ export default function Sidebar({ user, mobileOpen, onMobileClose }: SidebarProp
               <div className="text-white font-bold text-sm leading-tight">Health1 VPMS</div>
               <div className="text-blue-300 text-xs">Purchase Management</div>
             </div>
-            <button onClick={onMobileClose} className="lg:hidden text-blue-300 hover:text-white">
-              <X size={20} />
+            <button onClick={onMobileClose} className="lg:hidden text-blue-300 hover:text-white" aria-label="Close sidebar menu">
+              <X size={20} aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -193,7 +195,7 @@ export default function Sidebar({ user, mobileOpen, onMobileClose }: SidebarProp
       )}
 
       {/* Nav */}
-      <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-0.5">
+      <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-0.5" role="navigation" aria-label="Main navigation">
         {filteredNav.map(item => {
           if (item.href) {
             const active = pathname === item.href
@@ -201,6 +203,7 @@ export default function Sidebar({ user, mobileOpen, onMobileClose }: SidebarProp
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? 'page' : undefined}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
                   active
@@ -221,6 +224,14 @@ export default function Sidebar({ user, mobileOpen, onMobileClose }: SidebarProp
             <div key={item.label}>
               <button
                 onClick={() => toggleGroup(item.label)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    toggleGroup(item.label)
+                  }
+                }}
+                aria-expanded={isOpen}
+                aria-controls={`nav-group-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                 className={cn(
                   'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-left',
                   hasActiveChild
@@ -230,16 +241,22 @@ export default function Sidebar({ user, mobileOpen, onMobileClose }: SidebarProp
               >
                 {item.icon}
                 <span className="flex-1">{item.label}</span>
-                {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                {isOpen ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
               </button>
               {isOpen && item.children && (
-                <div className="ml-4 mt-0.5 space-y-0.5 border-l border-white/10 pl-3">
+                <div
+                  id={`nav-group-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  role="group"
+                  aria-label={`${item.label} submenu`}
+                  className="ml-4 mt-0.5 space-y-0.5 border-l border-white/10 pl-3"
+                >
                   {item.children.map(child => {
                     const active = pathname === child.href
                     return (
                       <Link
                         key={child.href}
                         href={child.href}
+                        aria-current={active ? 'page' : undefined}
                         className={cn(
                           'block px-3 py-1.5 rounded-lg text-[13px] transition-colors',
                           active
@@ -274,12 +291,13 @@ export default function Sidebar({ user, mobileOpen, onMobileClose }: SidebarProp
             onClick={handleLogout}
             className="text-blue-300 hover:text-white transition-colors"
             title="Sign out"
+            aria-label="Sign out"
           >
-            <LogOut size={16} />
+            <LogOut size={16} aria-hidden="true" />
           </button>
         </div>
       </div>
-    </div>
+    </aside>
     </>
   )
 }

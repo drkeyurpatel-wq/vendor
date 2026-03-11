@@ -124,6 +124,122 @@ export const itemSchema = z.object({
 export type ItemFormData = z.infer<typeof itemSchema>
 
 // ============================================================
+// API INPUT VALIDATION — PO Approval
+// ============================================================
+export const poApprovalSchema = z.object({
+  po_id: z.string().uuid('Invalid PO ID'),
+  action: z.enum(['approve', 'reject'], { errorMap: () => ({ message: 'Action must be approve or reject' }) }),
+  comments: z.string().max(1000).optional(),
+})
+
+export type POApprovalInput = z.infer<typeof poApprovalSchema>
+
+// ============================================================
+// API INPUT VALIDATION — GRN Submit
+// ============================================================
+export const grnSubmitSchema = z.object({
+  grn_id: z.string().uuid('Invalid GRN ID'),
+  action: z.enum(['verify', 'flag_discrepancy'], { errorMap: () => ({ message: 'Action must be verify or flag_discrepancy' }) }),
+})
+
+export type GRNSubmitInput = z.infer<typeof grnSubmitSchema>
+
+// ============================================================
+// API INPUT VALIDATION — Invoice Match
+// ============================================================
+export const invoiceMatchSchema = z.object({
+  invoice_id: z.string().uuid('Invalid invoice ID'),
+})
+
+export type InvoiceMatchInput = z.infer<typeof invoiceMatchSchema>
+
+// ============================================================
+// API INPUT VALIDATION — Credit Check
+// ============================================================
+export const creditCheckSchema = z.object({
+  vendor_id: z.string().uuid('Invalid vendor ID'),
+})
+
+export type CreditCheckInput = z.infer<typeof creditCheckSchema>
+
+// ============================================================
+// API INPUT VALIDATION — Tally Push
+// ============================================================
+export const tallyPushSchema = z.object({
+  type: z.enum(['purchase', 'payment', 'debit_note', 'credit_note'], {
+    errorMap: () => ({ message: 'Type must be purchase, payment, debit_note, or credit_note' }),
+  }),
+  entity_id: z.string().uuid('Invalid entity ID'),
+})
+
+export type TallyPushInput = z.infer<typeof tallyPushSchema>
+
+// ============================================================
+// API INPUT VALIDATION — Tally Sync
+// ============================================================
+export const tallySyncSchema = z.object({
+  action: z.enum(['export_vendors', 'export_items', 'import_ledgers'], {
+    errorMap: () => ({ message: 'Action must be export_vendors, export_items, or import_ledgers' }),
+  }),
+  xml_data: z.string().optional(),
+})
+
+export type TallySyncInput = z.infer<typeof tallySyncSchema>
+
+// ============================================================
+// API INPUT VALIDATION — Notification Send
+// ============================================================
+export const notificationSendSchema = z.object({
+  type: z.enum(['po_created', 'po_approved', 'grn_received', 'payment_processed', 'invoice_overdue'], {
+    errorMap: () => ({ message: 'Invalid notification type' }),
+  }),
+  data: z.record(z.unknown()),
+})
+
+export type NotificationSendInput = z.infer<typeof notificationSendSchema>
+
+// ============================================================
+// API INPUT VALIDATION — WhatsApp Notification
+// ============================================================
+export const whatsappNotificationSchema = z.object({
+  phone: z.string().min(10, 'Phone number is required'),
+  template: z.enum(['po_created', 'payment_advice', 'delivery_reminder'], {
+    errorMap: () => ({ message: 'Invalid template' }),
+  }),
+  params: z.record(z.string()),
+})
+
+export type WhatsAppNotificationInput = z.infer<typeof whatsappNotificationSchema>
+
+// ============================================================
+// API INPUT VALIDATION — Report Generate
+// ============================================================
+export const reportGenerateSchema = z.object({
+  report_type: z.enum(['spend_analysis', 'aging_report', 'po_status_report', 'vendor_scorecard'], {
+    errorMap: () => ({ message: 'Invalid report type' }),
+  }),
+  format: z.enum(['pdf', 'excel']).default('pdf'),
+  filters: z.object({
+    centre_id: z.string().uuid().optional().nullable(),
+    date_from: z.string().optional().nullable(),
+    date_to: z.string().optional().nullable(),
+    vendor_id: z.string().uuid().optional().nullable(),
+  }).default({}),
+})
+
+export type ReportGenerateInput = z.infer<typeof reportGenerateSchema>
+
+// ============================================================
+// API INPUT VALIDATION — Tenant Create
+// ============================================================
+export const tenantCreateSchema = z.object({
+  name: z.string().min(2, 'Name is required').max(200),
+  slug: z.string().min(2).max(50).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase letters, numbers, and hyphens only'),
+})
+
+export type TenantCreateInput = z.infer<typeof tenantCreateSchema>
+
+// ============================================================
 // HELPERS
 // ============================================================
 export function extractErrors(error: z.ZodError): Record<string, string> {

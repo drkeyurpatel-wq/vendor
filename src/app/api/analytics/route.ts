@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/rate-limit'
 
 /**
  * AI Analytics API
@@ -106,6 +107,11 @@ function stdDev(values: number[]): number {
 }
 
 export async function GET(req: NextRequest) {
+  const rateLimitResult = await rateLimit(req, 30, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

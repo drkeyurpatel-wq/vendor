@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { format } from 'date-fns'
+import { rateLimit } from '@/lib/rate-limit'
+import { tallyPushSchema } from '@/lib/validations'
 
 const TALLY_URL = process.env.TALLY_SERVER_URL || ''
 const COMPANY_NAME = 'Health1 Super Speciality Hospitals Pvt. Ltd.'
@@ -324,17 +326,29 @@ function buildCreditNoteXml(creditNote: any, vendor: any): string {
 }
 
 export async function POST(req: NextRequest) {
+  const rateLimitResult = await rateLimit(req, 10, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const body = await req.json()
-    const { type, entity_id } = body
-
-    if (!type || !entity_id) {
-      return NextResponse.json({ error: 'type and entity_id are required' }, { status: 400 })
+    let rawBody: unknown
+    try {
+      rawBody = await req.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
     }
+
+    const parsed = tallyPushSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+    }
+
+    const { type, entity_id } = parsed.data
 
     let xml = ''
     let entityTable = ''

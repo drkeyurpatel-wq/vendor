@@ -88,17 +88,18 @@ export default async function GRNListPage({
         {grns && grns.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="data-table">
+              <caption className="sr-only">List of goods receipt notes with GRN number, PO number, centre, vendor, date, invoice details, and status</caption>
               <thead>
                 <tr>
-                  <th>GRN Number</th>
-                  <th>PO Number</th>
-                  <th>Centre</th>
-                  <th>Vendor</th>
-                  <th>GRN Date</th>
-                  <th>Invoice No.</th>
-                  <th>Invoice Amt</th>
-                  <th>Status</th>
-                  <th>Action</th>
+                  <th scope="col">GRN Number</th>
+                  <th scope="col">PO Number</th>
+                  <th scope="col">Centre</th>
+                  <th scope="col">Vendor</th>
+                  <th scope="col">GRN Date</th>
+                  <th scope="col">Invoice No.</th>
+                  <th scope="col">Invoice Amt</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -106,7 +107,7 @@ export default async function GRNListPage({
                   <tr key={grn.id}>
                     <td><span className="font-mono text-xs font-semibold">{grn.grn_number}</span></td>
                     <td>
-                      <Link href={`/purchase-orders/${grn.po_id}`} className="font-mono text-xs text-[#0D7E8A] hover:underline">
+                      <Link href={`/purchase-orders/${grn.po_id}`} className="font-mono text-xs text-[#0D7E8A] hover:underline" aria-label={`View PO ${grn.po?.po_number}`}>
                         {grn.po?.po_number}
                       </Link>
                     </td>
@@ -116,7 +117,7 @@ export default async function GRNListPage({
                     <td className="font-mono text-xs text-gray-600">{grn.vendor_invoice_no || '—'}</td>
                     <td className="text-sm font-semibold">{grn.vendor_invoice_amount ? formatLakhs(grn.vendor_invoice_amount) : '—'}</td>
                     <td><span className={cn('badge', GRN_STATUS_COLORS[grn.status] || 'bg-gray-100 text-gray-700')}>{grn.status}</span></td>
-                    <td><Link href={`/grn/${grn.id}`} className="text-xs text-[#0D7E8A] hover:underline font-medium">View</Link></td>
+                    <td><Link href={`/grn/${grn.id}`} className="text-xs text-[#0D7E8A] hover:underline font-medium" aria-label={`View GRN ${grn.grn_number}`}>View</Link></td>
                   </tr>
                 ))}
               </tbody>

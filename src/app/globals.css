@@ -60,10 +60,11 @@ body {
 /* Form styles */
 .form-label {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #374151;
   margin-bottom: 4px;
+  line-height: 1.5;
 }
 .form-input {
   width: 100%;
@@ -75,14 +76,24 @@ body {
   background: white;
   transition: border-color 0.15s;
 }
-.form-input:focus {
+.form-input:focus,
+.form-input:focus-visible {
   outline: none;
   border-color: #0D7E8A;
-  box-shadow: 0 0 0 3px rgba(13,126,138,0.1);
+  box-shadow: 0 0 0 3px rgba(13,126,138,0.15);
+}
+.form-input[aria-invalid="true"] {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+}
+.form-input[aria-invalid="true"]:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.15);
 }
 .form-input:disabled {
   background: #f9fafb;
   color: #6b7280;
+  opacity: 0.6;
 }
 .form-select {
   width: 100%;
@@ -100,10 +111,15 @@ body {
   padding-right: 36px;
   transition: border-color 0.15s;
 }
-.form-select:focus {
+.form-select:focus,
+.form-select:focus-visible {
   outline: none;
   border-color: #0D7E8A;
-  box-shadow: 0 0 0 3px rgba(13,126,138,0.1);
+  box-shadow: 0 0 0 3px rgba(13,126,138,0.15);
+}
+.form-select[aria-invalid="true"] {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
 }
 
 /* Buttons */
@@ -229,4 +245,50 @@ body {
   padding: 60px 24px;
   color: #9ca3af;
   text-align: center;
+}
+
+/* ═══ Accessibility Utilities ═══ */
+
+/* Screen reader only — visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus-visible ring for all interactive elements */
+:focus-visible {
+  outline: 2px solid #0D7E8A;
+  outline-offset: 2px;
+}
+
+/* Ensure buttons and links show focus ring */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #0D7E8A;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* High-contrast status badges (WCAG 2.1 AA 4.5:1 minimum) */
+.badge.bg-yellow-100 { background-color: #fef3c7; color: #78350f; }
+.badge.bg-green-100 { background-color: #d1fae5; color: #064e3b; }
+.badge.bg-red-100 { background-color: #fee2e2; color: #7f1d1d; }
+.badge.bg-blue-100 { background-color: #dbeafe; color: #1e3a5f; }
+.badge.bg-orange-100 { background-color: #ffedd5; color: #7c2d12; }
+.badge.bg-gray-100 { background-color: #f3f4f6; color: #1f2937; }
+
+/* Disabled state with proper aria-disabled support */
+[aria-disabled="true"],
+:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }

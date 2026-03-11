@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/rate-limit'
 
 /**
  * Atomic sequence generator using DB sequences.
@@ -7,6 +8,11 @@ import { NextRequest, NextResponse } from 'next/server'
  * Returns { number: "H1-SHI-PO-2603-001" }
  */
 export async function GET(req: NextRequest) {
+  const rateLimitResult = await rateLimit(req, 30, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const type = req.nextUrl.searchParams.get('type')
   const centreCode = req.nextUrl.searchParams.get('centre_code') || 'XXX'
 

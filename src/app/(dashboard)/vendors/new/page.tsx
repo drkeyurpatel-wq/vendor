@@ -224,49 +224,55 @@ export default function NewVendorPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b border-gray-200 overflow-x-auto">
+      <div className="flex gap-1 mb-4 border-b border-gray-200 overflow-x-auto" role="tablist" aria-label="Vendor form sections">
         {TABS.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-controls={`tabpanel-${tab.id}`}
+            id={`tab-${tab.id}`}
             className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
               activeTab === tab.id ? 'border-[#0D7E8A] text-[#0D7E8A]' : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}>{tab.label}</button>
         ))}
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} aria-label="Add new vendor form">
         {/* ═══ Basic Info ═══ */}
         {activeTab === 'basic' && (
           <div className="card p-6">
-            <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
-              Vendor Identification
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div className="md:col-span-2">
-                <label className="form-label">Legal Name * <span className="text-gray-400 font-normal">(as per GST certificate)</span></label>
-                <input className="form-input" value={form.legal_name} onChange={e => update('legal_name', e.target.value)} required />
+            <fieldset>
+              <legend className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
+                Vendor Identification
+              </legend>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="md:col-span-2">
+                  <label htmlFor="legal_name" className="form-label">Legal Name * <span className="text-gray-400 font-normal">(as per GST certificate)</span></label>
+                  <input id="legal_name" className="form-input" value={form.legal_name} onChange={e => update('legal_name', e.target.value)} required aria-required="true" />
+                </div>
+                <div>
+                  <label htmlFor="trade_name" className="form-label">Trade / Brand Name</label>
+                  <input id="trade_name" className="form-input" value={form.trade_name} onChange={e => update('trade_name', e.target.value)} />
+                </div>
+                <div>
+                  <label htmlFor="category_id" className="form-label">Category</label>
+                  <select id="category_id" className="form-select" value={form.category_id} onChange={e => update('category_id', e.target.value)}>
+                    <option value="">Select category</option>
+                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="vendor_type" className="form-label">Vendor Type *</label>
+                  <select id="vendor_type" className="form-select" value={form.vendor_type} onChange={e => update('vendor_type', e.target.value)} aria-required="true">
+                    {VENDOR_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="vendor_code" className="form-label">Vendor Code</label>
+                  <input id="vendor_code" className="form-input" disabled aria-disabled="true" value="Auto-generated (H1V-XXXX)" />
+                </div>
               </div>
-              <div>
-                <label className="form-label">Trade / Brand Name</label>
-                <input className="form-input" value={form.trade_name} onChange={e => update('trade_name', e.target.value)} />
-              </div>
-              <div>
-                <label className="form-label">Category</label>
-                <select className="form-select" value={form.category_id} onChange={e => update('category_id', e.target.value)}>
-                  <option value="">Select category</option>
-                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="form-label">Vendor Type *</label>
-                <select className="form-select" value={form.vendor_type} onChange={e => update('vendor_type', e.target.value)}>
-                  {VENDOR_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="form-label">Vendor Code</label>
-                <input className="form-input" disabled value="Auto-generated (H1V-XXXX)" />
-              </div>
-            </div>
+            </fieldset>
           </div>
         )}
 
@@ -274,28 +280,32 @@ export default function NewVendorPage() {
         {activeTab === 'compliance' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
-                Tax Registration
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div>
-                  <label className="form-label">GSTIN</label>
-                  <input className="form-input uppercase" value={form.gstin} onChange={e => update('gstin', e.target.value)} maxLength={15} placeholder="24AABCU9603R1ZM" />
+              <fieldset>
+                <legend className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
+                  Tax Registration
+                </legend>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <div>
+                    <label htmlFor="gstin" className="form-label">GSTIN</label>
+                    <input id="gstin" className="form-input uppercase" value={form.gstin} onChange={e => update('gstin', e.target.value)} maxLength={15} placeholder="24AABCU9603R1ZM" aria-describedby="gstin-hint" />
+                    <span id="gstin-hint" className="sr-only">15-character GST Identification Number</span>
+                  </div>
+                  <div>
+                    <label htmlFor="pan" className="form-label">PAN</label>
+                    <input id="pan" className="form-input uppercase" value={form.pan} onChange={e => update('pan', e.target.value)} maxLength={10} placeholder="AABCU9603R" aria-describedby="pan-hint" />
+                    <span id="pan-hint" className="sr-only">10-character Permanent Account Number</span>
+                  </div>
+                  <div>
+                    <label htmlFor="gst_return_status" className="form-label">GST Filing Status</label>
+                    <select id="gst_return_status" className="form-select" value={form.gst_return_status} onChange={e => update('gst_return_status', e.target.value)}>
+                      <option value="regular">Regular Filer</option>
+                      <option value="irregular">Irregular</option>
+                      <option value="not_filed">Not Filed</option>
+                      <option value="not_applicable">Not Applicable</option>
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="form-label">PAN</label>
-                  <input className="form-input uppercase" value={form.pan} onChange={e => update('pan', e.target.value)} maxLength={10} placeholder="AABCU9603R" />
-                </div>
-                <div>
-                  <label className="form-label">GST Filing Status</label>
-                  <select className="form-select" value={form.gst_return_status} onChange={e => update('gst_return_status', e.target.value)}>
-                    <option value="regular">Regular Filer</option>
-                    <option value="irregular">Irregular</option>
-                    <option value="not_filed">Not Filed</option>
-                    <option value="not_applicable">Not Applicable</option>
-                  </select>
-                </div>
-              </div>
+              </fieldset>
             </div>
 
             <div className="card p-6">
@@ -351,14 +361,16 @@ export default function NewVendorPage() {
         {activeTab === 'contact' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
-                Primary Contact
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div><label className="form-label">Name</label><input className="form-input" value={form.primary_contact_name} onChange={e => update('primary_contact_name', e.target.value)} /></div>
-                <div><label className="form-label">Phone</label><input className="form-input" value={form.primary_contact_phone} onChange={e => update('primary_contact_phone', e.target.value)} placeholder="+91 98765 43210" /></div>
-                <div><label className="form-label">Email</label><input type="email" className="form-input" value={form.primary_contact_email} onChange={e => update('primary_contact_email', e.target.value)} /></div>
-              </div>
+              <fieldset>
+                <legend className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
+                  Primary Contact
+                </legend>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <div><label htmlFor="primary_contact_name" className="form-label">Name</label><input id="primary_contact_name" className="form-input" value={form.primary_contact_name} onChange={e => update('primary_contact_name', e.target.value)} /></div>
+                  <div><label htmlFor="primary_contact_phone" className="form-label">Phone</label><input id="primary_contact_phone" className="form-input" value={form.primary_contact_phone} onChange={e => update('primary_contact_phone', e.target.value)} placeholder="+91 98765 43210" /></div>
+                  <div><label htmlFor="primary_contact_email" className="form-label">Email</label><input id="primary_contact_email" type="email" className="form-input" value={form.primary_contact_email} onChange={e => update('primary_contact_email', e.target.value)} /></div>
+                </div>
+              </fieldset>
             </div>
 
             <div className="card p-6">
@@ -391,23 +403,25 @@ export default function NewVendorPage() {
         {/* ═══ Banking ═══ */}
         {activeTab === 'banking' && (
           <div className="card p-6">
-            <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
-              Banking Details
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div><label className="form-label">Bank Name</label><input className="form-input" value={form.bank_name} onChange={e => update('bank_name', e.target.value)} /></div>
-              <div>
-                <label className="form-label">Account Type</label>
-                <select className="form-select" value={form.bank_account_type} onChange={e => update('bank_account_type', e.target.value)}>
-                  <option value="current">Current</option>
-                  <option value="savings">Savings</option>
-                  <option value="cc">Cash Credit (CC)</option>
-                  <option value="od">Overdraft (OD)</option>
-                </select>
+            <fieldset>
+              <legend className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
+                Banking Details
+              </legend>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div><label htmlFor="bank_name" className="form-label">Bank Name</label><input id="bank_name" className="form-input" value={form.bank_name} onChange={e => update('bank_name', e.target.value)} /></div>
+                <div>
+                  <label htmlFor="bank_account_type" className="form-label">Account Type</label>
+                  <select id="bank_account_type" className="form-select" value={form.bank_account_type} onChange={e => update('bank_account_type', e.target.value)}>
+                    <option value="current">Current</option>
+                    <option value="savings">Savings</option>
+                    <option value="cc">Cash Credit (CC)</option>
+                    <option value="od">Overdraft (OD)</option>
+                  </select>
+                </div>
+                <div><label htmlFor="bank_account_no" className="form-label">Account Number</label><input id="bank_account_no" className="form-input" value={form.bank_account_no} onChange={e => update('bank_account_no', e.target.value)} /></div>
+                <div><label htmlFor="bank_ifsc" className="form-label">IFSC Code</label><input id="bank_ifsc" className="form-input uppercase" value={form.bank_ifsc} onChange={e => update('bank_ifsc', e.target.value)} maxLength={11} /></div>
               </div>
-              <div><label className="form-label">Account Number</label><input className="form-input" value={form.bank_account_no} onChange={e => update('bank_account_no', e.target.value)} /></div>
-              <div><label className="form-label">IFSC Code</label><input className="form-input uppercase" value={form.bank_ifsc} onChange={e => update('bank_ifsc', e.target.value)} maxLength={11} /></div>
-            </div>
+            </fieldset>
             <div className="mt-4 p-3 bg-yellow-50 rounded-lg text-xs text-yellow-800">
               Bank details will need verification via cancelled cheque before first payment release.
             </div>

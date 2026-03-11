@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Plus, Package } from 'lucide-react'
+import ItemListClient from './ItemListClient'
 
 export default async function ItemsPage({
   searchParams,
@@ -61,54 +62,7 @@ export default async function ItemsPage({
       {/* Table */}
       <div className="card overflow-hidden">
         {items && items.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Item Code</th>
-                  <th>Generic Name</th>
-                  <th>Brand</th>
-                  <th>Category</th>
-                  <th>Unit</th>
-                  <th>HSN</th>
-                  <th>GST %</th>
-                  <th>Flags</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item: any) => (
-                  <tr key={item.id}>
-                    <td>
-                      <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">
-                        {item.item_code}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="font-medium text-gray-900">{item.generic_name}</div>
-                    </td>
-                    <td className="text-sm text-gray-600">{item.brand_name ?? '—'}</td>
-                    <td className="text-sm text-gray-600">{item.category?.name ?? '—'}</td>
-                    <td className="text-sm text-gray-600">{item.unit}</td>
-                    <td className="text-xs font-mono text-gray-500">{item.hsn_code ?? '—'}</td>
-                    <td className="text-sm text-gray-600">{item.gst_percent}%</td>
-                    <td>
-                      <div className="flex gap-1">
-                        {item.is_narcotic && <span className="badge bg-red-100 text-red-700">Narcotic</span>}
-                        {item.is_high_alert && <span className="badge bg-orange-100 text-orange-700">High Alert</span>}
-                        {item.is_cold_chain && <span className="badge bg-blue-100 text-blue-700">Cold Chain</span>}
-                      </div>
-                    </td>
-                    <td>
-                      <Link href={`/items/${item.id}`} className="text-xs text-[#0D7E8A] hover:underline font-medium">
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ItemListClient items={items} categories={categories || []} />
         ) : (
           <div className="empty-state">
             <Package size={40} className="mb-3 text-gray-300" />

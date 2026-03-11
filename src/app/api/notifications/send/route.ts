@@ -8,6 +8,8 @@ import {
   paymentProcessedEmail,
   invoiceOverdueEmail,
 } from '@/lib/email'
+import { rateLimit } from '@/lib/rate-limit'
+import { notificationSendSchema } from '@/lib/validations'
 
 // ============================================================
 // H1 VPMS — Notification Dispatch API
@@ -21,12 +23,12 @@ type NotificationType =
   | 'payment_processed'
   | 'invoice_overdue'
 
-interface NotificationRequest {
-  type: NotificationType
-  data: Record<string, unknown>
-}
-
 export async function POST(request: NextRequest) {
+  const rateLimitResult = await rateLimit(request, 10, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -34,25 +36,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  let body: NotificationRequest
+  let rawBody: unknown
   try {
-    body = await request.json()
+    rawBody = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { type, data } = body
-
-  if (!type || !data) {
-    return NextResponse.json({ error: 'Missing type or data' }, { status: 400 })
+  const parsed = notificationSendSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten().fieldErrors }, { status: 400 })
   }
 
-  const validTypes: NotificationType[] = [
-    'po_created', 'po_approved', 'grn_received', 'payment_processed', 'invoice_overdue',
-  ]
-  if (!validTypes.includes(type)) {
-    return NextResponse.json({ error: `Invalid type. Must be one of: ${validTypes.join(', ')}` }, { status: 400 })
-  }
+  const { type, data } = parsed.data as { type: NotificationType; data: Record<string, unknown> }
 
   try {
     let emailSent = false

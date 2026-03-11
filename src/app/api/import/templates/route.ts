@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as XLSX from 'xlsx'
+import { rateLimit } from '@/lib/rate-limit'
 
 // CSV/Excel template definitions for each import type
 const TEMPLATES: Record<string, { name: string; headers: string[]; sampleRows: string[][]; instructions: string[] }> = {
@@ -168,6 +169,11 @@ const TEMPLATES: Record<string, { name: string; headers: string[]; sampleRows: s
 }
 
 export async function GET(request: NextRequest) {
+  const rateLimitResult = await rateLimit(request, 30, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const { searchParams } = new URL(request.url)
   const type = searchParams.get('type')
   const format = searchParams.get('format') || 'xlsx'

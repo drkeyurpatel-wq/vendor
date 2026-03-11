@@ -116,17 +116,18 @@ export default async function InvoicesPage({
           <>
           <div className="overflow-x-auto">
             <table className="data-table">
+              <caption className="sr-only">List of invoices with reference, vendor, centre, dates, amount, match status, and payment status</caption>
               <thead>
                 <tr>
-                  <th>Ref</th>
-                  <th>Vendor Invoice</th>
-                  <th>Centre</th>
-                  <th>Vendor</th>
-                  <th>Invoice Date</th>
-                  <th>Due Date</th>
-                  <th>Amount</th>
-                  <th>Match</th>
-                  <th>Payment</th>
+                  <th scope="col">Ref</th>
+                  <th scope="col">Vendor Invoice</th>
+                  <th scope="col">Centre</th>
+                  <th scope="col">Vendor</th>
+                  <th scope="col">Invoice Date</th>
+                  <th scope="col">Due Date</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Match</th>
+                  <th scope="col">Payment</th>
                 </tr>
               </thead>
               <tbody>

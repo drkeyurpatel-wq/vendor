@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/rate-limit'
 
 /**
  * CSV Export API
@@ -7,6 +8,11 @@ import { NextRequest, NextResponse } from 'next/server'
  * Usage: /api/export?type=purchase_orders&status=approved
  */
 export async function GET(req: NextRequest) {
+  const rateLimitResult = await rateLimit(req, 10, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { searchParams } = new URL(req.url)
   const type = searchParams.get('type')

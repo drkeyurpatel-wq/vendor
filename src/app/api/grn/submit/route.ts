@@ -1,7 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/rate-limit'
+import { grnSubmitSchema } from '@/lib/validations'
 
 export async function POST(request: NextRequest) {
+  const rateLimitResult = await rateLimit(request, 10, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -9,12 +16,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await request.json()
-  const { grn_id, action } = body
-
-  if (!grn_id || !['verify', 'flag_discrepancy'].includes(action)) {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
+
+  const parsed = grnSubmitSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+  }
+
+  const { grn_id, action } = parsed.data
 
   const { data: grn } = await supabase
     .from('grns')
