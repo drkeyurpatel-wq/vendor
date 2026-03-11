@@ -115,16 +115,17 @@ export default async function VendorsPage({
         {vendors && vendors.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="data-table">
+              <caption className="sr-only">List of vendors with code, name, category, GSTIN, credit period, contact, and status</caption>
               <thead>
                 <tr>
-                  <th>Vendor Code</th>
-                  <th>Legal Name</th>
-                  <th>Category</th>
-                  <th>GSTIN</th>
-                  <th>Credit Period</th>
-                  <th>Contact</th>
-                  <th>Status</th>
-                  <th>Action</th>
+                  <th scope="col">Vendor Code</th>
+                  <th scope="col">Legal Name</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">GSTIN</th>
+                  <th scope="col">Credit Period</th>
+                  <th scope="col">Contact</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -166,6 +167,7 @@ export default async function VendorsPage({
                       <Link
                         href={`/vendors/${vendor.id}`}
                         className="text-xs text-[#0D7E8A] hover:underline font-medium"
+                        aria-label={`View vendor ${vendor.legal_name}`}
                       >
                         View
                       </Link>

@@ -63,17 +63,18 @@ export default async function ItemsPage({
         {items && items.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="data-table">
+              <caption className="sr-only">List of items with code, name, brand, category, unit, HSN code, GST percentage, and flags</caption>
               <thead>
                 <tr>
-                  <th>Item Code</th>
-                  <th>Generic Name</th>
-                  <th>Brand</th>
-                  <th>Category</th>
-                  <th>Unit</th>
-                  <th>HSN</th>
-                  <th>GST %</th>
-                  <th>Flags</th>
-                  <th>Action</th>
+                  <th scope="col">Item Code</th>
+                  <th scope="col">Generic Name</th>
+                  <th scope="col">Brand</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Unit</th>
+                  <th scope="col">HSN</th>
+                  <th scope="col">GST %</th>
+                  <th scope="col">Flags</th>
+                  <th scope="col">Action</th>
                 </tr>
               </thead>
               <tbody>

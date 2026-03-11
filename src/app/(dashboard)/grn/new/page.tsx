@@ -599,41 +599,45 @@ export default function NewGRNPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" aria-label="Create goods receipt note form">
         {/* PO Selection */}
         <div className="card p-6">
-          <h2 className="font-semibold mb-4 pb-3 border-b border-gray-100" style={{ color: '#1B3A6B' }}>
-            Select Purchase Order
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label className="form-label">Purchase Order *</label>
-              <select
-                className="form-select"
-                value={selectedPO?.id || ''}
-                onChange={e => {
-                  const po = eligiblePOs.find(p => p.id === e.target.value)
-                  if (po) loadPOItems(po)
-                  else { setSelectedPO(null); setLineItems([]) }
-                }}
-              >
-                <option value="">Select a PO...</option>
-                {eligiblePOs.map(po => (
-                  <option key={po.id} value={po.id}>
-                    {po.po_number} — {po.vendor?.legal_name} ({po.centre?.code}) — {formatCurrency(po.total_amount)} — {po.status.replace(/_/g, ' ')}
-                  </option>
-                ))}
-              </select>
+          <fieldset>
+            <legend className="font-semibold mb-4 pb-3 border-b border-gray-100 w-full" style={{ color: '#1B3A6B' }}>
+              Select Purchase Order
+            </legend>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label htmlFor="grn-po-select" className="form-label">Purchase Order *</label>
+                <select
+                  id="grn-po-select"
+                  className="form-select"
+                  value={selectedPO?.id || ''}
+                  aria-required="true"
+                  onChange={e => {
+                    const po = eligiblePOs.find(p => p.id === e.target.value)
+                    if (po) loadPOItems(po)
+                    else { setSelectedPO(null); setLineItems([]) }
+                  }}
+                >
+                  <option value="">Select a PO...</option>
+                  {eligiblePOs.map(po => (
+                    <option key={po.id} value={po.id}>
+                      {po.po_number} — {po.vendor?.legal_name} ({po.centre?.code}) — {formatCurrency(po.total_amount)} — {po.status.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="grn-date" className="form-label">GRN Date *</label>
+                <input id="grn-date" type="date" className="form-input" value={grnDate} onChange={e => setGrnDate(e.target.value)} required aria-required="true" />
+              </div>
+              <div>
+                <label htmlFor="grn-notes" className="form-label">Notes</label>
+                <input id="grn-notes" className="form-input" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional notes..." />
+              </div>
             </div>
-            <div>
-              <label className="form-label">GRN Date *</label>
-              <input type="date" className="form-input" value={grnDate} onChange={e => setGrnDate(e.target.value)} required />
-            </div>
-            <div>
-              <label className="form-label">Notes</label>
-              <input className="form-input" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional notes..." />
-            </div>
-          </div>
+          </fieldset>
 
           {selectedPO && (
             <div className="mt-4 p-3 rounded-lg flex items-center gap-4 text-sm" style={{ backgroundColor: '#E6F5F6' }}>
@@ -652,56 +656,60 @@ export default function NewGRNPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Transport Details */}
           <div className="card p-6">
-            <h2 className="font-semibold mb-4 pb-3 border-b border-gray-100" style={{ color: '#1B3A6B' }}>
-              Transport Details
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="form-label">DC Number</label>
-                <input className="form-input" value={dcNumber} onChange={e => setDcNumber(e.target.value)} placeholder="Delivery challan #" />
+            <fieldset>
+              <legend className="font-semibold mb-4 pb-3 border-b border-gray-100 w-full" style={{ color: '#1B3A6B' }}>
+                Transport Details
+              </legend>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="grn-dc-number" className="form-label">DC Number</label>
+                  <input id="grn-dc-number" className="form-input" value={dcNumber} onChange={e => setDcNumber(e.target.value)} placeholder="Delivery challan #" />
+                </div>
+                <div>
+                  <label htmlFor="grn-dc-date" className="form-label">DC Date</label>
+                  <input id="grn-dc-date" type="date" className="form-input" value={dcDate} onChange={e => setDcDate(e.target.value)} />
+                </div>
+                <div>
+                  <label htmlFor="grn-lr-number" className="form-label">LR Number</label>
+                  <input id="grn-lr-number" className="form-input" value={lrNumber} onChange={e => setLrNumber(e.target.value)} placeholder="Lorry receipt #" />
+                </div>
+                <div>
+                  <label htmlFor="grn-transport-name" className="form-label">Transport Name</label>
+                  <input id="grn-transport-name" className="form-input" value={transportName} onChange={e => setTransportName(e.target.value)} placeholder="Transporter" />
+                </div>
+                <div>
+                  <label htmlFor="grn-vehicle-number" className="form-label">Vehicle Number</label>
+                  <input id="grn-vehicle-number" className="form-input" value={vehicleNumber} onChange={e => setVehicleNumber(e.target.value)} placeholder="GJ-01-XX-0000" />
+                </div>
+                <div>
+                  <label htmlFor="grn-eway-bill" className="form-label">E-Way Bill No</label>
+                  <input id="grn-eway-bill" className="form-input" value={ewayBillNo} onChange={e => setEwayBillNo(e.target.value)} placeholder="E-way bill #" />
+                </div>
               </div>
-              <div>
-                <label className="form-label">DC Date</label>
-                <input type="date" className="form-input" value={dcDate} onChange={e => setDcDate(e.target.value)} />
-              </div>
-              <div>
-                <label className="form-label">LR Number</label>
-                <input className="form-input" value={lrNumber} onChange={e => setLrNumber(e.target.value)} placeholder="Lorry receipt #" />
-              </div>
-              <div>
-                <label className="form-label">Transport Name</label>
-                <input className="form-input" value={transportName} onChange={e => setTransportName(e.target.value)} placeholder="Transporter" />
-              </div>
-              <div>
-                <label className="form-label">Vehicle Number</label>
-                <input className="form-input" value={vehicleNumber} onChange={e => setVehicleNumber(e.target.value)} placeholder="GJ-01-XX-0000" />
-              </div>
-              <div>
-                <label className="form-label">E-Way Bill No</label>
-                <input className="form-input" value={ewayBillNo} onChange={e => setEwayBillNo(e.target.value)} placeholder="E-way bill #" />
-              </div>
-            </div>
+            </fieldset>
           </div>
 
           {/* Vendor Invoice */}
           <div className="card p-6">
-            <h2 className="font-semibold mb-4 pb-3 border-b border-gray-100" style={{ color: '#1B3A6B' }}>
-              Vendor Invoice Details
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <label className="form-label">Invoice Number</label>
-                <input className="form-input" value={vendorInvoiceNo} onChange={e => setVendorInvoiceNo(e.target.value)} placeholder="Vendor invoice #" />
+            <fieldset>
+              <legend className="font-semibold mb-4 pb-3 border-b border-gray-100 w-full" style={{ color: '#1B3A6B' }}>
+                Vendor Invoice Details
+              </legend>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label htmlFor="grn-vendor-invoice-no" className="form-label">Invoice Number</label>
+                  <input id="grn-vendor-invoice-no" className="form-input" value={vendorInvoiceNo} onChange={e => setVendorInvoiceNo(e.target.value)} placeholder="Vendor invoice #" />
+                </div>
+                <div>
+                  <label htmlFor="grn-vendor-invoice-date" className="form-label">Invoice Date</label>
+                  <input id="grn-vendor-invoice-date" type="date" className="form-input" value={vendorInvoiceDate} onChange={e => setVendorInvoiceDate(e.target.value)} />
+                </div>
+                <div>
+                  <label htmlFor="grn-vendor-invoice-amount" className="form-label">Invoice Amount (₹)</label>
+                  <input id="grn-vendor-invoice-amount" type="number" step="0.01" className="form-input" value={vendorInvoiceAmount} onChange={e => setVendorInvoiceAmount(e.target.value)} placeholder="0.00" />
+                </div>
               </div>
-              <div>
-                <label className="form-label">Invoice Date</label>
-                <input type="date" className="form-input" value={vendorInvoiceDate} onChange={e => setVendorInvoiceDate(e.target.value)} />
-              </div>
-              <div>
-                <label className="form-label">Invoice Amount (₹)</label>
-                <input type="number" step="0.01" className="form-input" value={vendorInvoiceAmount} onChange={e => setVendorInvoiceAmount(e.target.value)} placeholder="0.00" />
-              </div>
-            </div>
+            </fieldset>
           </div>
         </div>
 
@@ -738,21 +746,22 @@ export default function NewGRNPage() {
             </div>
             <div className="overflow-x-auto">
               <table className="data-table">
+                <caption className="sr-only">GRN line items for receiving goods against purchase order</caption>
                 <thead>
                   <tr>
-                    <th>Item</th>
-                    <th className="text-center">Ordered</th>
-                    <th className="text-center">Prev Recv</th>
-                    <th className="text-center">Receiving</th>
-                    <th className="text-center">Accepted</th>
-                    <th className="text-center">Rejected</th>
-                    <th className="text-center">Damaged</th>
-                    <th className="text-center">Free</th>
-                    <th>Batch</th>
-                    <th>Expiry</th>
-                    <th>MRP</th>
-                    <th className="text-right">Rate</th>
-                    <th className="text-right">Amount</th>
+                    <th scope="col">Item</th>
+                    <th scope="col" className="text-center">Ordered</th>
+                    <th scope="col" className="text-center">Prev Recv</th>
+                    <th scope="col" className="text-center">Receiving</th>
+                    <th scope="col" className="text-center">Accepted</th>
+                    <th scope="col" className="text-center">Rejected</th>
+                    <th scope="col" className="text-center">Damaged</th>
+                    <th scope="col" className="text-center">Free</th>
+                    <th scope="col">Batch</th>
+                    <th scope="col">Expiry</th>
+                    <th scope="col">MRP</th>
+                    <th scope="col" className="text-right">Rate</th>
+                    <th scope="col" className="text-right">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -772,6 +781,7 @@ export default function NewGRNPage() {
                           className="form-input w-20 text-center"
                           value={li.received_qty}
                           onChange={e => updateLine(idx, 'received_qty', parseInt(e.target.value) || 0)}
+                          aria-label={`Receiving quantity for ${li.generic_name}`}
                         />
                       </td>
                       <td className="text-center">
@@ -785,6 +795,7 @@ export default function NewGRNPage() {
                           className="form-input w-20 text-center"
                           value={li.rejected_qty}
                           onChange={e => updateLine(idx, 'rejected_qty', parseInt(e.target.value) || 0)}
+                          aria-label={`Rejected quantity for ${li.generic_name}`}
                         />
                       </td>
                       <td className="text-center">
@@ -795,6 +806,7 @@ export default function NewGRNPage() {
                           className="form-input w-20 text-center"
                           value={li.damaged_qty}
                           onChange={e => updateLine(idx, 'damaged_qty', parseInt(e.target.value) || 0)}
+                          aria-label={`Damaged quantity for ${li.generic_name}`}
                         />
                       </td>
                       <td className="text-center">
@@ -804,6 +816,7 @@ export default function NewGRNPage() {
                           className="form-input w-16 text-center"
                           value={li.free_qty}
                           onChange={e => updateLine(idx, 'free_qty', parseInt(e.target.value) || 0)}
+                          aria-label={`Free quantity for ${li.generic_name}`}
                         />
                       </td>
                       <td>
@@ -812,6 +825,7 @@ export default function NewGRNPage() {
                           value={li.batch_no}
                           onChange={e => updateLine(idx, 'batch_no', e.target.value)}
                           placeholder="Batch"
+                          aria-label={`Batch number for ${li.generic_name}`}
                         />
                       </td>
                       <td>
@@ -820,6 +834,7 @@ export default function NewGRNPage() {
                           className="form-input w-36"
                           value={li.expiry_date}
                           onChange={e => updateLine(idx, 'expiry_date', e.target.value)}
+                          aria-label={`Expiry date for ${li.generic_name}`}
                         />
                       </td>
                       <td>
@@ -831,6 +846,7 @@ export default function NewGRNPage() {
                           value={li.mrp}
                           onChange={e => updateLine(idx, 'mrp', e.target.value)}
                           placeholder="MRP"
+                          aria-label={`MRP for ${li.generic_name}`}
                         />
                       </td>
                       <td className="text-right text-sm font-medium">
@@ -887,6 +903,8 @@ export default function NewGRNPage() {
                         value={li.rejection_reason}
                         onChange={e => updateLine(lineIdx, 'rejection_reason', e.target.value)}
                         placeholder="Reason for rejection (required)..."
+                        aria-label={`Rejection reason for ${li.generic_name}`}
+                        aria-required="true"
                       />
                     </div>
                   )
@@ -910,6 +928,8 @@ export default function NewGRNPage() {
                         value={li.damage_reason}
                         onChange={e => updateLine(lineIdx, 'damage_reason', e.target.value)}
                         placeholder="Reason for damage (required)..."
+                        aria-label={`Damage reason for ${li.generic_name}`}
+                        aria-required="true"
                       />
                     </div>
                   )

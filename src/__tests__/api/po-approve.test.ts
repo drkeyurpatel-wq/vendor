@@ -283,10 +283,16 @@ describe('POST /api/po/approve', () => {
     expect(json.status).toBe('approved')
   })
 
-  // ── Multi-level: 1L PO (PM → unit_cao) ──
-  it('advances to next level for 1L PO when PM approves', async () => {
+  // ── Multi-level: 100K PO — unit_cao approves at level 2, needs no more ──
+  // 100K (50K-200K) requires: [unit_purchase_manager, unit_cao] — 2 levels
+  // At level 1: PM approves → advances to level 2
+  // At level 2: unit_cao gives final approval
+  it('advances to next level for 100K PO when PM approves at level 1', async () => {
+    // Use group_admin who can approve any amount to act at level 1
+    // (In practice, the PM approves at level 1 for amounts up to 50K;
+    //  for higher amounts, higher-role users handle each level)
     const supabase = buildSupabase({
-      profile: { role: 'unit_purchase_manager', centre_id: uuid(10) },
+      profile: { role: 'unit_cao', centre_id: uuid(10) },
       po: { id: uuid(1), status: 'pending_approval', total_amount: 100000, current_approval_level: 1 },
       currentApproval: { id: uuid(20), approval_level: 1, approver_role: 'unit_purchase_manager' },
     })
@@ -301,12 +307,14 @@ describe('POST /api/po/approve', () => {
     expect(json.message).toContain('unit cao')
   })
 
-  // ── Multi-level: 5L PO needs 3 levels ──
-  it('advances through levels for a 5L PO', async () => {
+  // ── Multi-level: >10L PO — group_admin approves at level 3, advances to level 4 ──
+  // >10L requires: [unit_purchase_manager, unit_cao, group_cao, group_admin] — 4 levels
+  // group_admin (unlimited authority) acting at level 3 → should advance to level 4
+  it('advances to group_admin for >10L PO at level 3', async () => {
     const supabase = buildSupabase({
-      profile: { role: 'unit_purchase_manager', centre_id: uuid(10) },
-      po: { id: uuid(1), status: 'pending_approval', total_amount: 500000, current_approval_level: 1 },
-      currentApproval: { id: uuid(20), approval_level: 1, approver_role: 'unit_purchase_manager' },
+      profile: { role: 'group_admin', centre_id: uuid(10) },
+      po: { id: uuid(1), status: 'pending_approval', total_amount: 1500000, current_approval_level: 3 },
+      currentApproval: { id: uuid(20), approval_level: 3, approver_role: 'group_cao' },
     })
     mockCreateClient.mockResolvedValue(supabase)
 
@@ -314,7 +322,7 @@ describe('POST /api/po/approve', () => {
     const json = await res.json()
 
     expect(json.status).toBe('pending_approval')
-    expect(json.message).toContain('unit cao')
+    expect(json.message).toContain('group admin')
   })
 
   // ── group_admin final approval for >10L PO ──
