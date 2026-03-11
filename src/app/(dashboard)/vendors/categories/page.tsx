@@ -1,9 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Tag } from 'lucide-react'
+import VendorCategoryFormModal from './VendorCategoryFormModal'
 
 export default async function VendorCategoriesPage() {
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: categories } = await supabase
     .from('vendor_categories')
@@ -35,6 +40,7 @@ export default async function VendorCategoriesPage() {
             {categories?.length ?? 0} categories ({activeCount} active) covering {totalVendors} vendors
           </p>
         </div>
+        <VendorCategoryFormModal />
       </div>
 
       <div className="card overflow-hidden">
@@ -47,7 +53,8 @@ export default async function VendorCategoriesPage() {
                   <th>Name</th>
                   <th>Description</th>
                   <th>Status</th>
-                  <th>Vendor Count</th>
+                  <th>Vendors</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -79,18 +86,23 @@ export default async function VendorCategoriesPage() {
                         {countMap.get(cat.id) ?? 0}
                       </span>
                     </td>
+                    <td>
+                      <VendorCategoryFormModal editCategory={cat} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <div className="empty-state">
-            <Tag size={40} className="mb-3 text-gray-300" />
-            <p className="font-medium text-gray-500">No vendor categories found</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Add categories to organise your vendor master
-            </p>
+          <div className="p-12">
+            <div className="empty-state">
+              <Tag size={40} className="mb-3 text-gray-300" />
+              <p className="font-medium text-gray-500">No vendor categories found</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Click &quot;+ Add Category&quot; above to add your first category
+              </p>
+            </div>
           </div>
         )}
       </div>

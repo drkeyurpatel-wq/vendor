@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Building2, MapPin, Phone, Mail, CheckCircle, XCircle, Shield } from 'lucide-react'
+import CentreFormModal from './CentreFormModal'
 
 export default async function CentresPage() {
   const supabase = await createClient()
@@ -43,6 +44,9 @@ export default async function CentresPage() {
           <h1 className="page-title">Centre Management</h1>
           <p className="page-subtitle">All Health1 hospital centres</p>
         </div>
+        {currentProfile.role === 'group_admin' && (
+          <CentreFormModal />
+        )}
       </div>
 
       {/* Stats */}
@@ -90,21 +94,28 @@ export default async function CentresPage() {
                     </span>
                   </div>
                 </div>
-                <span className={cn(
-                  'badge',
-                  centre.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                )}>
-                  {centre.is_active ? (
-                    <span className="flex items-center gap-1"><CheckCircle size={12} /> Active</span>
-                  ) : (
-                    <span className="flex items-center gap-1"><XCircle size={12} /> Inactive</span>
-                  )}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    'badge',
+                    centre.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  )}>
+                    {centre.is_active ? (
+                      <span className="flex items-center gap-1"><CheckCircle size={12} /> Active</span>
+                    ) : (
+                      <span className="flex items-center gap-1"><XCircle size={12} /> Inactive</span>
+                    )}
+                  </span>
+                </div>
               </div>
 
               {/* Body */}
               <div className="px-5 py-4 space-y-3">
-                <h3 className="font-semibold text-[#1B3A6B] text-base">{centre.name}</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-[#1B3A6B] text-base">{centre.name}</h3>
+                  {currentProfile.role === 'group_admin' && (
+                    <CentreFormModal editCentre={centre} />
+                  )}
+                </div>
 
                 {centre.address && (
                   <div className="flex items-start gap-2 text-sm text-gray-600">
@@ -152,15 +163,10 @@ export default async function CentresPage() {
           <div className="empty-state">
             <Building2 size={40} className="mb-3 text-gray-300" />
             <p className="font-medium text-gray-500">No centres found</p>
-            <p className="text-sm text-gray-400 mt-1">Centres need to be configured in the database</p>
+            <p className="text-sm text-gray-400 mt-1">Click &quot;+ Add Centre&quot; above to add your first hospital centre</p>
           </div>
         </div>
       )}
-
-      {/* Read-only notice */}
-      <div className="mt-6 bg-[#E6F5F6] rounded-lg p-4 text-sm text-[#0D7E8A]">
-        Centre configuration is managed at the database level. Contact the system administrator to add or modify centres.
-      </div>
     </div>
   )
 }

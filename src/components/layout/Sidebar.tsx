@@ -46,6 +46,7 @@ const NAV: NavItem[] = [
     children: [
       { label: 'Item Master', href: '/items' },
       { label: 'Add Item', href: '/items/new' },
+      { label: 'Categories', href: '/items/categories' },
       { label: 'Stock Levels', href: '/items/stock' },
       { label: 'Consumption Import', href: '/items/consumption' },
     ]
