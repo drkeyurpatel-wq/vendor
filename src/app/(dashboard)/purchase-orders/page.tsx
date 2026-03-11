@@ -4,13 +4,14 @@ import { cn, formatLakhs, formatDate, PO_STATUS_COLORS } from '@/lib/utils'
 import { Plus, ShoppingCart } from 'lucide-react'
 import SearchInput from '@/components/ui/SearchInput'
 import Pagination from '@/components/ui/Pagination'
+import DateRangeFilter from '@/components/ui/DateRangeFilter'
 
 const PAGE_SIZE = 50
 
 export default async function PurchaseOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; centre?: string; q?: string; page?: string }>
+  searchParams: Promise<{ status?: string; centre?: string; q?: string; page?: string; from?: string; to?: string }>
 }) {
   const params = await searchParams
   const currentPage = Math.max(1, parseInt(params.page || '1'))
@@ -31,6 +32,8 @@ export default async function PurchaseOrdersPage({
   if (params.status) query = query.eq('status', params.status)
   if (params.centre) query = query.eq('centre_id', params.centre)
   if (params.q) query = query.or(`po_number.ilike.%${params.q}%,vendor.legal_name.ilike.%${params.q}%`)
+  if (params.from) query = query.gte('po_date', params.from)
+  if (params.to) query = query.lte('po_date', params.to)
 
   const from = (currentPage - 1) * PAGE_SIZE
   const { data: pos, count } = await query.range(from, from + PAGE_SIZE - 1)
@@ -70,6 +73,11 @@ export default async function PurchaseOrdersPage({
             {s.replace(/_/g, ' ')}
           </Link>
         ))}
+      </div>
+
+      {/* Date range filter */}
+      <div className="mb-4">
+        <DateRangeFilter />
       </div>
 
       {/* Centre filter */}

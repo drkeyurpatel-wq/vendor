@@ -126,8 +126,17 @@ export default function NewGRNPage() {
     setLoading(true)
 
     const centreCode = selectedPO.centre?.code || 'XXX'
-    const { count } = await supabase.from('grns').select('*', { count: 'exact', head: true })
-    const grnNumber = generateGRNNumber(centreCode, (count ?? 0) + 1)
+
+    // Use atomic DB sequence for race-safe numbering
+    let grnNumber: string
+    try {
+      const seqRes = await fetch(`/api/sequence?type=grn&centre_code=${centreCode}`)
+      const seqData = await seqRes.json()
+      grnNumber = seqData.number || generateGRNNumber(centreCode, Date.now() % 1000)
+    } catch {
+      const { count } = await supabase.from('grns').select('*', { count: 'exact', head: true })
+      grnNumber = generateGRNNumber(centreCode, (count ?? 0) + 1)
+    }
 
     // Determine if any rejections
     const hasDiscrepancy = lineItems.some(li => li.rejected_qty > 0)

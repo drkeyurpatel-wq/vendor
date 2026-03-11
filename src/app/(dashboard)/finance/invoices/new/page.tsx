@@ -123,17 +123,19 @@ export default function NewInvoicePage() {
       return
     }
 
-    // Generate invoice_ref: H1-{centreCode}-INV-{yyMM}-{seq}
+    // Use atomic DB sequence for race-safe numbering
     const centreCode = (selectedGRN.centre as any)?.code || 'XXX'
-    const now = new Date()
-    const yyMM = format(now, 'yyMM')
-
-    const { count } = await supabase
-      .from('invoices')
-      .select('*', { count: 'exact', head: true })
-
-    const seq = (count ?? 0) + 1
-    const invoiceRef = `H1-${centreCode}-INV-${yyMM}-${String(seq).padStart(3, '0')}`
+    let invoiceRef: string
+    try {
+      const seqRes = await fetch(`/api/sequence?type=invoice&centre_code=${centreCode}`)
+      const seqData = await seqRes.json()
+      invoiceRef = seqData.number
+    } catch {
+      const now = new Date()
+      const yyMM = format(now, 'yyMM')
+      const { count } = await supabase.from('invoices').select('*', { count: 'exact', head: true })
+      invoiceRef = `H1-${centreCode}-INV-${yyMM}-${String((count ?? 0) + 1).padStart(3, '0')}`
+    }
 
     const creditDays = (selectedGRN.vendor as any)?.credit_period_days ?? 30
 

@@ -4,13 +4,14 @@ import { cn, formatDate, formatLakhs, MATCH_STATUS_COLORS, PAYMENT_STATUS_COLORS
 import { FileText, Plus } from 'lucide-react'
 import SearchInput from '@/components/ui/SearchInput'
 import Pagination from '@/components/ui/Pagination'
+import DateRangeFilter from '@/components/ui/DateRangeFilter'
 
 const PAGE_SIZE = 50
 
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ match_status?: string; payment_status?: string; centre?: string; q?: string; page?: string }>
+  searchParams: Promise<{ match_status?: string; payment_status?: string; centre?: string; q?: string; page?: string; from?: string; to?: string }>
 }) {
   const params = await searchParams
   const currentPage = Math.max(1, parseInt(params.page || '1'))
@@ -31,6 +32,8 @@ export default async function InvoicesPage({
   if (params.payment_status) query = query.eq('payment_status', params.payment_status)
   if (params.centre) query = query.eq('centre_id', params.centre)
   if (params.q) query = query.or(`invoice_ref.ilike.%${params.q}%,vendor_invoice_no.ilike.%${params.q}%`)
+  if (params.from) query = query.gte('vendor_invoice_date', params.from)
+  if (params.to) query = query.lte('vendor_invoice_date', params.to)
 
   const from = (currentPage - 1) * PAGE_SIZE
   const { data: invoices, count } = await query.range(from, from + PAGE_SIZE - 1)
@@ -88,6 +91,11 @@ export default async function InvoicesPage({
             {s.replace(/_/g, ' ')}
           </Link>
         ))}
+      </div>
+
+      {/* Date range filter */}
+      <div className="mb-4">
+        <DateRangeFilter />
       </div>
 
       {/* Centre filter */}

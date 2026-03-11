@@ -66,8 +66,17 @@ export default function NewPOPage() {
     setLoading(true)
 
     const centreCode = centres.find(c => c.id === centreId)?.code || 'XXX'
-    const { count } = await supabase.from('purchase_orders').select('*', { count: 'exact', head: true })
-    const poNumber = generatePONumber(centreCode, (count ?? 0) + 1)
+
+    // Use atomic DB sequence for race-safe numbering
+    let poNumber: string
+    try {
+      const seqRes = await fetch(`/api/sequence?type=po&centre_code=${centreCode}`)
+      const seqData = await seqRes.json()
+      poNumber = seqData.number || generatePONumber(centreCode, Date.now() % 1000)
+    } catch {
+      const { count } = await supabase.from('purchase_orders').select('*', { count: 'exact', head: true })
+      poNumber = generatePONumber(centreCode, (count ?? 0) + 1)
+    }
 
     const subtotal = items.reduce((s, i) => s + i.ordered_qty * i.rate, 0)
     const gst_amount = items.reduce((s, i) => s + i.gst_amount, 0)
