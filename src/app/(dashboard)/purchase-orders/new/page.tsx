@@ -204,52 +204,54 @@ export default function NewPOPage() {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" aria-label="Create purchase order form">
         {/* Centre, Vendor, Priority */}
         <div className="card p-6">
-          <h2 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">Order Details</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <div>
-              <label className="form-label">Centre *</label>
-              <select className="form-select" value={centreId} onChange={e => setCentreId(e.target.value)}>
-                <option value="">Select centre</option>
-                {centres.map(c => <option key={c.id} value={c.id}>{c.code} — {c.name}</option>)}
-              </select>
+          <fieldset>
+            <legend className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">Order Details</legend>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div>
+                <label htmlFor="po-centre" className="form-label">Centre *</label>
+                <select id="po-centre" className="form-select" value={centreId} onChange={e => setCentreId(e.target.value)} aria-required="true">
+                  <option value="">Select centre</option>
+                  {centres.map(c => <option key={c.id} value={c.id}>{c.code} — {c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="po-priority" className="form-label">Priority</label>
+                <select id="po-priority" className="form-select" value={priority} onChange={e => setPriority(e.target.value)}>
+                  <option value="low">Low</option>
+                  <option value="normal">Normal</option>
+                  <option value="urgent">Urgent</option>
+                  <option value="emergency">Emergency</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="po-supply-type" className="form-label">Supply Type</label>
+                <select id="po-supply-type" className="form-select" value={supplyType} onChange={e => setSupplyType(e.target.value as any)}>
+                  <option value="intra_state">Intra-State (CGST+SGST)</option>
+                  <option value="inter_state">Inter-State (IGST)</option>
+                </select>
+              </div>
+              <div className="md:col-span-3">
+                <label id="po-vendor-label" className="form-label">Vendor *</label>
+                <VendorSearch value={vendor} onChange={setVendor} centreId={centreId} />
+              </div>
+              <div>
+                <label htmlFor="po-expected-delivery" className="form-label">Expected Delivery</label>
+                <input id="po-expected-delivery" type="date" className="form-input" value={expectedDelivery}
+                  onChange={e => setExpectedDelivery(e.target.value)} min={new Date().toISOString().split('T')[0]} />
+              </div>
+              <div>
+                <label htmlFor="po-quotation-ref" className="form-label">Quotation Ref</label>
+                <input id="po-quotation-ref" className="form-input" value={quotationRef} onChange={e => setQuotationRef(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor="po-quotation-date" className="form-label">Quotation Date</label>
+                <input id="po-quotation-date" type="date" className="form-input" value={quotationDate} onChange={e => setQuotationDate(e.target.value)} />
+              </div>
             </div>
-            <div>
-              <label className="form-label">Priority</label>
-              <select className="form-select" value={priority} onChange={e => setPriority(e.target.value)}>
-                <option value="low">Low</option>
-                <option value="normal">Normal</option>
-                <option value="urgent">Urgent</option>
-                <option value="emergency">Emergency</option>
-              </select>
-            </div>
-            <div>
-              <label className="form-label">Supply Type</label>
-              <select className="form-select" value={supplyType} onChange={e => setSupplyType(e.target.value as any)}>
-                <option value="intra_state">Intra-State (CGST+SGST)</option>
-                <option value="inter_state">Inter-State (IGST)</option>
-              </select>
-            </div>
-            <div className="md:col-span-3">
-              <label className="form-label">Vendor *</label>
-              <VendorSearch value={vendor} onChange={setVendor} centreId={centreId} />
-            </div>
-            <div>
-              <label className="form-label">Expected Delivery</label>
-              <input type="date" className="form-input" value={expectedDelivery}
-                onChange={e => setExpectedDelivery(e.target.value)} min={new Date().toISOString().split('T')[0]} />
-            </div>
-            <div>
-              <label className="form-label">Quotation Ref</label>
-              <input className="form-input" value={quotationRef} onChange={e => setQuotationRef(e.target.value)} />
-            </div>
-            <div>
-              <label className="form-label">Quotation Date</label>
-              <input type="date" className="form-input" value={quotationDate} onChange={e => setQuotationDate(e.target.value)} />
-            </div>
-          </div>
+          </fieldset>
         </div>
 
         {/* Line Items */}
@@ -262,24 +264,28 @@ export default function NewPOPage() {
 
         {/* Additional Charges */}
         <div className="card p-6">
-          <h2 className="font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-100">Additional Charges</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div><label className="form-label">Freight</label><input type="number" step="0.01" className="form-input" value={freightAmount} onChange={e => setFreightAmount(e.target.value)} min="0" /></div>
-            <div><label className="form-label">Loading</label><input type="number" step="0.01" className="form-input" value={loadingCharges} onChange={e => setLoadingCharges(e.target.value)} min="0" /></div>
-            <div><label className="form-label">Insurance</label><input type="number" step="0.01" className="form-input" value={insuranceCharges} onChange={e => setInsuranceCharges(e.target.value)} min="0" /></div>
-            <div><label className="form-label">Other</label><input type="number" step="0.01" className="form-input" value={otherCharges} onChange={e => setOtherCharges(e.target.value)} min="0" /></div>
-          </div>
+          <fieldset>
+            <legend className="font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-100 w-full">Additional Charges</legend>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div><label htmlFor="po-freight" className="form-label">Freight</label><input id="po-freight" type="number" step="0.01" className="form-input" value={freightAmount} onChange={e => setFreightAmount(e.target.value)} min="0" /></div>
+              <div><label htmlFor="po-loading" className="form-label">Loading</label><input id="po-loading" type="number" step="0.01" className="form-input" value={loadingCharges} onChange={e => setLoadingCharges(e.target.value)} min="0" /></div>
+              <div><label htmlFor="po-insurance" className="form-label">Insurance</label><input id="po-insurance" type="number" step="0.01" className="form-input" value={insuranceCharges} onChange={e => setInsuranceCharges(e.target.value)} min="0" /></div>
+              <div><label htmlFor="po-other" className="form-label">Other</label><input id="po-other" type="number" step="0.01" className="form-input" value={otherCharges} onChange={e => setOtherCharges(e.target.value)} min="0" /></div>
+            </div>
+          </fieldset>
         </div>
 
         {/* Terms */}
         <div className="card p-6">
-          <h2 className="font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-100">Terms & Instructions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label className="form-label">Payment Terms</label><input className="form-input" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} placeholder="e.g. Net 30 from GRN date" /></div>
-            <div><label className="form-label">Notes</label><input className="form-input" value={notes} onChange={e => setNotes(e.target.value)} /></div>
-            <div><label className="form-label">Terms & Conditions</label><textarea className="form-input" rows={3} value={termsAndConditions} onChange={e => setTermsAndConditions(e.target.value)} /></div>
-            <div><label className="form-label">Delivery Instructions</label><textarea className="form-input" rows={3} value={deliveryInstructions} onChange={e => setDeliveryInstructions(e.target.value)} /></div>
-          </div>
+          <fieldset>
+            <legend className="font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-100 w-full">Terms & Instructions</legend>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><label htmlFor="po-payment-terms" className="form-label">Payment Terms</label><input id="po-payment-terms" className="form-input" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} placeholder="e.g. Net 30 from GRN date" /></div>
+              <div><label htmlFor="po-notes" className="form-label">Notes</label><input id="po-notes" className="form-input" value={notes} onChange={e => setNotes(e.target.value)} /></div>
+              <div><label htmlFor="po-terms" className="form-label">Terms & Conditions</label><textarea id="po-terms" className="form-input" rows={3} value={termsAndConditions} onChange={e => setTermsAndConditions(e.target.value)} /></div>
+              <div><label htmlFor="po-delivery-instructions" className="form-label">Delivery Instructions</label><textarea id="po-delivery-instructions" className="form-input" rows={3} value={deliveryInstructions} onChange={e => setDeliveryInstructions(e.target.value)} /></div>
+            </div>
+          </fieldset>
         </div>
 
         <div className="flex gap-3 pb-6">

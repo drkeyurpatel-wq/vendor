@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/rate-limit'
+import { invoiceMatchSchema } from '@/lib/validations'
 
 /**
  * 3-Way Matching Engine
@@ -27,6 +29,11 @@ interface MatchResult {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimitResult = await rateLimit(request, 20, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -34,12 +41,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await request.json()
-  const { invoice_id } = body
-
-  if (!invoice_id) {
-    return NextResponse.json({ error: 'invoice_id is required' }, { status: 400 })
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
+
+  const parsed = invoiceMatchSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+  }
+
+  const { invoice_id } = parsed.data
 
   // Get invoice
   const { data: invoice } = await supabase

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import * as XLSX from 'xlsx'
+import { rateLimit } from '@/lib/rate-limit'
 
 type ImportType = 'vendors' | 'items' | 'vendor_items' | 'opening_stock' | 'vendor_outstanding'
 
@@ -640,6 +641,11 @@ async function importVendorOutstanding(
 
 // ─── MAIN HANDLER ─────────────────────────────────────────
 export async function POST(request: NextRequest) {
+  const rateLimitResult = await rateLimit(request, 5, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {

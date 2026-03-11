@@ -1,10 +1,10 @@
 {
-  "name": "Health1 VPMS",
+  "name": "H1 VPMS - Vendor & Purchase Management",
   "short_name": "H1 VPMS",
   "description": "Vendor & Purchase Management System for Health1 Hospitals",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1B3A6B",
+  "background_color": "#ffffff",
   "theme_color": "#1B3A6B",
   "orientation": "any",
   "icons": [

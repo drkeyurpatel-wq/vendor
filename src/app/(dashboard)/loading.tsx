@@ -1,6 +1,7 @@
 export default function DashboardLoading() {
   return (
-    <div className="animate-pulse">
+    <div className="animate-pulse" role="status" aria-label="Loading page content">
+      <span className="sr-only">Loading page content...</span>
       <div className="page-header">
         <div>
           <div className="h-7 bg-gray-200 rounded w-48 mb-2" />

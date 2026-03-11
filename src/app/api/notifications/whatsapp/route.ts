@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/rate-limit'
+import { whatsappNotificationSchema } from '@/lib/validations'
 
 // ============================================================
 // H1 VPMS — WhatsApp Notification API
@@ -96,6 +98,11 @@ function buildTemplatePayload(template: WhatsAppTemplate, params: Record<string,
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimitResult = await rateLimit(request, 10, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -111,29 +118,19 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  let body: WhatsAppRequest
+  let rawBody: unknown
   try {
-    body = await request.json()
+    rawBody = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { phone, template, params } = body
-
-  if (!phone || !template || !params) {
-    return NextResponse.json(
-      { error: 'Missing required fields: phone, template, params' },
-      { status: 400 }
-    )
+  const parsed = whatsappNotificationSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten().fieldErrors }, { status: 400 })
   }
 
-  const validTemplates: WhatsAppTemplate[] = ['po_created', 'payment_advice', 'delivery_reminder']
-  if (!validTemplates.includes(template)) {
-    return NextResponse.json(
-      { error: `Invalid template. Must be one of: ${validTemplates.join(', ')}` },
-      { status: 400 }
-    )
-  }
+  const { phone, template, params } = parsed.data as WhatsAppRequest
 
   const normalizedPhone = normalizePhone(phone)
   if (normalizedPhone.length < 10) {

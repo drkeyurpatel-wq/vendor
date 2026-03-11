@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { canApprovePO, PO_APPROVAL_THRESHOLD } from '@/types/database'
 import type { UserRole } from '@/types/database'
+import { rateLimit } from '@/lib/rate-limit'
+import { poApprovalSchema } from '@/lib/validations'
 
 /**
  * Multi-level sequential PO approval chain.
@@ -9,6 +11,11 @@ import type { UserRole } from '@/types/database'
  * Only the current pending level can be actioned.
  */
 export async function POST(request: NextRequest) {
+  const rateLimitResult = await rateLimit(request, 10, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -26,12 +33,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
   }
 
-  const body = await request.json()
-  const { po_id, action, comments } = body
-
-  if (!po_id || !['approve', 'reject'].includes(action)) {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
+
+  const parsed = poApprovalSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+  }
+
+  const { po_id, action, comments } = parsed.data
 
   // Get PO
   const { data: po } = await supabase

@@ -119,6 +119,14 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
         }
         setNotifications((prev) => [newNotification, ...prev].slice(0, 30))
         setUnreadCount((prev) => prev + 1)
+        // Announce new notification to screen readers
+        const srAnnounce = document.getElementById('sr-announce-polite')
+        if (srAnnounce) {
+          srAnnounce.textContent = ''
+          requestAnimationFrame(() => {
+            srAnnounce.textContent = `New notification: ${ACTION_LABELS[newNotification.action] || newNotification.action.replace(/_/g, ' ')}`
+          })
+        }
       }
     }
   }, [userId]))
@@ -168,10 +176,13 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
           if (!isOpen) fetchNotifications()
         }}
         className="relative w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+        aria-label={unreadCount > 0 ? `Notifications: ${unreadCount} unread` : 'Notifications: none unread'}
+        aria-expanded={isOpen}
+        aria-haspopup="true"
       >
-        <Bell size={17} />
+        <Bell size={17} aria-hidden="true" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 rounded-full flex items-center justify-center px-1">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 rounded-full flex items-center justify-center px-1" aria-live="polite" aria-atomic="true">
             <span className="text-white text-[10px] font-bold leading-none">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
@@ -252,8 +263,9 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
                           }}
                           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#E6F5F6] text-[#0D7E8A] transition-colors"
                           title="View"
+                          aria-label={`View ${label}`}
                         >
-                          <ExternalLink size={13} />
+                          <ExternalLink size={13} aria-hidden="true" />
                         </Link>
                       )}
                       {!notification.is_read && (
@@ -261,8 +273,9 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
                           onClick={() => markAsRead(notification.id)}
                           className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#E6F5F6] text-gray-400 hover:text-[#0D7E8A] transition-colors"
                           title="Mark as read"
+                          aria-label={`Mark ${label} as read`}
                         >
-                          <Check size={13} />
+                          <Check size={13} aria-hidden="true" />
                         </button>
                       )}
                     </div>

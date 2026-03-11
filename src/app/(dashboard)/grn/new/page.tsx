@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, AlertTriangle, WifiOff, CloudOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { generateGRNNumber, formatCurrency } from '@/lib/utils'
 import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { queueOfflineRequest } from '@/lib/service-worker'
 
 interface GRNLineItem {
   po_item_id: string
@@ -55,6 +57,7 @@ export default function NewGRNPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
+  const { isOnline, pendingCount } = useOnlineStatus()
 
   const [loading, setLoading] = useState(false)
   const [profile, setProfile] = useState<any>(null)
@@ -305,6 +308,81 @@ export default function NewGRNPage() {
 
     setLoading(true)
 
+    // ── Offline mode: queue for later sync ──
+    if (!isOnline) {
+      const centreCode = selectedPO.centre?.code || 'XXX'
+      const offlineGRNNumber = generateGRNNumber(centreCode, Date.now() % 10000)
+      const centreId = selectedPO.centre_id || profile?.centre_id
+
+      const grnPayload = {
+        grn_number: offlineGRNNumber,
+        centre_id: centreId,
+        po_id: selectedPO.id,
+        vendor_id: selectedPO.vendor_id,
+        grn_date: grnDate,
+        vendor_invoice_no: vendorInvoiceNo.trim() || null,
+        vendor_invoice_date: vendorInvoiceDate || null,
+        vendor_invoice_amount: vendorInvoiceAmount ? parseFloat(vendorInvoiceAmount) : null,
+        dc_number: dcNumber.trim() || null,
+        dc_date: dcDate || null,
+        lr_number: lrNumber.trim() || null,
+        transport_name: transportName.trim() || null,
+        vehicle_number: vehicleNumber.trim() || null,
+        eway_bill_no: ewayBillNo.trim() || null,
+        notes: notes.trim() || null,
+        line_items: lineItems.filter(li => li.received_qty > 0).map(li => ({
+          po_item_id: li.po_item_id,
+          item_id: li.item_id,
+          ordered_qty: li.ordered_qty,
+          received_qty: li.received_qty,
+          accepted_qty: li.accepted_qty,
+          rejected_qty: li.rejected_qty,
+          short_qty: li.short_qty,
+          excess_qty: li.excess_qty,
+          damaged_qty: li.damaged_qty,
+          free_qty: li.free_qty,
+          rejection_reason: li.rejection_reason.trim() || null,
+          damage_reason: li.damage_reason.trim() || null,
+          batch_no: li.batch_no.trim() || null,
+          expiry_date: li.expiry_date || null,
+          mrp: li.mrp ? parseFloat(li.mrp) : null,
+          manufacturer: li.manufacturer.trim() || null,
+          storage_location: li.storage_location.trim() || null,
+          rate: li.rate,
+          net_rate: li.net_rate,
+          trade_discount_percent: li.trade_discount_percent,
+          gst_percent: li.gst_percent,
+          cgst_percent: li.cgst_percent,
+          sgst_percent: li.sgst_percent,
+          igst_percent: li.igst_percent,
+          cgst_amount: li.cgst_amount,
+          sgst_amount: li.sgst_amount,
+          igst_amount: li.igst_amount,
+          total_amount: li.total_amount,
+          hsn_code: li.hsn_code || null,
+          qc_status: li.qc_status || 'pending',
+          qc_remarks: li.qc_remarks.trim() || null,
+        })),
+        total_amount: Math.round(grandTotal * 100) / 100,
+      }
+
+      try {
+        await queueOfflineRequest(
+          '/api/grn/submit',
+          'POST',
+          JSON.stringify(grnPayload),
+          { 'Content-Type': 'application/json' },
+          { type: 'grn', grn_number: offlineGRNNumber, po_number: selectedPO.po_number }
+        )
+        toast.success(`GRN saved offline (${offlineGRNNumber}). Will submit when connected.`, { duration: 5000 })
+        router.push('/grn')
+      } catch (err) {
+        toast.error('Failed to save GRN offline. Please try again.')
+      }
+      setLoading(false)
+      return
+    }
+
     const centreCode = selectedPO.centre?.code || 'XXX'
 
     // Use atomic DB sequence for race-safe numbering
@@ -502,9 +580,23 @@ export default function NewGRNPage() {
           <h1 className="page-title">New Goods Receipt Note</h1>
           <p className="page-subtitle mt-1">Record goods received against a purchase order</p>
         </div>
-        <button onClick={handleSubmit} disabled={loading || !selectedPO} className="btn-primary">
-          {loading ? <><Loader2 size={16} className="animate-spin" /> Submitting...</> : <><Save size={16} /> Submit GRN</>}
-        </button>
+        <div className="flex items-center gap-3">
+          {pendingCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ backgroundColor: '#1B3A6B' }}>
+              <CloudOff size={14} />
+              {pendingCount} Pending Sync
+            </span>
+          )}
+          {!isOnline && (
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800">
+              <WifiOff size={14} />
+              Offline Mode
+            </span>
+          )}
+          <button onClick={handleSubmit} disabled={loading || !selectedPO} className="btn-primary">
+            {loading ? <><Loader2 size={16} className="animate-spin" /> Submitting...</> : !isOnline ? <><CloudOff size={16} /> Save Offline</> : <><Save size={16} /> Submit GRN</>}
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -829,7 +921,7 @@ export default function NewGRNPage() {
 
         <div className="flex gap-3 pb-6">
           <button type="submit" disabled={loading || !selectedPO} className="btn-primary">
-            {loading ? <><Loader2 size={16} className="animate-spin" /> Submitting...</> : <><Save size={16} /> Submit GRN</>}
+            {loading ? <><Loader2 size={16} className="animate-spin" /> Submitting...</> : !isOnline ? <><CloudOff size={16} /> Save Offline</> : <><Save size={16} /> Submit GRN</>}
           </button>
           <Link href="/grn" className="btn-secondary">Cancel</Link>
         </div>
