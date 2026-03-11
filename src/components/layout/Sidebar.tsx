@@ -82,6 +82,7 @@ const NAV: NavItem[] = [
       { label: 'Stock Levels', href: '/items/stock' },
       { label: 'Stock Transfers', href: '/inventory/transfers' },
       { label: 'Expiry Alerts', href: '/inventory/expiry-alerts' },
+      { label: 'Demand Forecasting', href: '/inventory/forecasting' },
     ]
   },
   {
@@ -100,6 +101,7 @@ const NAV: NavItem[] = [
       { label: 'Users', href: '/settings/users' },
       { label: 'Approval Matrix', href: '/settings/approvals' },
       { label: 'Rate Contracts', href: '/settings/rate-contracts' },
+      { label: 'Document Alerts', href: '/settings/document-alerts' },
       { label: 'Data Import', href: '/settings/data-import' },
       { label: 'Audit Log', href: '/settings/audit-log' },
     ]
