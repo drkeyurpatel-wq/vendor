@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cn, formatCurrency, formatLakhs, formatDate } from '@/lib/utils'
-import { Shield, CheckCircle, UserCheck, ArrowRight, Clock, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { Shield, CheckCircle, UserCheck, ArrowRight, Clock, ChevronRight } from 'lucide-react'
 import { ROLE_LABELS, PO_APPROVAL_THRESHOLD } from '@/types/database'
 import type { UserRole } from '@/types/database'
 
@@ -14,14 +14,15 @@ const ROLE_COLORS: Record<string, string> = {
 
 const TIER_COLORS = [
   { bg: 'bg-green-50', border: 'border-green-200', icon: 'text-green-600', bar: 'bg-green-500' },
+  { bg: 'bg-emerald-50', border: 'border-emerald-200', icon: 'text-emerald-600', bar: 'bg-emerald-500' },
   { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-blue-600', bar: 'bg-blue-500' },
-  { bg: 'bg-teal-50', border: 'border-teal-200', icon: 'text-teal-600', bar: 'bg-teal-500' },
-  { bg: 'bg-orange-50', border: 'border-orange-200', icon: 'text-orange-600', bar: 'bg-orange-500' },
+  { bg: 'bg-indigo-50', border: 'border-indigo-200', icon: 'text-indigo-600', bar: 'bg-indigo-500' },
   { bg: 'bg-purple-50', border: 'border-purple-200', icon: 'text-purple-600', bar: 'bg-purple-500' },
 ]
 
-const APPROVAL_MATRIX: {
+const APPROVAL_TIERS: {
   range: string
+  rangeShort: string
   rangeFrom: number
   rangeTo: number | null
   approver: string
@@ -30,50 +31,56 @@ const APPROVAL_MATRIX: {
 }[] = [
   {
     range: `Up to ${formatCurrency(PO_APPROVAL_THRESHOLD.auto)}`,
+    rangeShort: formatLakhs(PO_APPROVAL_THRESHOLD.auto),
     rangeFrom: 0,
     rangeTo: PO_APPROVAL_THRESHOLD.auto,
     approver: 'Auto-approved',
     role: 'unit_purchase_manager',
-    description: 'Low-value POs are automatically approved upon creation',
+    description: 'System auto-approves. No manual intervention needed.',
   },
   {
-    range: `${formatCurrency(PO_APPROVAL_THRESHOLD.auto + 1)} - ${formatCurrency(PO_APPROVAL_THRESHOLD.unit_pm)}`,
+    range: `${formatCurrency(PO_APPROVAL_THRESHOLD.auto + 1)} -- ${formatCurrency(PO_APPROVAL_THRESHOLD.unit_pm)}`,
+    rangeShort: formatLakhs(PO_APPROVAL_THRESHOLD.unit_pm),
     rangeFrom: PO_APPROVAL_THRESHOLD.auto + 1,
     rangeTo: PO_APPROVAL_THRESHOLD.unit_pm,
     approver: ROLE_LABELS.unit_purchase_manager,
     role: 'unit_purchase_manager',
-    description: 'Centre-level purchase manager approval required',
+    description: 'Centre-level purchase manager approves.',
   },
   {
-    range: `${formatCurrency(PO_APPROVAL_THRESHOLD.unit_pm + 1)} - ${formatCurrency(PO_APPROVAL_THRESHOLD.unit_cao)}`,
+    range: `${formatCurrency(PO_APPROVAL_THRESHOLD.unit_pm + 1)} -- ${formatCurrency(PO_APPROVAL_THRESHOLD.unit_cao)}`,
+    rangeShort: formatLakhs(PO_APPROVAL_THRESHOLD.unit_cao),
     rangeFrom: PO_APPROVAL_THRESHOLD.unit_pm + 1,
     rangeTo: PO_APPROVAL_THRESHOLD.unit_cao,
     approver: ROLE_LABELS.unit_cao,
     role: 'unit_cao',
-    description: 'Unit finance officer (CAO) must review and approve',
+    description: 'Unit CAO (Nileshbhai) reviews and approves.',
   },
   {
-    range: `${formatCurrency(PO_APPROVAL_THRESHOLD.unit_cao + 1)} - ${formatCurrency(PO_APPROVAL_THRESHOLD.group_cao)}`,
+    range: `${formatCurrency(PO_APPROVAL_THRESHOLD.unit_cao + 1)} -- ${formatCurrency(PO_APPROVAL_THRESHOLD.group_cao)}`,
+    rangeShort: formatLakhs(PO_APPROVAL_THRESHOLD.group_cao),
     rangeFrom: PO_APPROVAL_THRESHOLD.unit_cao + 1,
     rangeTo: PO_APPROVAL_THRESHOLD.group_cao,
     approver: ROLE_LABELS.group_cao,
     role: 'group_cao',
-    description: 'Group-level CAO approval for high-value orders',
+    description: 'Group CAO (Tinabhai) reviews and approves.',
   },
   {
     range: `Above ${formatCurrency(PO_APPROVAL_THRESHOLD.group_cao)}`,
+    rangeShort: `>${formatLakhs(PO_APPROVAL_THRESHOLD.group_cao)}`,
     rangeFrom: PO_APPROVAL_THRESHOLD.group_cao + 1,
     rangeTo: null,
     approver: ROLE_LABELS.group_admin,
     role: 'group_admin',
-    description: 'Managing Director (Keyur) must personally approve',
+    description: 'Group Admin (Keyur) must personally approve.',
   },
 ]
 
 const APPROVAL_STATUS_COLORS: Record<string, string> = {
   approved: 'bg-green-100 text-green-700',
   rejected: 'bg-red-100 text-red-700',
-  pending: 'bg-yellow-100 text-yellow-700',
+  pending: 'bg-yellow-100 text-yellow-800',
+  auto_approved: 'bg-blue-100 text-blue-700',
 }
 
 export default async function ApprovalsSettingsPage() {
@@ -101,7 +108,7 @@ export default async function ApprovalsSettingsPage() {
     )
   }
 
-  // Fetch approvers and recent activity in parallel
+  // Fetch approvers and recent approvals in parallel
   const approverRoles: UserRole[] = ['unit_purchase_manager', 'unit_cao', 'group_cao', 'group_admin']
 
   const [{ data: approvers }, { data: recentApprovals }] = await Promise.all([
@@ -119,7 +126,8 @@ export default async function ApprovalsSettingsPage() {
         status,
         comments,
         created_at,
-        approver:user_profiles!po_approvals_approved_by_fkey(full_name, role),
+        approval_level,
+        approver:user_profiles!po_approvals_approver_id_fkey(full_name, role),
         po:purchase_orders!po_approvals_po_id_fkey(po_number, total_amount, centre:centres(code))
       `)
       .order('created_at', { ascending: false })
@@ -140,74 +148,79 @@ export default async function ApprovalsSettingsPage() {
         <div>
           <h1 className="page-title">PO Approval Matrix</h1>
           <p className="page-subtitle">
-            Purchase order approval thresholds, authorised approvers, and recent activity
+            Purchase order approval thresholds and authorised approvers
           </p>
         </div>
       </div>
 
-      {/* Visual Stepped Tier Display */}
+      {/* Visual Tiered Display */}
       <div className="mb-8">
         <h2 className="text-sm font-semibold text-[#1B3A6B] uppercase tracking-wide mb-4">
           Approval Thresholds
         </h2>
         <div className="space-y-3">
-          {APPROVAL_MATRIX.map((tier, i) => {
-            const colors = TIER_COLORS[i]
+          {APPROVAL_TIERS.map((tier, i) => {
+            const color = TIER_COLORS[i]
             return (
               <div
                 key={i}
                 className={cn(
                   'rounded-lg border-2 overflow-hidden transition-all',
-                  colors.bg,
-                  colors.border
+                  color.bg,
+                  color.border
                 )}
               >
                 <div className="flex items-stretch">
                   {/* Level indicator bar */}
-                  <div className={cn('w-1.5 shrink-0', colors.bar)} />
+                  <div className={cn('w-1.5 shrink-0', color.bar)} />
 
-                  <div className="flex-1 p-4 flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
-                    {/* Level badge */}
-                    <div className="flex items-center gap-3 md:min-w-[120px]">
-                      <div className={cn(
-                        'w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm',
-                        i === 0 ? 'bg-green-500' :
-                        i === 1 ? 'bg-blue-500' :
-                        i === 2 ? 'bg-teal-500' :
-                        i === 3 ? 'bg-orange-500' : 'bg-purple-500'
-                      )}>
-                        {i === 0 ? <CheckCircle size={16} /> : `L${i}`}
-                      </div>
-                      <div className="text-sm font-bold text-gray-900">
-                        {tier.range}
-                      </div>
+                  <div className="flex-1 px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    {/* Level number */}
+                    <div className={cn(
+                      'w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm text-white',
+                      color.bar
+                    )}>
+                      {i === 0 ? (
+                        <CheckCircle size={16} />
+                      ) : (
+                        i
+                      )}
+                    </div>
+
+                    {/* Amount range */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-gray-900 text-sm">{tier.range}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{tier.description}</div>
                     </div>
 
                     {/* Arrow */}
-                    <ArrowRight size={16} className="text-gray-400 hidden md:block shrink-0" />
+                    <ChevronRight size={16} className="text-gray-300 hidden sm:block shrink-0" />
 
                     {/* Approver */}
-                    <div className="flex items-center gap-2 md:min-w-[200px]">
+                    <div className="flex items-center gap-2 shrink-0">
                       {i === 0 ? (
-                        <CheckCircle size={16} className="text-green-500" />
+                        <CheckCircle size={16} className={color.icon} />
                       ) : (
-                        <UserCheck size={16} className={colors.icon} />
+                        <UserCheck size={16} className={color.icon} />
                       )}
-                      <span className="font-semibold text-gray-800 text-sm">{tier.approver}</span>
-                      <span className={cn('badge text-xs', ROLE_COLORS[tier.role] || 'bg-gray-100 text-gray-700')}>
+                      <span className="font-semibold text-sm text-gray-800">{tier.approver}</span>
+                      <span className={cn('badge', ROLE_COLORS[tier.role] || 'bg-gray-100 text-gray-700')}>
                         {ROLE_LABELS[tier.role]}
                       </span>
-                    </div>
-
-                    {/* Description */}
-                    <div className="text-xs text-gray-500 flex-1">
-                      {tier.description}
                     </div>
                   </div>
                 </div>
               </div>
             )
           })}
+        </div>
+
+        {/* Flow diagram */}
+        <div className="mt-4 bg-[#E6F5F6] rounded-lg p-4 text-sm text-[#0D7E8A] flex items-center gap-2">
+          <ArrowRight size={16} className="shrink-0" />
+          <span>
+            <strong>Rule:</strong> Approval chain never skips levels. Every approval records approver, timestamp, and comments.
+          </span>
         </div>
       </div>
 
@@ -270,12 +283,11 @@ export default async function ApprovalsSettingsPage() {
                 <thead>
                   <tr>
                     <th>PO Number</th>
-                    <th>Centre</th>
                     <th>Amount</th>
-                    <th>Approver</th>
+                    <th>Centre</th>
                     <th>Level</th>
+                    <th>Approver</th>
                     <th>Status</th>
-                    <th>Comments</th>
                     <th>Date</th>
                   </tr>
                 </thead>
@@ -287,50 +299,50 @@ export default async function ApprovalsSettingsPage() {
                           {approval.po?.po_number || '—'}
                         </span>
                       </td>
+                      <td className="text-sm font-medium text-gray-900">
+                        {approval.po?.total_amount
+                          ? formatCurrency(approval.po.total_amount)
+                          : '—'}
+                      </td>
                       <td>
-                        {approval.po?.centre ? (
+                        {approval.po?.centre?.code ? (
                           <span className="badge bg-blue-50 text-blue-700 text-xs">
                             {approval.po.centre.code}
                           </span>
                         ) : (
-                          <span className="text-gray-400">—</span>
+                          <span className="text-xs text-gray-400">—</span>
                         )}
                       </td>
-                      <td className="text-sm font-medium text-gray-900">
-                        {approval.po?.total_amount
-                          ? formatLakhs(approval.po.total_amount)
-                          : '—'}
+                      <td>
+                        <span className="text-sm text-gray-600">
+                          Level {approval.approval_level ?? '—'}
+                        </span>
                       </td>
                       <td>
-                        <div className="text-sm font-medium text-gray-900">
-                          {approval.approver?.full_name || '—'}
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {approval.approver?.full_name || 'System'}
+                          </div>
+                          {approval.approver?.role && (
+                            <span className={cn(
+                              'badge text-xs mt-0.5',
+                              ROLE_COLORS[approval.approver.role] || 'bg-gray-100 text-gray-700'
+                            )}>
+                              {ROLE_LABELS[approval.approver.role as UserRole] || approval.approver.role}
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td>
-                        {approval.approver?.role ? (
-                          <span className={cn('badge text-xs', ROLE_COLORS[approval.approver.role] || 'bg-gray-100 text-gray-700')}>
-                            {ROLE_LABELS[approval.approver.role as UserRole] || approval.approver.role}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">—</span>
-                        )}
-                      </td>
-                      <td>
                         <span className={cn(
-                          'badge text-xs flex items-center gap-1 w-fit',
+                          'badge',
                           APPROVAL_STATUS_COLORS[approval.status] || 'bg-gray-100 text-gray-700'
                         )}>
-                          {approval.status === 'approved' && <ThumbsUp size={11} />}
-                          {approval.status === 'rejected' && <ThumbsDown size={11} />}
-                          {approval.status === 'pending' && <Clock size={11} />}
-                          {approval.status ? approval.status.charAt(0).toUpperCase() + approval.status.slice(1) : '—'}
+                          {approval.status?.replace(/_/g, ' ')}
                         </span>
                       </td>
-                      <td className="text-xs text-gray-500 max-w-[200px] truncate">
-                        {approval.comments || '—'}
-                      </td>
-                      <td className="text-sm text-gray-500 whitespace-nowrap">
-                        {formatDate(approval.created_at)}
+                      <td className="text-sm text-gray-500">
+                        {approval.created_at ? formatDate(approval.created_at) : '—'}
                       </td>
                     </tr>
                   ))}
@@ -341,7 +353,7 @@ export default async function ApprovalsSettingsPage() {
             <div className="empty-state py-12">
               <Clock size={40} className="mb-3 text-gray-300" />
               <p className="font-medium text-gray-500">No approval activity yet</p>
-              <p className="text-sm text-gray-400 mt-1">Approval records will appear here once POs are submitted for approval</p>
+              <p className="text-sm text-gray-400 mt-1">Approval records will appear here once POs are submitted</p>
             </div>
           )}
         </div>
