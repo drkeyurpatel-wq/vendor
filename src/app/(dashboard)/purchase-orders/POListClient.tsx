@@ -96,9 +96,10 @@ export default function POListClient({ pos, userRole }: POListClientProps) {
     <>
       <div className="overflow-x-auto">
         <table className="data-table">
+          <caption className="sr-only">List of purchase orders with number, centre, vendor, date, amount, and status</caption>
           <thead>
             <tr>
-              <th className="w-10">
+              <th scope="col" className="w-10">
                 <BulkCheckbox
                   checked={isAllSelected}
                   indeterminate={isIndeterminate}
@@ -111,14 +112,14 @@ export default function POListClient({ pos, userRole }: POListClientProps) {
                   }}
                 />
               </th>
-              <th>PO Number</th>
-              <th>Centre</th>
-              <th>Vendor</th>
-              <th>Date</th>
-              <th>Expected Delivery</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th scope="col">PO Number</th>
+              <th scope="col">Centre</th>
+              <th scope="col">Vendor</th>
+              <th scope="col">Date</th>
+              <th scope="col">Expected Delivery</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Status</th>
+              <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -157,7 +158,7 @@ export default function POListClient({ pos, userRole }: POListClientProps) {
                   </span>
                 </td>
                 <td>
-                  <Link href={`/purchase-orders/${po.id}`} className="text-xs text-[#0D7E8A] hover:underline font-medium">
+                  <Link href={`/purchase-orders/${po.id}`} className="text-xs text-[#0D7E8A] hover:underline font-medium" aria-label={`View purchase order ${po.po_number}`}>
                     View
                   </Link>
                 </td>
