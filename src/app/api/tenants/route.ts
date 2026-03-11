@@ -89,5 +89,14 @@ export async function POST(req: NextRequest) {
     .update({ tenant_id: tenant.id })
     .eq('id', user.id)
 
+  // Audit log
+  await supabase.from('activity_log').insert({
+    user_id: user.id,
+    action: 'tenant_created',
+    entity_type: 'tenant',
+    entity_id: tenant.id,
+    details: { name, slug },
+  })
+
   return NextResponse.json({ tenant, message: 'Tenant created successfully' })
 }
