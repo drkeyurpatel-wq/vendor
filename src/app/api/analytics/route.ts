@@ -111,8 +111,14 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(req.url)
+  const analysisType = searchParams.get('type')
   const centreId = searchParams.get('centre_id')
   const itemId = searchParams.get('item_id')
+
+  // Advanced anomaly detection mode
+  if (analysisType === 'anomalies') {
+    return detectAnomalies(supabase, centreId)
+  }
 
   // 1. Fetch stock ledger (last 180 days of consumption data)
   const sixMonthsAgo = new Date()
@@ -416,4 +422,175 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json(response)
+}
+
+// ── Advanced Anomaly Detection ──
+async function detectAnomalies(supabase: any, centreId: string | null) {
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  const sevenDaysAgo = new Date()
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+  // 1. Price anomalies: recent PO rates vs historical average (>10% deviation)
+  const { data: recentPOs } = await supabase
+    .from('purchase_order_items')
+    .select('item_id, rate, po:purchase_orders!inner(po_date, po_number, vendor:vendors(legal_name))')
+    .gte('po.po_date', thirtyDaysAgo.toISOString().split('T')[0])
+    .limit(500)
+
+  const { data: historicalRates } = await supabase
+    .from('purchase_order_items')
+    .select('item_id, rate')
+    .lt('po.po_date', thirtyDaysAgo.toISOString().split('T')[0])
+    .limit(5000)
+
+  // Group historical by item
+  const itemAvgRates: Record<string, { sum: number; count: number }> = {}
+  for (const hr of historicalRates || []) {
+    if (!itemAvgRates[hr.item_id]) itemAvgRates[hr.item_id] = { sum: 0, count: 0 }
+    itemAvgRates[hr.item_id].sum += hr.rate
+    itemAvgRates[hr.item_id].count++
+  }
+
+  const priceAnomalies = (recentPOs || [])
+    .filter((po: any) => {
+      const avg = itemAvgRates[po.item_id]
+      if (!avg || avg.count < 2) return false
+      const mean = avg.sum / avg.count
+      return Math.abs(po.rate - mean) / mean > 0.1 // >10% deviation
+    })
+    .map((po: any) => {
+      const avg = itemAvgRates[po.item_id]
+      const mean = avg.sum / avg.count
+      const poData = Array.isArray(po.po) ? po.po[0] : po.po
+      const vendor = poData?.vendor
+      const vendorData = Array.isArray(vendor) ? vendor[0] : vendor
+      return {
+        type: 'price_spike',
+        item_id: po.item_id,
+        po_number: poData?.po_number,
+        vendor: vendorData?.legal_name,
+        current_rate: po.rate,
+        avg_rate: Math.round(mean * 100) / 100,
+        deviation_pct: Math.round(((po.rate - mean) / mean) * 100),
+      }
+    })
+    .slice(0, 20)
+
+  // 2. Volume anomalies: items ordered >2x monthly average
+  const { data: monthlyOrders } = await supabase
+    .from('purchase_order_items')
+    .select('item_id, ordered_qty, po:purchase_orders!inner(po_date)')
+    .gte('po.po_date', new Date(Date.now() - 180 * 86400000).toISOString().split('T')[0])
+    .limit(5000)
+
+  const monthlyQty: Record<string, number[]> = {}
+  for (const o of monthlyOrders || []) {
+    if (!monthlyQty[o.item_id]) monthlyQty[o.item_id] = []
+    monthlyQty[o.item_id].push(o.ordered_qty)
+  }
+
+  const volumeAnomalies: any[] = []
+  for (const [itemId, qtys] of Object.entries(monthlyQty)) {
+    if (qtys.length < 3) continue
+    const avg = qtys.slice(0, -1).reduce((a, b) => a + b, 0) / (qtys.length - 1)
+    const latest = qtys[qtys.length - 1]
+    if (latest > avg * 2 && avg > 0) {
+      volumeAnomalies.push({
+        type: 'volume_spike',
+        item_id: itemId,
+        latest_qty: latest,
+        avg_qty: Math.round(avg),
+        multiplier: Math.round((latest / avg) * 10) / 10,
+      })
+    }
+  }
+
+  // 3. Vendor concentration: categories with >80% to single vendor
+  const { data: categorySpend } = await supabase
+    .from('purchase_orders')
+    .select('vendor_id, total_amount, vendor:vendors(legal_name, category:vendor_categories(name))')
+    .in('status', ['approved', 'sent_to_vendor', 'fully_received'])
+    .gte('po_date', new Date(Date.now() - 365 * 86400000).toISOString().split('T')[0])
+    .limit(2000)
+
+  const catVendorSpend: Record<string, Record<string, { amount: number; name: string }>> = {}
+  for (const po of categorySpend || []) {
+    const vendor = Array.isArray(po.vendor) ? po.vendor[0] : po.vendor
+    const cat = vendor?.category
+    const catData = Array.isArray(cat) ? cat[0] : cat
+    const catName = catData?.name || 'Uncategorized'
+    if (!catVendorSpend[catName]) catVendorSpend[catName] = {}
+    if (!catVendorSpend[catName][po.vendor_id]) catVendorSpend[catName][po.vendor_id] = { amount: 0, name: vendor?.legal_name || '' }
+    catVendorSpend[catName][po.vendor_id].amount += po.total_amount || 0
+  }
+
+  const concentrationRisks: any[] = []
+  for (const [category, vendors] of Object.entries(catVendorSpend)) {
+    const total = Object.values(vendors).reduce((s, v) => s + v.amount, 0)
+    if (total === 0) continue
+    for (const [vendorId, vendor] of Object.entries(vendors)) {
+      const pct = (vendor.amount / total) * 100
+      if (pct > 80) {
+        concentrationRisks.push({
+          type: 'vendor_concentration',
+          category,
+          vendor_id: vendorId,
+          vendor_name: vendor.name,
+          spend_pct: Math.round(pct),
+          total_spend: total,
+        })
+      }
+    }
+  }
+
+  // 4. Duplicate invoice detection: same vendor + similar amount within 7 days
+  const { data: recentInvoices } = await supabase
+    .from('invoices')
+    .select('id, invoice_ref, vendor_invoice_no, vendor_id, total_amount, vendor_invoice_date, vendor:vendors(legal_name)')
+    .gte('vendor_invoice_date', sevenDaysAgo.toISOString().split('T')[0])
+    .order('vendor_id')
+    .limit(500)
+
+  const potentialDuplicates: any[] = []
+  const invoicesByVendor: Record<string, any[]> = {}
+  for (const inv of recentInvoices || []) {
+    if (!invoicesByVendor[inv.vendor_id]) invoicesByVendor[inv.vendor_id] = []
+    invoicesByVendor[inv.vendor_id].push(inv)
+  }
+
+  for (const [, invs] of Object.entries(invoicesByVendor)) {
+    for (let i = 0; i < invs.length; i++) {
+      for (let j = i + 1; j < invs.length; j++) {
+        const diff = Math.abs(invs[i].total_amount - invs[j].total_amount)
+        if (diff < invs[i].total_amount * 0.02) { // within 2% amount
+          const vendor = Array.isArray(invs[i].vendor) ? invs[i].vendor[0] : invs[i].vendor
+          potentialDuplicates.push({
+            type: 'potential_duplicate',
+            vendor_name: vendor?.legal_name,
+            invoice_1: invs[i].invoice_ref,
+            invoice_2: invs[j].invoice_ref,
+            amount_1: invs[i].total_amount,
+            amount_2: invs[j].total_amount,
+          })
+        }
+      }
+    }
+  }
+
+  return NextResponse.json({
+    anomalies: {
+      price_spikes: priceAnomalies,
+      volume_spikes: volumeAnomalies.slice(0, 15),
+      vendor_concentration: concentrationRisks,
+      potential_duplicates: potentialDuplicates.slice(0, 10),
+    },
+    summary: {
+      price_anomalies: priceAnomalies.length,
+      volume_anomalies: volumeAnomalies.length,
+      concentration_risks: concentrationRisks.length,
+      potential_duplicates: potentialDuplicates.length,
+      total_alerts: priceAnomalies.length + volumeAnomalies.length + concentrationRisks.length + potentialDuplicates.length,
+    },
+  })
 }

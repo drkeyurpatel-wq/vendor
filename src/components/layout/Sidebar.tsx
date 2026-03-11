@@ -7,9 +7,10 @@ import { UserProfile } from '@/types/database'
 import {
   LayoutDashboard, Users, Package, ShoppingCart, ClipboardList,
   FileText, CreditCard, BarChart2, Settings, ChevronDown, ChevronRight,
-  Building2, LogOut, TrendingDown, Warehouse, ArrowLeftRight, AlertTriangle
+  Building2, LogOut, TrendingDown, Warehouse, ArrowLeftRight, AlertTriangle,
+  Menu, X
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -22,8 +23,12 @@ interface NavItem {
 }
 
 const VENDOR_NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/', icon: <LayoutDashboard size={18} /> },
-  { label: 'My Portal', href: '/vendor-portal', icon: <Package size={18} />, roles: ['vendor'] },
+  { label: 'Dashboard', href: '/vendor-portal', icon: <LayoutDashboard size={18} /> },
+  { label: 'Purchase Orders', href: '/vendor-portal/orders', icon: <ShoppingCart size={18} /> },
+  { label: 'Upload Invoice', href: '/vendor-portal/invoices/upload', icon: <FileText size={18} /> },
+  { label: 'Invoices', href: '/vendor-portal/invoices', icon: <CreditCard size={18} /> },
+  { label: 'Payments', href: '/vendor-portal/payments', icon: <CreditCard size={18} /> },
+  { label: 'Outstanding', href: '/vendor-portal/outstanding', icon: <AlertTriangle size={18} /> },
 ]
 
 const NAV: NavItem[] = [
@@ -96,6 +101,7 @@ const NAV: NavItem[] = [
       { label: 'Approval Matrix', href: '/settings/approvals' },
       { label: 'Rate Contracts', href: '/settings/rate-contracts' },
       { label: 'Data Import', href: '/settings/data-import' },
+      { label: 'Audit Log', href: '/settings/audit-log' },
     ]
   },
 ]
@@ -103,13 +109,20 @@ const NAV: NavItem[] = [
 interface SidebarProps {
   user: UserProfile
   collapsed?: boolean
+  mobileOpen?: boolean
+  onMobileClose?: () => void
 }
 
-export default function Sidebar({ user }: SidebarProps) {
+export default function Sidebar({ user, mobileOpen, onMobileClose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
   const [openGroups, setOpenGroups] = useState<string[]>(['Purchase', 'Vendors'])
+
+  // Close mobile sidebar on navigation
+  useEffect(() => {
+    onMobileClose?.()
+  }, [pathname])
 
   const toggleGroup = (label: string) => {
     setOpenGroups(prev =>
@@ -129,19 +142,35 @@ export default function Sidebar({ user }: SidebarProps) {
   )
 
   return (
-    <div className="w-60 min-h-screen bg-[#1B3A6B] flex flex-col flex-shrink-0">
-      {/* Logo */}
-      <div className="px-5 py-5 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-sm font-bold text-[#1B3A6B]">H1</span>
-          </div>
-          <div>
-            <div className="text-white font-bold text-sm leading-tight">Health1 VPMS</div>
-            <div className="text-blue-300 text-xs">Purchase Management</div>
+    <>
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onMobileClose}
+        />
+      )}
+
+      <div className={cn(
+        'w-60 min-h-screen bg-[#1B3A6B] flex flex-col flex-shrink-0 z-50 transition-transform duration-200',
+        'fixed lg:static lg:translate-x-0',
+        mobileOpen ? 'translate-x-0' : '-translate-x-full'
+      )}>
+        {/* Logo + mobile close */}
+        <div className="px-5 py-5 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-bold text-[#1B3A6B]">H1</span>
+            </div>
+            <div className="flex-1">
+              <div className="text-white font-bold text-sm leading-tight">Health1 VPMS</div>
+              <div className="text-blue-300 text-xs">Purchase Management</div>
+            </div>
+            <button onClick={onMobileClose} className="lg:hidden text-blue-300 hover:text-white">
+              <X size={20} />
+            </button>
           </div>
         </div>
-      </div>
 
       {/* Centre pill */}
       {user.centre && (
@@ -251,5 +280,6 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
       </div>
     </div>
+    </>
   )
 }
