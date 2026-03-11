@@ -123,9 +123,10 @@ export default function ItemListClient({ items, categories }: ItemListClientProp
     <>
       <div className="overflow-x-auto">
         <table className="data-table">
+          <caption className="sr-only">List of items with code, name, brand, category, unit, HSN code, GST percentage, and flags</caption>
           <thead>
             <tr>
-              <th className="w-10">
+              <th scope="col" className="w-10">
                 <BulkCheckbox
                   checked={isAllSelected}
                   indeterminate={isIndeterminate}
@@ -138,15 +139,15 @@ export default function ItemListClient({ items, categories }: ItemListClientProp
                   }}
                 />
               </th>
-              <th>Item Code</th>
-              <th>Generic Name</th>
-              <th>Brand</th>
-              <th>Category</th>
-              <th>Unit</th>
-              <th>HSN</th>
-              <th>GST %</th>
-              <th>Flags</th>
-              <th>Action</th>
+              <th scope="col">Item Code</th>
+              <th scope="col">Generic Name</th>
+              <th scope="col">Brand</th>
+              <th scope="col">Category</th>
+              <th scope="col">Unit</th>
+              <th scope="col">HSN</th>
+              <th scope="col">GST %</th>
+              <th scope="col">Flags</th>
+              <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -188,7 +189,7 @@ export default function ItemListClient({ items, categories }: ItemListClientProp
                   </div>
                 </td>
                 <td>
-                  <Link href={`/items/${item.id}`} className="text-xs text-[#0D7E8A] hover:underline font-medium">
+                  <Link href={`/items/${item.id}`} className="text-xs text-[#0D7E8A] hover:underline font-medium" aria-label={`View item ${item.generic_name}`}>
                     View
                   </Link>
                 </td>
