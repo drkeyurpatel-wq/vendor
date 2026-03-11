@@ -1,14 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { cn, formatDate, formatLakhs, MATCH_STATUS_COLORS, PAYMENT_STATUS_COLORS } from '@/lib/utils'
-import { FileText } from 'lucide-react'
+import { FileText, Plus } from 'lucide-react'
+import SearchInput from '@/components/ui/SearchInput'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 50
 
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ match_status?: string; payment_status?: string; centre?: string }>
+  searchParams: Promise<{ match_status?: string; payment_status?: string; centre?: string; q?: string; page?: string }>
 }) {
   const params = await searchParams
+  const currentPage = Math.max(1, parseInt(params.page || '1'))
   const supabase = await createClient()
 
   const { data: profile } = await supabase
@@ -25,8 +30,10 @@ export default async function InvoicesPage({
   if (params.match_status) query = query.eq('match_status', params.match_status)
   if (params.payment_status) query = query.eq('payment_status', params.payment_status)
   if (params.centre) query = query.eq('centre_id', params.centre)
+  if (params.q) query = query.or(`invoice_ref.ilike.%${params.q}%,vendor_invoice_no.ilike.%${params.q}%`)
 
-  const { data: invoices, count } = await query.limit(50)
+  const from = (currentPage - 1) * PAGE_SIZE
+  const { data: invoices, count } = await query.range(from, from + PAGE_SIZE - 1)
   const { data: centres } = await supabase.from('centres').select('id,code,name').eq('is_active', true)
 
   const MATCH_STATUSES = ['pending', 'matched', 'partial_match', 'mismatch']
@@ -39,6 +46,14 @@ export default async function InvoicesPage({
           <h1 className="page-title">Invoices</h1>
           <p className="page-subtitle">{count ?? 0} total invoices</p>
         </div>
+        <Link href="/finance/invoices/new" className="btn-primary">
+          <Plus size={16} /> New Invoice
+        </Link>
+      </div>
+
+      {/* Search */}
+      <div className="mb-4">
+        <SearchInput placeholder="Search invoice ref or vendor invoice no..." />
       </div>
 
       {/* Match status filter */}
@@ -90,6 +105,7 @@ export default async function InvoicesPage({
 
       <div className="card overflow-hidden">
         {invoices && invoices.length > 0 ? (
+          <>
           <div className="overflow-x-auto">
             <table className="data-table">
               <thead>
@@ -130,6 +146,8 @@ export default async function InvoicesPage({
               </tbody>
             </table>
           </div>
+          <Pagination totalCount={count ?? 0} pageSize={PAGE_SIZE} currentPage={currentPage} />
+          </>
         ) : (
           <div className="empty-state">
             <FileText size={40} className="mb-3 text-gray-300" />

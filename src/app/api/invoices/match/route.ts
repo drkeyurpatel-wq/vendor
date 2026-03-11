@@ -92,6 +92,17 @@ export async function POST(request: NextRequest) {
     })
   }
 
+  // Try to get invoice line items (if table exists)
+  const { data: invoiceItems } = await supabase
+    .from('invoice_items')
+    .select('item_id, quantity, rate')
+    .eq('invoice_id', invoice_id)
+
+  const invoiceItemsMap = new Map<string, { qty: number; rate: number }>()
+  invoiceItems?.forEach((ii: any) => {
+    invoiceItemsMap.set(ii.item_id, { qty: ii.quantity, rate: ii.rate })
+  })
+
   // Build match results
   const results: MatchResult[] = []
   let allMatch = true
@@ -99,14 +110,15 @@ export async function POST(request: NextRequest) {
 
   for (const poItem of (poItems || [])) {
     const grnQty = grnItemsMap.get(poItem.item_id) || 0
+    const invoiceItem = invoiceItemsMap.get(poItem.item_id)
 
-    // For simplicity, use PO rate as invoice rate comparison
-    // In production, you'd compare against actual invoice line items
-    const invoiceQty = grnQty // Assuming invoice matches GRN for now
-    const invoiceRate = poItem.rate // Will be compared against actual invoice
+    // Use actual invoice line item data if available, otherwise compare totals
+    const invoiceQty = invoiceItem?.qty ?? grnQty
+    const invoiceRate = invoiceItem?.rate ?? poItem.rate
 
-    const qtyMatch = poItem.ordered_qty === grnQty && grnQty === invoiceQty
-    const rateDiff = Math.abs(poItem.rate - invoiceRate) / poItem.rate
+    // Qty match: GRN accepted qty should match what's invoiced
+    const qtyMatch = grnQty === invoiceQty && grnQty > 0
+    const rateDiff = poItem.rate > 0 ? Math.abs(poItem.rate - invoiceRate) / poItem.rate : 0
     const rateMatch = rateDiff <= RATE_TOLERANCE
 
     results.push({
@@ -127,11 +139,20 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Also compare total amounts as a cross-check
+  const poTotal = poItems?.reduce((s, p: any) => s + (p.ordered_qty * p.rate), 0) ?? 0
+  const grnTotal = Array.from(grnItemsMap.entries()).reduce((s, [itemId, qty]) => {
+    const poItem = poItems?.find((p: any) => p.item_id === itemId)
+    return s + qty * (poItem?.rate || 0)
+  }, 0)
+  const invoiceTotal = invoice.total_amount || 0
+  const totalDiff = poTotal > 0 ? Math.abs(grnTotal - invoiceTotal) / poTotal : 0
+
   // Determine match status
   let matchStatus: string
-  if (allMatch && results.length > 0) {
+  if (allMatch && results.length > 0 && totalDiff <= RATE_TOLERANCE) {
     matchStatus = 'matched'
-  } else if (anyMatch) {
+  } else if (anyMatch || totalDiff <= 0.05) {
     matchStatus = 'partial_match'
   } else {
     matchStatus = 'mismatch'

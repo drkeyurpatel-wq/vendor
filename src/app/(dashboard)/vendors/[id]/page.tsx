@@ -2,11 +2,21 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate, VENDOR_STATUS_COLORS, PO_STATUS_COLORS, formatLakhs } from '@/lib/utils'
-import { ArrowLeft, Building2, Phone, Mail, MapPin, CreditCard, FileText, ShoppingCart, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Building2, Phone, Mail, MapPin, CreditCard, FileText, ShoppingCart, AlertTriangle, Upload } from 'lucide-react'
+import VendorActions from './VendorActions'
 
 export default async function VendorDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+
+  const { data: { user: authUser } } = await supabase.auth.getUser()
+  if (!authUser) redirect('/login')
+
+  const { data: currentProfile } = await supabase
+    .from('user_profiles')
+    .select('role')
+    .eq('id', authUser.id)
+    .single()
 
   const { data: vendor, error } = await supabase
     .from('vendors')
@@ -68,6 +78,9 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
             )}
           </div>
           <div className="flex gap-2">
+            <Link href={`/vendors/${vendor.id}/documents`} className="btn-secondary">
+              <Upload size={15} /> Documents
+            </Link>
             <Link href={`/purchase-orders/new?vendor=${vendor.id}`} className="btn-primary">
               <ShoppingCart size={15} /> Create PO
             </Link>
@@ -232,6 +245,17 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Vendor Actions */}
+      {currentProfile && (
+        <div className="mt-6">
+          <VendorActions
+            vendorId={vendor.id}
+            currentStatus={vendor.status}
+            userRole={currentProfile.role}
+          />
         </div>
       )}
 

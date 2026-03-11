@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { formatLakhs } from '@/lib/utils'
-import { BarChart3, TrendingUp, ShoppingCart, Users, Package, AlertTriangle } from 'lucide-react'
+import { BarChart3, TrendingUp, ShoppingCart, Users, Package, AlertTriangle, Download } from 'lucide-react'
 
 export default async function ReportsPage() {
   const supabase = await createClient()
@@ -150,10 +150,10 @@ export default async function ReportsPage() {
           </div>
         </div>
 
-        {/* Quick Links */}
+        {/* Quick Links & Exports */}
         <div className="card p-6 lg:col-span-2">
           <h2 className="font-semibold text-gray-900 mb-4">Quick Reports</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <Link href="/finance/credit" className="p-4 rounded-lg border border-gray-200 hover:border-[#0D7E8A] hover:bg-blue-50 transition-colors text-center">
               <div className="text-sm font-medium text-gray-700">Aging Report</div>
               <div className="text-xs text-gray-400 mt-1">Credit period analysis</div>
@@ -170,6 +170,26 @@ export default async function ReportsPage() {
               <div className="text-sm font-medium text-gray-700">Low Stock</div>
               <div className="text-xs text-gray-400 mt-1">Below reorder level</div>
             </Link>
+          </div>
+
+          <h2 className="font-semibold text-gray-900 mb-3">Export Data (CSV)</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <a href="/api/export?type=purchase_orders" className="p-3 rounded-lg border border-gray-200 hover:border-[#0D7E8A] hover:bg-blue-50 transition-colors text-center flex items-center justify-center gap-2">
+              <Download size={14} className="text-[#0D7E8A]" />
+              <span className="text-sm font-medium text-gray-700">POs</span>
+            </a>
+            <a href="/api/export?type=invoices" className="p-3 rounded-lg border border-gray-200 hover:border-[#0D7E8A] hover:bg-blue-50 transition-colors text-center flex items-center justify-center gap-2">
+              <Download size={14} className="text-[#0D7E8A]" />
+              <span className="text-sm font-medium text-gray-700">Invoices</span>
+            </a>
+            <a href="/api/export?type=vendors" className="p-3 rounded-lg border border-gray-200 hover:border-[#0D7E8A] hover:bg-blue-50 transition-colors text-center flex items-center justify-center gap-2">
+              <Download size={14} className="text-[#0D7E8A]" />
+              <span className="text-sm font-medium text-gray-700">Vendors</span>
+            </a>
+            <a href="/api/export?type=stock" className="p-3 rounded-lg border border-gray-200 hover:border-[#0D7E8A] hover:bg-blue-50 transition-colors text-center flex items-center justify-center gap-2">
+              <Download size={14} className="text-[#0D7E8A]" />
+              <span className="text-sm font-medium text-gray-700">Stock</span>
+            </a>
           </div>
         </div>
       </div>

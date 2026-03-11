@@ -2,13 +2,18 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { cn, formatLakhs, formatDate, PO_STATUS_COLORS } from '@/lib/utils'
 import { Plus, ShoppingCart } from 'lucide-react'
+import SearchInput from '@/components/ui/SearchInput'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 50
 
 export default async function PurchaseOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; centre?: string }>
+  searchParams: Promise<{ status?: string; centre?: string; q?: string; page?: string }>
 }) {
   const params = await searchParams
+  const currentPage = Math.max(1, parseInt(params.page || '1'))
   const supabase = await createClient()
 
   const { data: profile } = await supabase
@@ -25,8 +30,10 @@ export default async function PurchaseOrdersPage({
 
   if (params.status) query = query.eq('status', params.status)
   if (params.centre) query = query.eq('centre_id', params.centre)
+  if (params.q) query = query.or(`po_number.ilike.%${params.q}%,vendor.legal_name.ilike.%${params.q}%`)
 
-  const { data: pos, count } = await query.limit(50)
+  const from = (currentPage - 1) * PAGE_SIZE
+  const { data: pos, count } = await query.range(from, from + PAGE_SIZE - 1)
 
   const { data: centres } = await supabase.from('centres').select('id,code,name').eq('is_active', true)
 
@@ -42,6 +49,11 @@ export default async function PurchaseOrdersPage({
         <Link href="/purchase-orders/new" className="btn-primary">
           <Plus size={16} /> New PO
         </Link>
+      </div>
+
+      {/* Search */}
+      <div className="mb-4">
+        <SearchInput placeholder="Search PO number or vendor..." />
       </div>
 
       {/* Status filter tabs */}
@@ -82,6 +94,7 @@ export default async function PurchaseOrdersPage({
 
       <div className="card overflow-hidden">
         {pos && pos.length > 0 ? (
+          <>
           <div className="overflow-x-auto">
             <table className="data-table">
               <thead>
@@ -126,6 +139,8 @@ export default async function PurchaseOrdersPage({
               </tbody>
             </table>
           </div>
+          <Pagination totalCount={count ?? 0} pageSize={PAGE_SIZE} currentPage={currentPage} />
+          </>
         ) : (
           <div className="empty-state">
             <ShoppingCart size={40} className="mb-3 text-gray-300" />
