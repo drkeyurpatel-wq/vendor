@@ -97,11 +97,13 @@ export default async function VendorsPage({
             defaultValue={params.q}
             placeholder="Search vendor name..."
             className="form-input pl-9"
+            aria-label="Search vendors by name"
           />
         </form>
         <select
           className="form-select w-48"
           defaultValue={params.category}
+          aria-label="Filter vendors by category"
         >
           <option value="">All Categories</option>
           {categories?.map(c => (
