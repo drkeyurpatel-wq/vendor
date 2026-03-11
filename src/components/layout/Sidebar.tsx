@@ -7,7 +7,7 @@ import { UserProfile } from '@/types/database'
 import {
   LayoutDashboard, Users, Package, ShoppingCart, ClipboardList,
   FileText, CreditCard, BarChart2, Settings, ChevronDown, ChevronRight,
-  Building2, LogOut, TrendingDown
+  Building2, LogOut, TrendingDown, Warehouse, ArrowLeftRight, AlertTriangle
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -68,6 +68,15 @@ const NAV: NavItem[] = [
       { label: 'Credit Period', href: '/finance/credit' },
       { label: 'Payment Batches', href: '/finance/payments' },
       { label: 'New Batch', href: '/finance/payments/new' },
+      { label: 'Debit Notes', href: '/finance/debit-notes' },
+    ]
+  },
+  {
+    label: 'Inventory', icon: <Warehouse size={18} />,
+    children: [
+      { label: 'Stock Levels', href: '/items/stock' },
+      { label: 'Stock Transfers', href: '/inventory/transfers' },
+      { label: 'Expiry Alerts', href: '/inventory/expiry-alerts' },
     ]
   },
   {
@@ -86,6 +95,7 @@ const NAV: NavItem[] = [
       { label: 'Users', href: '/settings/users' },
       { label: 'Approval Matrix', href: '/settings/approvals' },
       { label: 'Rate Contracts', href: '/settings/rate-contracts' },
+      { label: 'Data Import', href: '/settings/data-import' },
     ]
   },
 ]
