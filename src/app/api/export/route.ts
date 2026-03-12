@@ -118,10 +118,20 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: `Unknown export type: ${type}` }, { status: 400 })
   }
 
-  return new NextResponse(csvContent, {
+  // Stream the CSV response for large datasets
+  const encoder = new TextEncoder()
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(csvContent))
+      controller.close()
+    },
+  })
+
+  return new NextResponse(stream, {
     headers: {
-      'Content-Type': 'text/csv',
+      'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': `attachment; filename="${filename}"`,
+      'Transfer-Encoding': 'chunked',
     },
   })
 }

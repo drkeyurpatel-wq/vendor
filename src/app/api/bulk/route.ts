@@ -67,26 +67,40 @@ export async function POST(request: NextRequest) {
               continue
             }
 
-            const { error } = await supabase
+            // Atomic: update PO status + insert approval record together
+            const now = new Date().toISOString()
+            const { error: updateError } = await supabase
               .from('purchase_orders')
               .update({
                 status: 'approved',
                 approved_by: user.id,
-                approved_at: new Date().toISOString(),
+                approved_at: now,
               })
               .eq('id', po.id)
+              .eq('status', 'pending_approval') // Optimistic lock: only update if still pending
 
-            if (error) {
-              errors.push(`${po.po_number}: ${error.message}`)
+            if (updateError) {
+              errors.push(`${po.po_number}: ${updateError.message}`)
+              failed++
+              continue
+            }
+
+            const { error: approvalError } = await supabase.from('po_approvals').insert({
+              po_id: po.id,
+              approved_by: user.id,
+              action: 'approved',
+              comments: 'Bulk approved',
+            })
+
+            if (approvalError) {
+              // Rollback: revert PO status if approval record fails
+              await supabase
+                .from('purchase_orders')
+                .update({ status: 'pending_approval', approved_by: null, approved_at: null })
+                .eq('id', po.id)
+              errors.push(`${po.po_number}: Failed to record approval — rolled back`)
               failed++
             } else {
-              // Record approval
-              await supabase.from('po_approvals').insert({
-                po_id: po.id,
-                approved_by: user.id,
-                action: 'approved',
-                comments: 'Bulk approved',
-              })
               success++
             }
           }

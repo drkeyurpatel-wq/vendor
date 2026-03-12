@@ -916,6 +916,79 @@ export interface VendorOutstanding {
 }
 
 
+// ─── Rate Contracts ──────────────────────────────────────
+
+export type RateContractStatus = 'draft' | 'active' | 'expired' | 'terminated'
+export type RateContractType = 'annual' | 'quarterly' | 'spot'
+
+export interface RateContract {
+  id: string
+  contract_number: string
+  vendor_id: string
+  centre_id: string | null
+  contract_type: RateContractType
+  status: RateContractStatus
+  start_date: string
+  end_date: string
+  terms_and_conditions: string | null
+  notes: string | null
+  approved_by: string | null
+  approved_at: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+  vendor?: Vendor
+  centre?: Centre
+  items?: RateContractItem[]
+}
+
+export interface RateContractItem {
+  id: string
+  rate_contract_id: string
+  item_id: string
+  contracted_rate: number
+  max_qty: number | null
+  min_qty: number | null
+  l_rank: number
+  tolerance_percent: number
+  notes: string | null
+  item?: Item
+}
+
+// ─── Vendor Performance ──────────────────────────────────
+
+export interface VendorPerformance {
+  id: string
+  vendor_id: string
+  centre_id: string | null
+  period_month: string
+  delivery_score: number
+  quality_score: number
+  price_score: number
+  service_score: number
+  overall_score: number
+  total_pos: number
+  on_time_deliveries: number
+  rejected_items: number
+  notes: string | null
+  created_at: string
+  vendor?: Vendor
+  centre?: Centre
+}
+
+// ─── Activity Log ────────────────────────────────────────
+
+export interface ActivityLog {
+  id: string
+  action: string
+  entity_type: string
+  entity_id: string | null
+  user_id: string | null
+  details: Record<string, unknown> | null
+  created_at: string
+  user?: UserProfile
+}
+
 // ─── Existing types kept for backward compatibility ───────
 
 export interface PurchaseIndent {
