@@ -91,12 +91,12 @@ export default async function VendorsPage({
       {/* Filters */}
       <div className="card p-4 mb-5 flex gap-4 flex-wrap">
         <form className="flex-1 min-w-48 relative">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <input
             name="q"
             defaultValue={params.q}
             placeholder="Search vendor name..."
-            className="form-input pl-9"
+            className="form-input pl-10"
             aria-label="Search vendors by name"
           />
         </form>

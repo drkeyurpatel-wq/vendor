@@ -39,10 +39,10 @@ export default function SearchInput({ placeholder = 'Search...', paramName = 'q'
 
   return (
     <div className="relative">
-      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+      <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
       <input
         type="text"
-        className="form-input pl-9 pr-8 w-full md:w-72"
+        className="form-input pl-10 pr-8 w-full md:w-72"
         placeholder={placeholder}
         value={value}
         onChange={e => setValue(e.target.value)}
