@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import VendorSearch from '@/components/ui/VendorSearch'
 import POLineItems, { LineItem } from '@/components/ui/POLineItems'
+import { notifyAll } from '@/lib/notify'
 import { generatePONumber } from '@/lib/utils'
 
 export default function NewPOPage() {
@@ -187,6 +188,17 @@ export default function NewPOPage() {
     }
 
     toast.success(`PO ${poNumber} created`)
+
+    // Notify: email vendor + in-app to approvers
+    notifyAll({
+      emailType: 'po_created',
+      emailData: { po_id: po.id },
+      action: status === 'pending_approval' ? 'po_submitted' : 'po_created',
+      entity_type: 'purchase_order',
+      entity_id: po.id,
+      details: { po_number: poNumber },
+    })
+
     router.push(`/purchase-orders/${po.id}`)
   }
 
@@ -288,7 +300,7 @@ export default function NewPOPage() {
           </fieldset>
         </div>
 
-        <div className="flex gap-3 pb-6">
+        <div className="flex gap-3 pb-6 flex-wrap">
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : <><Save size={16} /> Create PO</>}
           </button>

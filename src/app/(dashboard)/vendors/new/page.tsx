@@ -680,7 +680,7 @@ export default function NewVendorPage() {
         )}
 
         {/* Save bar */}
-        <div className="flex gap-3 pt-4 pb-8 mt-6 border-t">
+        <div className="flex gap-3 pt-4 pb-8 mt-6 border-t flex-wrap">
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save Vendor</>}
           </button>

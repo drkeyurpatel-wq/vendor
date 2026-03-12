@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 import { grnSubmitSchema } from '@/lib/validations'
+import { sendInAppNotification } from '@/lib/notify-server'
 
 export async function POST(request: NextRequest) {
   const rateLimitResult = await rateLimit(request, 10, 60000)
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
 
   const { data: grn } = await supabase
     .from('grns')
-    .select('id, status, po_id')
+    .select('id, status, po_id, grn_number')
     .eq('id', grn_id)
     .single()
 
@@ -48,12 +49,22 @@ export async function POST(request: NextRequest) {
     .eq('id', grn_id)
 
   // Log activity
+  const auditAction = action === 'verify' ? 'grn_verified' : 'grn_discrepancy_flagged'
   await supabase.from('activity_log').insert({
     user_id: user.id,
-    action: action === 'verify' ? 'grn_verified' : 'grn_discrepancy_flagged',
+    action: auditAction,
     entity_type: 'grn',
     entity_id: grn_id,
   })
+
+  // Notify: in-app to relevant users
+  sendInAppNotification(supabase, {
+    action: auditAction as any,
+    entity_type: 'grn',
+    entity_id: grn_id,
+    details: { grn_number: grn.grn_number },
+    actor_user_id: user.id,
+  }).catch(() => {})
 
   return NextResponse.json({ success: true, status: newStatus })
 }

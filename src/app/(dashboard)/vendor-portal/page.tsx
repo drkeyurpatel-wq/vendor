@@ -84,7 +84,7 @@ export default async function VendorPortalPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="stat-card border-l-4 border-[#1B3A6B]">
           <div className="flex items-center gap-2 mb-1">
             <ShoppingCart size={18} className="text-[#1B3A6B]" />

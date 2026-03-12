@@ -134,7 +134,7 @@ export default function BulkActions({
   return (
     <>
       {/* Floating action bar */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white shadow-2xl border border-gray-200 rounded-xl px-5 py-3 flex items-center gap-4 animate-in slide-in-from-bottom-4">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white shadow-2xl border border-gray-200 rounded-xl px-4 sm:px-5 py-3 flex items-center gap-3 sm:gap-4 flex-wrap justify-center max-w-[calc(100vw-2rem)] animate-in slide-in-from-bottom-4">
         <div className="flex items-center gap-2 text-sm font-medium text-[#1B3A6B]">
           <CheckSquare size={16} className="text-[#0D7E8A]" />
           <span>{selectedIds.length} item{selectedIds.length > 1 ? 's' : ''} selected</span>

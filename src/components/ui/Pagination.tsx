@@ -38,8 +38,8 @@ export default function Pagination({ totalCount, pageSize = 50, currentPage }: P
   }
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-      <div className="text-sm text-gray-500">
+    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 gap-2">
+      <div className="text-sm text-gray-500 hidden sm:block">
         Showing {Math.min((currentPage - 1) * pageSize + 1, totalCount)}–{Math.min(currentPage * pageSize, totalCount)} of {totalCount}
       </div>
       <div className="flex items-center gap-1">

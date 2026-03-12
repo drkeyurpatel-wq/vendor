@@ -235,7 +235,7 @@ export default function EditPOPage() {
           </Link>
           <h1 className="page-title">Edit Purchase Order</h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <button onClick={handleDelete} disabled={deleting} className="btn-danger">
             {deleting ? <><Loader2 size={16} className="animate-spin" /> Deleting...</> : <><Trash2 size={16} /> Delete Draft</>}
           </button>
@@ -292,7 +292,7 @@ export default function EditPOPage() {
           <POLineItems items={items} onChange={setItems} />
         </div>
 
-        <div className="flex gap-3 pb-6">
+        <div className="flex gap-3 pb-6 flex-wrap">
           <button type="submit" disabled={saving} className="btn-primary">
             {saving ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save Changes</>}
           </button>

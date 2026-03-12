@@ -192,7 +192,7 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-[#EEF2F9]">
             <h3 className="text-sm font-semibold text-[#1B3A6B]">Notifications</h3>

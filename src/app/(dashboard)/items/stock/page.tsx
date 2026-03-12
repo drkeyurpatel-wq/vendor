@@ -87,7 +87,7 @@ export default async function StockLevelsPage({
           <h1 className="page-title">Stock Levels</h1>
           <p className="page-subtitle">{count ?? 0} items tracked</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Link
             href={`/items/stock?${params.centre ? `centre=${params.centre}&` : ''}${params.status ? `status=${params.status}&` : ''}view=summary`}
             className={cn('btn-secondary text-sm', !isBatchView && 'bg-[#1B3A6B] text-white border-[#1B3A6B]')}

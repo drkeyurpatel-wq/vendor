@@ -201,7 +201,7 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="form-label">Centre Code *</label>
                   <input
@@ -237,7 +237,7 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="form-label">City</label>
                   <input
@@ -260,7 +260,7 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="form-label">Phone</label>
                   <input

@@ -332,7 +332,7 @@ export default function NewInvoicePage() {
           </div>
         </div>
 
-        <div className="flex gap-3 pb-6">
+        <div className="flex gap-3 pb-6 flex-wrap">
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save Invoice</>}
           </button>

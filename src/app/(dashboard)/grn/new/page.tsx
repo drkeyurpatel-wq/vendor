@@ -10,6 +10,7 @@ import { generateGRNNumber, formatCurrency } from '@/lib/utils'
 import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { queueOfflineRequest } from '@/lib/service-worker'
+import { notifyAll } from '@/lib/notify'
 
 interface GRNLineItem {
   po_item_id: string
@@ -567,6 +568,17 @@ export default function NewGRNPage() {
     }
 
     toast.success(`GRN ${grnNumber} created successfully`)
+
+    // Notify: email vendor (goods received) + in-app to finance
+    notifyAll({
+      emailType: 'grn_received',
+      emailData: { grn_id: grn.id },
+      action: 'grn_submitted',
+      entity_type: 'grn',
+      entity_id: grn.id,
+      details: { grn_number: grnNumber },
+    })
+
     router.push(`/grn/${grn.id}`)
   }
 
@@ -580,7 +592,7 @@ export default function NewGRNPage() {
           <h1 className="page-title">New Goods Receipt Note</h1>
           <p className="page-subtitle mt-1">Record goods received against a purchase order</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {pendingCount > 0 && (
             <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ backgroundColor: '#1B3A6B' }}>
               <CloudOff size={14} />
@@ -660,7 +672,7 @@ export default function NewGRNPage() {
               <legend className="font-semibold mb-4 pb-3 border-b border-gray-100 w-full" style={{ color: '#1B3A6B' }}>
                 Transport Details
               </legend>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="grn-dc-number" className="form-label">DC Number</label>
                   <input id="grn-dc-number" className="form-input" value={dcNumber} onChange={e => setDcNumber(e.target.value)} placeholder="Delivery challan #" />
@@ -695,8 +707,8 @@ export default function NewGRNPage() {
               <legend className="font-semibold mb-4 pb-3 border-b border-gray-100 w-full" style={{ color: '#1B3A6B' }}>
                 Vendor Invoice Details
               </legend>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
                   <label htmlFor="grn-vendor-invoice-no" className="form-label">Invoice Number</label>
                   <input id="grn-vendor-invoice-no" className="form-input" value={vendorInvoiceNo} onChange={e => setVendorInvoiceNo(e.target.value)} placeholder="Vendor invoice #" />
                 </div>

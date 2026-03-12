@@ -141,10 +141,10 @@ export default function ItemListClient({ items, categories }: ItemListClientProp
               </th>
               <th scope="col">Item Code</th>
               <th scope="col">Generic Name</th>
-              <th scope="col">Brand</th>
+              <th scope="col" className="hidden md:table-cell">Brand</th>
               <th scope="col">Category</th>
               <th scope="col">Unit</th>
-              <th scope="col">HSN</th>
+              <th scope="col" className="hidden md:table-cell">HSN</th>
               <th scope="col">GST %</th>
               <th scope="col">Flags</th>
               <th scope="col">Action</th>
@@ -176,10 +176,10 @@ export default function ItemListClient({ items, categories }: ItemListClientProp
                 <td>
                   <div className="font-medium text-gray-900">{item.generic_name}</div>
                 </td>
-                <td className="text-sm text-gray-600">{item.brand_name ?? '\u2014'}</td>
+                <td className="text-sm text-gray-600 hidden md:table-cell">{item.brand_name ?? '\u2014'}</td>
                 <td className="text-sm text-gray-600">{item.category?.name ?? '\u2014'}</td>
                 <td className="text-sm text-gray-600">{item.unit}</td>
-                <td className="text-xs font-mono text-gray-500">{item.hsn_code ?? '\u2014'}</td>
+                <td className="text-xs font-mono text-gray-500 hidden md:table-cell">{item.hsn_code ?? '\u2014'}</td>
                 <td className="text-sm text-gray-600">{item.gst_percent}%</td>
                 <td>
                   <div className="flex gap-1">

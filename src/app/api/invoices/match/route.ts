@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 import { invoiceMatchSchema } from '@/lib/validations'
+import { sendInAppNotification } from '@/lib/notify-server'
 
 /**
  * 3-Way Matching Engine
@@ -186,6 +187,15 @@ export async function POST(request: NextRequest) {
     entity_id: invoice_id,
     details: { match_status: matchStatus, item_count: results.length },
   })
+
+  // Notify: in-app notification (especially important on mismatch — payment blocked)
+  sendInAppNotification(supabase, {
+    action: 'invoice_matched',
+    entity_type: 'invoice',
+    entity_id: invoice_id,
+    details: { match_status: matchStatus, invoice_ref: invoice_id },
+    actor_user_id: user.id,
+  }).catch(() => {})
 
   return NextResponse.json({
     match_status: matchStatus,

@@ -4,6 +4,7 @@ import { canApprovePO, PO_APPROVAL_THRESHOLD } from '@/types/database'
 import type { UserRole } from '@/types/database'
 import { rateLimit } from '@/lib/rate-limit'
 import { poApprovalSchema } from '@/lib/validations'
+import { sendInAppNotification, emailVendorPOApproved } from '@/lib/notify-server'
 
 /**
  * Multi-level sequential PO approval chain.
@@ -110,6 +111,15 @@ export async function POST(request: NextRequest) {
       details: { level: currentLevel, comments: comments?.trim() || null },
     })
 
+    // Notify: PO rejected → in-app to PO creator/purchase team
+    sendInAppNotification(supabase, {
+      action: 'po_rejected',
+      entity_type: 'purchase_order',
+      entity_id: po_id,
+      details: { po_number: po_id, comments: comments?.trim() || null },
+      actor_user_id: user.id,
+    }).catch(() => {}) // fire-and-forget
+
     return NextResponse.json({ success: true, status: 'cancelled' })
   }
 
@@ -141,6 +151,15 @@ export async function POST(request: NextRequest) {
       details: { level: currentLevel, next_level: nextLevel, next_role: nextRole },
     })
 
+    // Notify: next approver needs to act
+    sendInAppNotification(supabase, {
+      action: 'po_approved_level',
+      entity_type: 'purchase_order',
+      entity_id: po_id,
+      details: { po_number: po_id, level: currentLevel, next_role: nextRole },
+      actor_user_id: user.id,
+    }).catch(() => {})
+
     return NextResponse.json({
       success: true,
       status: 'pending_approval',
@@ -165,6 +184,16 @@ export async function POST(request: NextRequest) {
     entity_id: po_id,
     details: { level: currentLevel, final: true },
   })
+
+  // Notify: PO fully approved → email vendor + in-app to staff
+  emailVendorPOApproved(supabase, po_id, user.id).catch(() => {})
+  sendInAppNotification(supabase, {
+    action: 'po_approved',
+    entity_type: 'purchase_order',
+    entity_id: po_id,
+    details: { po_number: po_id, final: true },
+    actor_user_id: user.id,
+  }).catch(() => {})
 
   return NextResponse.json({ success: true, status: 'approved' })
 }

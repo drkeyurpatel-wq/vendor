@@ -415,3 +415,56 @@ button:focus-visible,
 
 /* ═══ Smooth page transitions ═══ */
 main { animation: fadeIn 0.2s ease-out; }
+
+/* ═══ Mobile Touch Targets ═══ */
+@media (max-width: 640px) {
+  button:not(.data-table button),
+  [role="button"],
+  a.btn-primary, a.btn-secondary, a.btn-navy, a.btn-danger {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .data-table td button,
+  .data-table td a[role="button"] {
+    min-height: 36px;
+    min-width: 36px;
+  }
+}
+
+/* ═══ Mobile Responsive Fixes (Audit March 2026) ═══ */
+
+/* Hide non-essential table columns on mobile */
+@media (max-width: 768px) {
+  .data-table .mobile-hide { display: none; }
+}
+
+/* Tab bar scroll snap on mobile */
+@media (max-width: 640px) {
+  [role="tablist"] {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  [role="tablist"] > * {
+    scroll-snap-align: start;
+  }
+}
+
+/* Form action buttons stack on narrow screens */
+@media (max-width: 480px) {
+  .form-actions {
+    flex-direction: column;
+  }
+  .form-actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Pagination compact on mobile */
+@media (max-width: 480px) {
+  .pagination-compact a,
+  .pagination-compact span {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}

@@ -113,10 +113,10 @@ export default function POListClient({ pos, userRole }: POListClientProps) {
                 />
               </th>
               <th scope="col">PO Number</th>
-              <th scope="col">Centre</th>
+              <th scope="col" className="hidden md:table-cell">Centre</th>
               <th scope="col">Vendor</th>
               <th scope="col">Date</th>
-              <th scope="col">Expected Delivery</th>
+              <th scope="col" className="hidden md:table-cell">Expected Delivery</th>
               <th scope="col">Amount</th>
               <th scope="col">Status</th>
               <th scope="col">Action</th>
@@ -143,12 +143,12 @@ export default function POListClient({ pos, userRole }: POListClientProps) {
                 <td>
                   <span className="font-mono text-xs font-semibold">{po.po_number}</span>
                 </td>
-                <td>
+                <td className="hidden md:table-cell">
                   <span className="badge bg-blue-50 text-blue-700">{po.centre?.code}</span>
                 </td>
                 <td className="text-sm font-medium text-gray-900">{po.vendor?.legal_name}</td>
                 <td className="text-sm text-gray-600">{formatDate(po.po_date)}</td>
-                <td className="text-sm text-gray-600">
+                <td className="text-sm text-gray-600 hidden md:table-cell">
                   {po.expected_delivery_date ? formatDate(po.expected_delivery_date) : '\u2014'}
                 </td>
                 <td className="text-sm font-semibold text-gray-900">{formatLakhs(po.total_amount)}</td>

@@ -99,7 +99,7 @@ export default function AnalyticsPage() {
           </div>
           <p className="page-subtitle">Consumption projections, inventory optimization, and price intelligence</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <select className="form-select text-sm" value={centreId} onChange={e => setCentreId(e.target.value)}>
             <option value="">All Centres</option>
             {centres.map(c => <option key={c.id} value={c.id}>{c.code} — {c.name}</option>)}

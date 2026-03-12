@@ -428,7 +428,7 @@ export default function NewItemPage() {
                     <input className="form-input" value={form.combination_of_drugs} onChange={e => update('combination_of_drugs', e.target.value)} />
                   </div>
                 </div>
-                <div className="flex gap-6 mt-4 pt-3 border-t">
+                <div className="flex gap-4 mt-4 pt-3 border-t flex-wrap">
                   <label className="flex items-center gap-2 text-sm cursor-pointer">
                     <input type="checkbox" checked={form.allow_medicine_admin} onChange={e => update('allow_medicine_admin', e.target.checked)}
                       className="w-4 h-4 accent-[#0D7E8A]" /> Allow for Medicine Administration
@@ -879,7 +879,7 @@ export default function NewItemPage() {
         )}
 
         {/* Save bar */}
-        <div className="flex gap-3 pt-4 pb-8 mt-6 border-t">
+        <div className="flex gap-3 flex-wrap pt-4 pb-8 mt-6 border-t">
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save Item</>}
           </button>

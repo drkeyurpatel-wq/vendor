@@ -244,7 +244,7 @@ export default function DataImportPage() {
                   <h3 className="font-semibold text-red-700 mb-3 text-sm">
                     Errors ({result.errors.length})
                   </h3>
-                  <div className="max-h-72 overflow-y-auto">
+                  <div className="max-h-72 overflow-y-auto overflow-x-auto">
                     <table className="data-table">
                       <thead>
                         <tr><th>Row</th><th>Field</th><th>Error</th></tr>

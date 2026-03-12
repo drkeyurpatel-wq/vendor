@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Loader2, Wallet, CheckSquare } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { formatLakhs, formatDate, cn } from '@/lib/utils'
+import { fireInAppNotification } from '@/lib/notify'
 
 interface EligibleInvoice {
   id: string
@@ -142,6 +143,15 @@ export default function NewPaymentBatchPage() {
     }
 
     toast.success(`Payment batch ${batchNumber} created with ${selectedIds.size} invoices`)
+
+    // Notify: in-app to CAO/admin for approval
+    fireInAppNotification(
+      'payment_batch_created',
+      'payment_batch',
+      batch.id,
+      { batch_number: batchNumber, amount: totalSelectedAmount, invoice_count: selectedIds.size }
+    )
+
     router.push('/finance/payments')
   }
 
@@ -283,7 +293,7 @@ export default function NewPaymentBatchPage() {
           )}
         </div>
 
-        <div className="flex gap-3 pb-6">
+        <div className="flex gap-3 pb-6 flex-wrap">
           <button type="submit" disabled={loading || selectedIds.size === 0} className="btn-primary">
             {loading ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : <><Save size={16} /> Create Batch</>}
           </button>

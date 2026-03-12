@@ -306,7 +306,7 @@ async function GroupAdminDashboard({ profile }: { profile: any }) {
       />
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         <StatCard
           label="Total Spend (MTD)"
           value={formatLakhs(totalSpendMTD)}
@@ -1473,7 +1473,7 @@ async function FinanceStaffDashboard({ profile }: { profile: any }) {
           <Timer size={18} className="text-[#1B3A6B]" />
           Aging Summary
         </h2>
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {[
             { label: 'Current', value: aging.current, color: 'bg-green-50 border-green-200', text: 'text-green-700' },
             { label: '0-30 Days', value: aging.days_0_30, color: 'bg-yellow-50 border-yellow-200', text: 'text-yellow-700' },

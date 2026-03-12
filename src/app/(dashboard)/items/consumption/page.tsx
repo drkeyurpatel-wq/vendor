@@ -282,7 +282,7 @@ ECW002,,VAS,5,2026-03-11,OT,MRN12345,Surgery consumable
             </div>
           )}
 
-          <div className="flex gap-3 mt-6">
+          <div className="flex gap-3 mt-6 flex-wrap">
             <button onClick={() => { setResult(null); setRows([]); setFileName('') }} className="btn-primary">
               Import Another File
             </button>
