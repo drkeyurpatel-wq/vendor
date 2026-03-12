@@ -13,6 +13,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
+  const supabaseAuth = await createClient()
+  const { data: { user } } = await supabaseAuth.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const type = req.nextUrl.searchParams.get('type')
   const centreCode = req.nextUrl.searchParams.get('centre_code') || 'XXX'
 

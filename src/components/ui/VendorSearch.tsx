@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Search, X } from 'lucide-react'
+import { Search, X, Loader2 } from 'lucide-react'
 
 interface VendorResult {
   id: string
@@ -74,9 +74,9 @@ export default function VendorSearch({ value, onChange, centreId, placeholder = 
   return (
     <div ref={ref} className="relative">
       <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
         <input
-          className="form-input pl-9"
+          className="form-input pl-10"
           value={query}
           onChange={e => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
@@ -102,8 +102,9 @@ export default function VendorSearch({ value, onChange, centreId, placeholder = 
         </div>
       )}
       {open && loading && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-400 text-sm">
-          Searching...
+        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-4 flex items-center justify-center gap-2 text-gray-400 text-sm">
+          <Loader2 size={16} className="animate-spin text-[#0D7E8A]" />
+          Searching vendors...
         </div>
       )}
     </div>

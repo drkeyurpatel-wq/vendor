@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { Plus, Package } from 'lucide-react'
+import { Plus, Package, Search } from 'lucide-react'
 import ItemListClient from './ItemListClient'
 
 export default async function ItemsPage({
@@ -44,13 +44,16 @@ export default async function ItemsPage({
 
       {/* Filters */}
       <div className="card p-4 mb-5 flex gap-4 flex-wrap">
-        <div className="flex-1 min-w-48 relative">
+        <form className="flex-1 min-w-48 relative">
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <input
+            name="q"
             placeholder="Search item name or code..."
             defaultValue={params.q}
-            className="form-input pl-4"
+            className="form-input pl-10"
+            aria-label="Search items by name or code"
           />
-        </div>
+        </form>
         <select className="form-select w-52" defaultValue={params.category}>
           <option value="">All Categories</option>
           {categories?.map(c => (

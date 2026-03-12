@@ -66,6 +66,12 @@ body {
 }
 .data-table tbody tr:last-child td { border-bottom: none; }
 
+/* Responsive: horizontal scroll hint on mobile */
+@media (max-width: 768px) {
+  .data-table th { padding: 9px 12px; font-size: 10px; }
+  .data-table td { padding: 9px 12px; font-size: 12px; }
+}
+
 /* ═══ Badges ═══ */
 .badge {
   display: inline-flex;
@@ -292,6 +298,7 @@ body {
   justify-content: space-between;
   margin-bottom: 28px;
   gap: 16px;
+  flex-wrap: wrap;
 }
 .page-title {
   font-size: 24px;
@@ -299,6 +306,10 @@ body {
   color: var(--navy);
   letter-spacing: -0.02em;
   line-height: 1.2;
+}
+@media (max-width: 640px) {
+  .page-title { font-size: 20px; }
+  .page-header { margin-bottom: 20px; }
 }
 .page-subtitle {
   font-size: 13px;
@@ -389,3 +400,18 @@ button:focus-visible,
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+
+/* ═══ Form responsive ═══ */
+@media (max-width: 640px) {
+  .form-input, .form-select { font-size: 16px; /* prevent iOS zoom */ }
+  .stat-card { padding: 16px 18px; }
+}
+
+/* ═══ Scroll indicator for tables ═══ */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* ═══ Smooth page transitions ═══ */
+main { animation: fadeIn 0.2s ease-out; }

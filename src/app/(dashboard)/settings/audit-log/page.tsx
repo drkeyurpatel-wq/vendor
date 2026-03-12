@@ -189,13 +189,13 @@ export default async function AuditLogPage({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
             {/* Search */}
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               <input
                 name="search"
                 type="text"
                 placeholder="Search entity ID..."
                 defaultValue={params.search || ''}
-                className="form-input pl-9 w-full"
+                className="form-input pl-10 w-full"
               />
             </div>
 
@@ -230,12 +230,12 @@ export default async function AuditLogPage({
 
             {/* Date From */}
             <div className="relative">
-              <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               <input
                 name="date_from"
                 type="date"
                 defaultValue={params.date_from || ''}
-                className="form-input pl-9 w-full"
+                className="form-input pl-10 w-full"
                 placeholder="From"
               />
             </div>

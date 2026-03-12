@@ -124,13 +124,13 @@ export default async function VendorOrdersPage({
           <form method="GET" action="/vendor-portal/orders" className="flex items-center gap-2 flex-1">
             {statusFilter && <input type="hidden" name="status" value={statusFilter} />}
             <div className="relative flex-1 max-w-sm">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               <input
                 type="text"
                 name="search"
                 defaultValue={searchQuery}
                 placeholder="Search by PO number..."
-                className="form-input pl-9 w-full"
+                className="form-input pl-10 w-full"
               />
             </div>
             <button type="submit" className="btn-primary text-sm">Search</button>

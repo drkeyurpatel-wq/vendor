@@ -11,6 +11,7 @@ import {
   PackageCheck, PackagePlus, ScanBarcode, AlertCircle, CreditCard,
   FileCheck, Layers, Timer, Activity, ChevronRight, Box
 } from 'lucide-react'
+import SeedDataBanner from '@/components/ui/SeedDataBanner'
 
 // ─── Shared UI helpers ───────────────────────────────────────
 
@@ -260,6 +261,15 @@ async function GroupAdminDashboard({ profile }: { profile: any }) {
       .not('status', 'eq', 'cancelled'),
   ])
 
+  // Check if master data exists (for seed banner)
+  const [
+    { count: vendorCatCount },
+    { count: itemCatCount },
+  ] = await Promise.all([
+    supabase.from('vendor_categories').select('*', { count: 'exact', head: true }),
+    supabase.from('item_categories').select('*', { count: 'exact', head: true }),
+  ])
+
   const totalSpendMTD = (mtdPOs || []).reduce((sum: number, po: any) => sum + (po.total_amount || 0), 0)
   const overdueCount = overdueInvoices?.length ?? 0
   const lowStockCount = lowStockItems?.length ?? 0
@@ -287,6 +297,13 @@ async function GroupAdminDashboard({ profile }: { profile: any }) {
           <QuickAction href="/settings/users" icon={<Settings size={16} />} label="Users" variant="secondary" />
         </div>
       </div>
+
+      {/* Master Data Seed Banner — shown when centres/categories are missing */}
+      <SeedDataBanner
+        hasCentres={(centres?.length ?? 0) > 0}
+        hasVendorCategories={(vendorCatCount ?? 0) > 0}
+        hasItemCategories={(itemCatCount ?? 0) > 0}
+      />
 
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">

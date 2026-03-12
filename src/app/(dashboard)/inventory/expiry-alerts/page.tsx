@@ -26,24 +26,71 @@ export default async function ExpiryAlertsPage({
     .select('id, code, name')
     .eq('is_active', true)
 
-  // Fetch expiry alerts from view
+  // Fetch expiry alerts from view (falls back gracefully if view doesn't exist)
+  let alerts: any[] | null = null
+  let allAlerts: any[] | null = null
+
+  // Try the database view first
   let query = supabase.from('v_expiry_alerts').select('*')
+  if (params.centre) query = query.eq('centre_id', params.centre)
+  if (params.alert_level) query = query.eq('alert_level', params.alert_level)
 
-  if (params.centre) {
-    query = query.eq('centre_id', params.centre)
-  }
-  if (params.alert_level) {
-    query = query.eq('alert_level', params.alert_level)
-  }
+  const { data: viewData, error: viewError } = await query.order('days_to_expiry', { ascending: true })
 
-  const { data: alerts } = await query.order('days_to_expiry', { ascending: true })
+  if (!viewError) {
+    alerts = viewData
 
-  // Compute stats from full data (unfiltered by alert_level to show all counts)
-  let statsQuery = supabase.from('v_expiry_alerts').select('alert_level')
-  if (params.centre) {
-    statsQuery = statsQuery.eq('centre_id', params.centre)
+    let statsQuery = supabase.from('v_expiry_alerts').select('alert_level')
+    if (params.centre) statsQuery = statsQuery.eq('centre_id', params.centre)
+    const { data: statsData } = await statsQuery
+    allAlerts = statsData
+  } else {
+    // Fallback: query grn_items with batch expiry data directly
+    const today = new Date()
+    const d180 = new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0]
+
+    let fallbackQuery = supabase
+      .from('grn_items')
+      .select('id, batch_no, expiry_date, received_qty, item:items(item_code, generic_name), grn:grns(centre_id, centre:centres(code))')
+      .lte('expiry_date', d180)
+      .gt('received_qty', 0)
+      .order('expiry_date', { ascending: true })
+      .limit(200)
+
+    const { data: grnItems } = await fallbackQuery
+
+    alerts = (grnItems || [])
+      .filter((gi: any) => {
+        if (params.centre && gi.grn?.centre_id !== params.centre) return false
+        return true
+      })
+      .map((gi: any) => {
+        const daysToExpiry = Math.ceil((new Date(gi.expiry_date).getTime() - today.getTime()) / 86400000)
+        const alertLevel = daysToExpiry <= 0 ? 'expired'
+          : daysToExpiry <= 30 ? 'expiring_30_days'
+          : daysToExpiry <= 90 ? 'expiring_90_days'
+          : 'expiring_180_days'
+
+        if (params.alert_level && alertLevel !== params.alert_level) return null
+
+        return {
+          id: gi.id,
+          item_name: gi.item?.generic_name,
+          item_code: gi.item?.item_code,
+          centre_code: gi.grn?.centre?.code,
+          batch_number: gi.batch_no,
+          expiry_date: gi.expiry_date,
+          days_to_expiry: daysToExpiry,
+          qty_available: gi.received_qty,
+          mrp: null,
+          purchase_rate: null,
+          alert_level: alertLevel,
+        }
+      })
+      .filter(Boolean)
+
+    allAlerts = (alerts || []).map((a: any) => ({ alert_level: a.alert_level }))
   }
-  const { data: allAlerts } = await statsQuery
 
   const expiredCount = allAlerts?.filter((a: any) => a.alert_level === 'expired').length ?? 0
   const exp30Count = allAlerts?.filter((a: any) => a.alert_level === 'expiring_30_days').length ?? 0

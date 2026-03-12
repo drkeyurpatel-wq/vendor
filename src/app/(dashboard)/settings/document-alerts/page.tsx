@@ -186,12 +186,12 @@ export default async function DocumentAlertsPage({
           <label className="form-label">Search Vendor</label>
           <form>
             <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               <input
                 name="q"
                 placeholder="Search vendor name or code..."
                 defaultValue={params.q}
-                className="form-input pl-9"
+                className="form-input pl-10"
               />
             </div>
             {params.status && <input type="hidden" name="status" value={params.status} />}
