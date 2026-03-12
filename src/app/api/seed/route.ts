@@ -100,6 +100,14 @@ const ITEM_CATEGORIES: { code: string; name: string; children?: { code: string; 
 ]
 
 export async function POST() {
+  // Block seed endpoint in production
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_SEED) {
+    return NextResponse.json(
+      { error: 'Seed endpoint is disabled in production. Set ALLOW_SEED=1 to enable.' },
+      { status: 403 }
+    )
+  }
+
   const supabase = await createClient()
 
   // Verify user is group_admin
