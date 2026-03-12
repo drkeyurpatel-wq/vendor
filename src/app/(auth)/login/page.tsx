@@ -31,12 +31,12 @@ export default function LoginPage() {
   return (
     <div className="w-full animate-fade-in">
       {/* Logo */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-2xl shadow-black/20 mb-5">
-          <span className="text-2xl font-extrabold text-[#1B3A6B] tracking-tight">H1</span>
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-2xl shadow-black/20 mb-4">
+          <span className="text-xl sm:text-2xl font-extrabold text-[#1B3A6B] tracking-tight">H1</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Health1 VPMS</h1>
-        <p className="text-blue-300/60 text-sm mt-2 font-medium">Vendor & Purchase Management System</p>
+        <p className="text-blue-300/60 text-sm mt-1.5 font-medium">Vendor & Purchase Management System</p>
       </div>
 
       {/* Card */}
