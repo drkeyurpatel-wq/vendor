@@ -78,6 +78,10 @@ export default function SeedDataBanner({ hasCentres, hasVendorCategories, hasIte
                 <span>13 Parent + 30 Sub Item Categories</span>
               </div>
             )}
+            <div className="flex items-center gap-1.5 bg-white/10 rounded-lg px-3 py-1.5 text-sm">
+              <Tag size={14} />
+              <span>10 Sample Vendors + 20 Items + Demo PO</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-4 mt-4">
