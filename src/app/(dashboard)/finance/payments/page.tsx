@@ -114,7 +114,11 @@ export default async function PaymentsPage({
               <tbody>
                 {batches.map((batch: any) => (
                   <tr key={batch.id}>
-                    <td><span className="font-mono text-xs font-semibold">{batch.batch_number}</span></td>
+                    <td>
+                          <Link href={`/finance/payments/${batch.id}`} className="font-mono text-xs font-semibold text-[#0D7E8A] hover:underline">
+                            {batch.batch_number}
+                          </Link>
+                        </td>
                     <td className="text-sm font-medium">{formatDate(batch.batch_date)}</td>
                     <td className="text-sm font-semibold">{formatLakhs(batch.total_amount || 0)}</td>
                     <td className="text-sm text-gray-600">{batch.payment_count || 0}</td>

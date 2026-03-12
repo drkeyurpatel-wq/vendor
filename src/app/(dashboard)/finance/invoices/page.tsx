@@ -132,8 +132,12 @@ export default async function InvoicesPage({
               </thead>
               <tbody>
                 {invoices.map((inv: any) => (
-                  <tr key={inv.id}>
-                    <td><span className="font-mono text-xs font-semibold">{inv.invoice_ref}</span></td>
+                  <tr key={inv.id} className="cursor-pointer hover:bg-[#EEF2F9]/50">
+                    <td>
+                      <Link href={`/finance/invoices/${inv.id}`} className="font-mono text-xs font-semibold text-[#0D7E8A] hover:underline">
+                        {inv.invoice_ref}
+                      </Link>
+                    </td>
                     <td className="font-mono text-xs text-gray-600">{inv.vendor_invoice_no}</td>
                     <td><span className="badge bg-blue-50 text-blue-700">{inv.centre?.code}</span></td>
                     <td className="text-sm font-medium text-gray-900">{inv.vendor?.legal_name}</td>
