@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { cn, formatLakhs, formatDate, formatCurrency } from '@/lib/utils'
 import { PAYMENT_STATUS_COLORS } from '@/lib/utils'
 import { AlertTriangle, Clock, CheckCircle } from 'lucide-react'
+import CreditAgingCharts from './CreditAgingCharts'
 
 export default async function CreditPeriodPage() {
   const supabase = await createClient()
@@ -50,6 +51,23 @@ export default async function CreditPeriodPage() {
   const criticalTotal = criticalInvoices?.reduce((s: number, i: any) => s + i.total_amount, 0) ?? 0
   const upcomingTotal = upcomingInvoices?.reduce((s: number, i: any) => s + i.total_amount, 0) ?? 0
 
+  // Compute aging buckets for chart
+  const agingBuckets = [
+    { bucket: 'Current', amount: 0, color: '#22c55e' },
+    { bucket: '1-30 days', amount: 0, color: '#eab308' },
+    { bucket: '31-60 days', amount: 0, color: '#f97316' },
+    { bucket: '61-90 days', amount: 0, color: '#ef4444' },
+    { bucket: '90+ days', amount: 0, color: '#991b1b' },
+  ]
+  summary?.forEach((inv: any) => {
+    const daysOverdue = Math.floor((new Date().getTime() - new Date(inv.due_date).getTime()) / (1000 * 60 * 60 * 24))
+    if (daysOverdue <= 0) agingBuckets[0].amount += inv.total_amount || 0
+    else if (daysOverdue <= 30) agingBuckets[1].amount += inv.total_amount || 0
+    else if (daysOverdue <= 60) agingBuckets[2].amount += inv.total_amount || 0
+    else if (daysOverdue <= 90) agingBuckets[3].amount += inv.total_amount || 0
+    else agingBuckets[4].amount += inv.total_amount || 0
+  })
+
   return (
     <div>
       <div className="page-header">
@@ -86,6 +104,11 @@ export default async function CreditPeriodPage() {
           <div className="text-2xl font-bold text-blue-600">{formatLakhs(upcomingTotal)}</div>
           <div className="text-sm text-gray-500 mt-1">{upcomingInvoices?.length ?? 0} invoices upcoming</div>
         </div>
+      </div>
+
+      {/* Aging Chart */}
+      <div className="mb-6">
+        <CreditAgingCharts agingData={agingBuckets} />
       </div>
 
       {/* Overdue Table */}
