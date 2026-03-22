@@ -78,7 +78,7 @@ export default async function StockLevelsPage({
         </div>
       )}
 
-      <StockListClient stocks={stocks ?? []} />
+      <StockListClient stocks={stocks ?? []} userRole={profile?.role || 'store_staff'} />
     </div>
   )
 }

@@ -1,107 +1,138 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { type ColumnDef } from '@tanstack/react-table'
 import DataTable from '@/components/ui/DataTable'
-import { cn, formatDate, formatLakhs } from '@/lib/utils'
-import { ClipboardList, Plus } from 'lucide-react'
+import { cn, formatLakhs, formatDate } from '@/lib/utils'
+import { Package, CheckCircle2, XCircle, AlertTriangle, ClipboardCheck } from 'lucide-react'
 import Link from 'next/link'
+import BulkActionBar from '@/components/ui/BulkActionBar'
 
 const GRN_STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700',
-  submitted: 'bg-blue-100 text-blue-800',
-  verified: 'bg-green-100 text-green-800',
-  discrepancy: 'bg-red-100 text-red-800',
+  draft: 'bg-gray-100 text-gray-700', submitted: 'bg-blue-100 text-blue-800',
+  verified: 'bg-green-100 text-green-800', discrepancy: 'bg-red-100 text-red-800',
 }
 
 interface GRN {
   id: string
   grn_number: string
   grn_date: string
+  status: string
+  quality_status?: string
   vendor_invoice_no?: string
   vendor_invoice_amount?: number
-  status: string
-  po_id: string
   vendor?: { legal_name: string } | null
-  centre?: { code: string; name: string } | null
+  centre?: { code: string } | null
   po?: { po_number: string } | null
 }
 
-export default function GRNListClient({ grns }: { grns: GRN[] }) {
+export default function GRNListClient({ grns, userRole }: { grns: GRN[]; userRole: string }) {
   const router = useRouter()
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const canBulk = ['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(userRole)
 
-  const columns = useMemo<ColumnDef<GRN, any>[]>(() => [
-    {
-      accessorKey: 'grn_number',
-      header: 'GRN #',
-      size: 160,
-      cell: ({ row }) => <span className="font-mono text-xs font-semibold text-gray-900">{row.original.grn_number}</span>,
-    },
-    {
-      id: 'po_number',
-      header: 'PO #',
-      accessorFn: row => row.po?.po_number ?? '',
-      size: 160,
-      cell: ({ row }) => (
-        <Link href={`/purchase-orders/${row.original.po_id}`} className="font-mono text-xs text-teal-600 hover:underline" onClick={e => e.stopPropagation()}>
-          {row.original.po?.po_number}
-        </Link>
-      ),
-    },
-    {
-      id: 'centre',
-      header: 'Centre',
-      accessorFn: row => row.centre?.code ?? '',
-      size: 80,
-      cell: ({ row }) => <span className="badge bg-blue-50 text-blue-700">{row.original.centre?.code}</span>,
-    },
-    {
-      id: 'vendor',
-      header: 'Vendor',
-      accessorFn: row => row.vendor?.legal_name ?? '',
-      cell: ({ row }) => <span className="text-sm font-medium text-gray-900">{row.original.vendor?.legal_name}</span>,
-    },
-    {
-      accessorKey: 'grn_date',
-      header: 'Date',
-      size: 100,
-      cell: ({ row }) => <span className="text-sm text-gray-600">{formatDate(row.original.grn_date)}</span>,
-    },
-    {
-      accessorKey: 'vendor_invoice_no',
-      header: 'Invoice No.',
-      size: 120,
-      cell: ({ row }) => <span className="font-mono text-xs text-gray-600">{row.original.vendor_invoice_no || '—'}</span>,
-    },
-    {
-      accessorKey: 'vendor_invoice_amount',
-      header: 'Inv. Amt',
-      size: 100,
-      cell: ({ row }) => <span className="text-sm font-semibold">{row.original.vendor_invoice_amount ? formatLakhs(row.original.vendor_invoice_amount) : '—'}</span>,
-    },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      size: 100,
-      cell: ({ row }) => <span className={cn('badge', GRN_STATUS_COLORS[row.original.status] || 'bg-gray-100 text-gray-700')}>{row.original.status}</span>,
-    },
-  ], [])
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+
+  const columns = useMemo<ColumnDef<GRN, any>[]>(() => {
+    const cols: ColumnDef<GRN, any>[] = []
+    if (canBulk) {
+      cols.push({
+        id: 'select', size: 40, enableSorting: false,
+        header: () => <input type="checkbox" checked={selectedIds.length === grns.length && grns.length > 0}
+          onChange={() => setSelectedIds(selectedIds.length === grns.length ? [] : grns.map(g => g.id))}
+          className="w-4 h-4 rounded border-gray-300 text-teal-600" />,
+        cell: ({ row }) => <input type="checkbox" checked={selectedIds.includes(row.original.id)}
+          onChange={() => toggleSelect(row.original.id)} onClick={e => e.stopPropagation()}
+          className="w-4 h-4 rounded border-gray-300 text-teal-600" />,
+      })
+    }
+    cols.push(
+      {
+        accessorKey: 'grn_number', header: 'GRN #', size: 180,
+        cell: ({ row }) => <Link href={`/grn/${row.original.id}`} className="font-mono text-xs font-semibold text-teal-600 hover:underline">{row.original.grn_number}</Link>,
+      },
+      {
+        id: 'po', header: 'PO #', accessorFn: r => r.po?.po_number ?? '', size: 160,
+        cell: ({ row }) => row.original.po?.po_number ? <span className="font-mono text-xs text-gray-600">{row.original.po.po_number}</span> : <span className="text-xs text-gray-400">—</span>,
+      },
+      {
+        id: 'centre', header: 'Centre', accessorFn: r => r.centre?.code ?? '', size: 70,
+        cell: ({ row }) => <span className="badge bg-blue-50 text-blue-700">{row.original.centre?.code}</span>,
+      },
+      {
+        id: 'vendor', header: 'Vendor', accessorFn: r => r.vendor?.legal_name ?? '',
+        cell: ({ row }) => <span className="text-sm font-medium text-gray-900 truncate max-w-[180px] block">{row.original.vendor?.legal_name}</span>,
+      },
+      {
+        accessorKey: 'grn_date', header: 'Date', size: 100,
+        cell: ({ row }) => <span className="text-sm text-gray-600">{formatDate(row.original.grn_date)}</span>,
+      },
+      {
+        accessorKey: 'vendor_invoice_amount', header: 'Amount', size: 100,
+        cell: ({ row }) => <span className="text-sm font-semibold">{row.original.vendor_invoice_amount ? formatLakhs(row.original.vendor_invoice_amount) : '—'}</span>,
+      },
+      {
+        accessorKey: 'status', header: 'Status', size: 100,
+        cell: ({ row }) => <span className={cn('badge', GRN_STATUS_COLORS[row.original.status] || 'bg-gray-100 text-gray-700')}>{row.original.status}</span>,
+      },
+      {
+        accessorKey: 'quality_status', header: 'QC', size: 90,
+        cell: ({ row }) => {
+          const qs = row.original.quality_status || 'pending'
+          return <span className={cn('badge', qs === 'approved' ? 'bg-green-100 text-green-800' : qs === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600')}>{qs}</span>
+        },
+      },
+    )
+    return cols
+  }, [selectedIds, grns.length, canBulk])
+
+  const pendingCount = grns.filter(g => g.status === 'submitted' || g.status === 'draft').length
+  const discrepancyCount = grns.filter(g => g.status === 'discrepancy').length
+
+  const bulkActions = [
+    { key: 'verify', label: 'Verify', icon: <CheckCircle2 size={12} />, variant: 'primary' as const, newStatus: 'verified' },
+    { key: 'discrepancy', label: 'Flag Discrepancy', icon: <AlertTriangle size={12} />, variant: 'warning' as const, requireComment: true, newStatus: 'discrepancy' },
+  ]
 
   return (
-    <DataTable
-      columns={columns}
-      data={grns}
-      searchPlaceholder="Search GRN number, PO, vendor..."
-      showSearch
-      showExport
-      exportFilename="grns"
-      pageSize={25}
-      onRowClick={(grn) => router.push(`/grn/${grn.id}`)}
-      emptyIcon={<ClipboardList size={40} className="text-gray-300" />}
-      emptyTitle="No GRNs found"
-      emptyDescription="GRNs will appear when you receive goods against purchase orders"
-      emptyAction={<Link href="/grn/new" className="btn-primary text-sm"><Plus size={15} /> Create First GRN</Link>}
-    />
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="bg-white rounded-xl border border-gray-200/80 p-3">
+          <div className="text-xs text-gray-500">Total GRNs</div>
+          <div className="text-lg font-bold text-navy-600">{grns.length}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200/80 p-3">
+          <div className="text-xs text-gray-500">Total Value</div>
+          <div className="text-sm font-bold text-navy-600">{formatLakhs(grns.reduce((s, g) => s + (g.vendor_invoice_amount || 0), 0))}</div>
+        </div>
+        {pendingCount > 0 && (
+          <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-3">
+            <div className="text-xs text-yellow-600">Pending Verification</div>
+            <div className="text-lg font-bold text-yellow-700">{pendingCount}</div>
+          </div>
+        )}
+        {discrepancyCount > 0 && (
+          <div className="bg-red-50 rounded-xl border border-red-200 p-3">
+            <div className="text-xs text-red-600">Discrepancies</div>
+            <div className="text-lg font-bold text-red-700">{discrepancyCount}</div>
+          </div>
+        )}
+      </div>
+
+      {canBulk && (
+        <BulkActionBar selectedIds={selectedIds} entityType="grn" tableName="grns"
+          actions={bulkActions} onClear={() => setSelectedIds([])} entityLabel="GRN" />
+      )}
+
+      <DataTable columns={columns} data={grns}
+        searchPlaceholder="Search GRN#, PO#, vendor..." showSearch showExport showColumnToggle
+        exportFilename="grns" pageSize={25}
+        onRowClick={g => router.push(`/grn/${g.id}`)}
+        emptyIcon={<Package size={40} className="text-gray-300" />}
+        emptyTitle="No GRNs found" emptyDescription="GRNs are created when goods arrive against a PO" />
+    </>
   )
 }

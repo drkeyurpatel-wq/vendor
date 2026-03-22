@@ -76,7 +76,7 @@ export default async function GRNListPage({
         </div>
       )}
 
-      <GRNListClient grns={grns ?? []} />
+      <GRNListClient grns={grns ?? []} userRole={profile?.role || 'store_staff'} />
     </div>
   )
 }

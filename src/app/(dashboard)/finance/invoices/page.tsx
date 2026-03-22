@@ -19,7 +19,7 @@ export default async function InvoicesPage({
 
   let query = supabase
     .from('invoices')
-    .select('*, vendor:vendors(legal_name), centre:centres(code, name)', { count: 'exact' })
+    .select('*, vendor:vendors(legal_name, vendor_code), centre:centres(code, name)', { count: 'exact' })
     .order('created_at', { ascending: false })
 
   if (params.match_status) query = query.eq('match_status', params.match_status)
@@ -102,7 +102,7 @@ export default async function InvoicesPage({
         </div>
       )}
 
-      <InvoiceListClient invoices={invoices ?? []} />
+      <InvoiceListClient invoices={invoices ?? []} userRole={profile?.role || 'store_staff'} />
     </div>
   )
 }
