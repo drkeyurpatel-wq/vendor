@@ -212,7 +212,7 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
         </div>
         <div className="overflow-x-auto">
           <table className="data-table">
-            <thead><tr><th>Item</th><th>HSN</th><th>Unit</th><th>Qty</th><th>Free</th><th>Recv</th><th className="text-right">Rate</th><th className="text-right">Net Rate</th>{!isInterState ? <><th className="text-right">CGST</th><th className="text-right">SGST</th></> : <th className="text-right">IGST</th>}<th className="text-right">Total</th></tr></thead>
+            <thead><tr><th>Item</th><th>HSN</th><th>Unit</th><th>Qty</th><th>Free</th><th>Recv</th><th className="text-right">Rate/Unit</th><th className="text-right">Net Rate/Unit</th>{!isInterState ? <><th className="text-right">CGST</th><th className="text-right">SGST</th></> : <th className="text-right">IGST</th>}<th className="text-right">Total</th></tr></thead>
             <tbody>
               {lineItems?.map((li: any) => (
                 <tr key={li.id}>
@@ -222,8 +222,8 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
                   <td className="text-sm font-medium">{li.ordered_qty}</td>
                   <td className="text-sm text-gray-500">{li.free_qty || '—'}</td>
                   <td><span className={cn('text-sm font-medium', (li.received_qty || 0) >= li.ordered_qty ? 'text-green-600' : (li.received_qty || 0) > 0 ? 'text-yellow-600' : 'text-gray-400')}>{li.received_qty || 0}/{li.ordered_qty}</span></td>
-                  <td className="text-sm text-right font-mono">{formatCurrency(li.rate)}</td>
-                  <td className="text-sm text-right font-mono">{li.net_rate ? formatCurrency(li.net_rate) : '—'}</td>
+                  <td className="text-sm text-right"><span className="font-mono">{formatCurrency(li.rate)}</span><span className="text-[10px] text-gray-400">/{li.unit}</span></td>
+                  <td className="text-sm text-right"><span className="font-mono">{li.net_rate ? formatCurrency(li.net_rate) : '—'}</span>{li.net_rate ? <span className="text-[10px] text-gray-400">/{li.unit}</span> : null}</td>
                   {!isInterState ? (
                     <><td className="text-xs text-right text-gray-500">{li.cgst_percent || (li.gst_percent / 2)}%<br /><span className="font-mono">{formatCurrency(li.cgst_amount || 0)}</span></td>
                     <td className="text-xs text-right text-gray-500">{li.sgst_percent || (li.gst_percent / 2)}%<br /><span className="font-mono">{formatCurrency(li.sgst_amount || 0)}</span></td></>

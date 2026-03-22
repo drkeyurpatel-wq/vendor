@@ -169,7 +169,7 @@ export default function GlobalSearch() {
       <div className="relative group">
         <Search
           size={15}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#0D7E8A] transition-colors pointer-events-none"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#0D7E8A] transition-colors pointer-events-none z-10"
         />
         <input
           ref={inputRef}
@@ -182,7 +182,7 @@ export default function GlobalSearch() {
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleInputKeyDown}
           placeholder="Search vendors, POs, items..."
-          className="w-full pl-10 pr-12 py-2 bg-gray-50/80 border border-gray-200/80 rounded-xl text-sm focus:outline-none focus:border-[#0D7E8A]/40 focus:bg-white focus:shadow-md focus:shadow-[#0D7E8A]/5 transition-all placeholder:text-gray-400"
+          className="w-full pl-11 pr-12 py-2 bg-gray-50/80 border border-gray-200/80 rounded-xl text-sm focus:outline-none focus:border-[#0D7E8A]/40 focus:bg-white focus:shadow-md focus:shadow-[#0D7E8A]/5 transition-all placeholder:text-gray-400"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 text-gray-400 pointer-events-none">
           {isLoading ? (

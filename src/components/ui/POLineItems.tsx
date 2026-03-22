@@ -230,10 +230,10 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                   <th>Unit</th>
                   <th>Qty</th>
                   <th>Free</th>
-                  <th>Rate</th>
+                  <th>Rate/Unit</th>
                   {showDiscounts && <th>Trade%</th>}
                   {showDiscounts && <th>Cash%</th>}
-                  <th>Net Rate</th>
+                  <th>Net Rate/Unit</th>
                   {supplyType === 'intra_state' ? (
                     <>
                       <th>CGST</th>
@@ -256,7 +256,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                       {item.contract_rate && (
                         <div className="flex items-center gap-1 mt-0.5">
                           <CheckCircle2 size={10} className="text-green-500" />
-                          <span className="text-[10px] text-green-600">Contract: ₹{item.contract_rate.toFixed(2)}</span>
+                          <span className="text-[10px] text-green-600">Contract: ₹{item.contract_rate.toFixed(2)}/{item.purchase_unit || item.unit}</span>
                         </div>
                       )}
                     </td>
@@ -278,11 +278,14 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                         value={item.free_qty || ''} onChange={e => updateItem(idx, 'free_qty', parseInt(e.target.value) || 0)} />
                     </td>
                     <td>
-                      <input type="number" min="0" step="0.01"
-                        className={`form-input w-24 text-right text-sm ${item.rate_warning ? 'border-red-400 bg-red-50' : ''}`}
-                        value={item.rate || ''} onChange={e => updateItem(idx, 'rate', parseFloat(e.target.value) || 0)} />
+                      <div className="flex items-center gap-1">
+                        <input type="number" min="0" step="0.01"
+                          className={`form-input w-24 text-right text-sm ${item.rate_warning ? 'border-red-400 bg-red-50' : ''}`}
+                          value={item.rate || ''} onChange={e => updateItem(idx, 'rate', parseFloat(e.target.value) || 0)} />
+                        <span className="text-[10px] text-gray-400 whitespace-nowrap">/{item.purchase_unit || item.unit}</span>
+                      </div>
                       {item.rate_warning && (
-                        <div className="flex items-start gap-1 mt-1 max-w-[120px]">
+                        <div className="flex items-start gap-1 mt-1 max-w-[140px]">
                           <AlertTriangle size={10} className="text-red-500 mt-0.5 flex-shrink-0" />
                           <span className="text-[9px] text-red-600 leading-tight">{item.rate_warning}</span>
                         </div>
@@ -300,7 +303,10 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                           value={item.cash_discount_percent || ''} onChange={e => updateItem(idx, 'cash_discount_percent', parseFloat(e.target.value) || 0)} />
                       </td>
                     )}
-                    <td className="text-sm text-gray-600 text-right font-mono">{formatCurrency(item.net_rate)}</td>
+                    <td className="text-sm text-gray-600 text-right">
+                      <span className="font-mono">{formatCurrency(item.net_rate)}</span>
+                      <span className="text-[10px] text-gray-400">/{item.purchase_unit || item.unit}</span>
+                    </td>
                     {supplyType === 'intra_state' ? (
                       <>
                         <td className="text-xs text-gray-500 text-right">

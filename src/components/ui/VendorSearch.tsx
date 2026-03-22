@@ -74,9 +74,9 @@ export default function VendorSearch({ value, onChange, centreId, placeholder = 
   return (
     <div ref={ref} className="relative">
       <div className="relative">
-        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
         <input
-          className="form-input pl-10"
+          className="form-input pl-11"
           value={query}
           onChange={e => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
