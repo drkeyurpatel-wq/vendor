@@ -5,6 +5,7 @@ import { cn, formatDate, formatCurrency, formatLakhs, getDueDateStatus, MATCH_ST
 import { ArrowLeft, FileText, Download, Calendar, CreditCard, Building2, Clock } from 'lucide-react'
 import { differenceInDays } from 'date-fns'
 import MatchBreakdown from './MatchBreakdown'
+import InvoiceActions from '@/components/ui/InvoiceActions'
 
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -12,6 +13,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const { data: profile } = await supabase.from('user_profiles').select('id, role').eq('id', user.id).single()
 
   // Fetch invoice with joins
   const { data: invoice, error } = await supabase
@@ -168,6 +171,22 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
       </div>
+
+      {/* Invoice Actions */}
+      {profile && (
+        <div className="card p-5 mb-6">
+          <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-3">Actions</h3>
+          <InvoiceActions
+            invoiceId={invoice.id} invoiceRef={invoice.invoice_ref}
+            currentStatus={invoice.status || 'pending'} matchStatus={invoice.match_status || 'pending'}
+            paymentStatus={invoice.payment_status || 'unpaid'}
+            totalAmount={invoice.total_amount || 0} paidAmount={invoice.paid_amount || 0}
+            vendorId={invoice.vendor_id} centreId={invoice.centre_id}
+            poId={poId || undefined} grnId={invoice.grn_id || undefined}
+            userRole={profile.role}
+          />
+        </div>
+      )}
 
       {/* 3-col summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">

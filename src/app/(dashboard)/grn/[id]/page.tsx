@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { cn, formatCurrency, formatDate, formatDateTime, formatLakhs } from '@/lib/utils'
 import { ArrowLeft, CheckCircle, AlertTriangle, Package, RotateCcw, ClipboardCheck, Printer, Download } from 'lucide-react'
 
+import GRNStatusActions from '@/components/ui/GRNStatusActions'
+
 const GRN_STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
   submitted: 'bg-blue-100 text-blue-800',
@@ -37,6 +39,9 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
     .single()
 
   if (!grn || error) redirect('/grn')
+
+  const { data: { user: authUser } } = await supabase.auth.getUser()
+  const { data: profile } = authUser ? await supabase.from('user_profiles').select('id, role').eq('id', authUser.id).single() : { data: null }
 
   const { data: grnItems } = await supabase
     .from('grn_items')
@@ -126,6 +131,19 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
           </div>
         </div>
       </div>
+
+      {/* GRN Actions */}
+      {profile && (
+        <div className="card p-5 mb-6">
+          <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-3">Actions</h3>
+          <GRNStatusActions
+            grnId={grn.id} grnNumber={grn.grn_number} currentStatus={grn.status}
+            qualityStatus={grn.quality_status} poId={grn.po_id} vendorId={grn.vendor_id}
+            centreId={grn.centre_id} userRole={profile.role}
+            lineItems={items.map((i: any) => ({ item_id: i.item_id, received_qty: i.received_qty || i.accepted_qty || 0, rate: i.rate }))}
+          />
+        </div>
+      )}
 
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">

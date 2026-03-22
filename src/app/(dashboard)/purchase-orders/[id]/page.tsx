@@ -4,6 +4,7 @@ import { cn, formatDate, formatLakhs, formatCurrency, PO_STATUS_COLORS, timeAgo 
 import { ArrowLeft, Edit, Printer, CheckCircle, Package, FileText, Truck, Download, Mail, MessageCircle, Clock, XCircle, Send } from 'lucide-react'
 import Link from 'next/link'
 import POApprovalActions from './POApprovalActions'
+import POStatusActions from '@/components/ui/POStatusActions'
 
 function ApprovalTimeline({ approvals, poStatus }: { approvals: any[]; poStatus: string }) {
   const steps = [
@@ -146,22 +147,15 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
         </div>
       )}
 
-      {/* Send to Vendor */}
-      {['approved', 'sent_to_vendor'].includes(po.status) && (
+      {/* STATUS ACTIONS — cancel, close, duplicate, send to vendor, reopen */}
+      {profile && (
         <div className="card p-5 mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">Send to Vendor</h3>
-              <p className="text-xs text-gray-500 mt-0.5">{po.vendor?.primary_contact_email || 'No email on file'}{po.vendor?.primary_contact_phone && ` · ${po.vendor.primary_contact_phone}`}</p>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {po.vendor?.primary_contact_email && (
-                <a href={`mailto:${po.vendor.primary_contact_email}?subject=PO ${po.po_number} - Health1 Hospitals&body=Dear Vendor,%0D%0A%0D%0APlease find attached PO ${po.po_number}.%0D%0AKindly acknowledge and confirm delivery.%0D%0A%0D%0ARegards,%0D%0AHealth1 Hospitals`} className="btn-primary text-sm"><Mail size={14} /> Email PO</a>
-              )}
-              <a href={`https://wa.me/${po.vendor?.primary_contact_phone?.replace(/\D/g, '')}?text=Purchase Order ${po.po_number} from Health1 Hospitals. Please acknowledge.`} target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm"><MessageCircle size={14} /> WhatsApp</a>
-              <a href={pdfUrl} target="_blank" className="btn-secondary text-sm"><Printer size={14} /> PDF</a>
-            </div>
-          </div>
+          <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-3">Actions</h3>
+          <POStatusActions
+            poId={po.id} poNumber={po.po_number} currentStatus={po.status}
+            vendorEmail={po.vendor?.primary_contact_email} vendorPhone={po.vendor?.primary_contact_phone}
+            userRole={profile.role} centreId={po.centre_id}
+          />
         </div>
       )}
 
