@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import OfflineIndicator from '@/components/ui/OfflineIndicator'
+import CommandPalette from '@/components/ui/CommandPalette'
 import { UserProfile } from '@/types/database'
 import { registerServiceWorker, syncOfflineQueue } from '@/lib/service-worker'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -15,7 +16,18 @@ interface DashboardShellProps {
 
 export default function DashboardShell({ user, children }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const { isOnline } = useOnlineStatus()
+
+  // Persist sidebar state
+  useEffect(() => {
+    const saved = localStorage.getItem('vpms-sidebar-collapsed')
+    if (saved === 'true') setCollapsed(true)
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('vpms-sidebar-collapsed', String(collapsed))
+  }, [collapsed])
 
   useEffect(() => {
     registerServiceWorker()
@@ -32,15 +44,19 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
       {/* Skip to main content */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[#1B3A6B] focus:text-white focus:rounded-xl focus:text-sm focus:font-medium focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-navy-600 focus:text-white focus:rounded-xl focus:text-sm focus:font-medium focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-white"
       >
         Skip to main content
       </a>
+
       <Sidebar
         user={user}
+        collapsed={collapsed}
+        onToggleCollapse={() => setCollapsed(!collapsed)}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
       />
+
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <OfflineIndicator />
         <TopBar user={user} onMenuClick={() => setMobileOpen(true)} />
@@ -55,6 +71,9 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
           </div>
         </main>
       </div>
+
+      {/* Command Palette — available everywhere */}
+      <CommandPalette />
     </div>
   )
 }

@@ -1,10 +1,9 @@
 'use client'
 
-import { Menu } from 'lucide-react'
+import { Menu, Search } from 'lucide-react'
 import { UserProfile } from '@/types/database'
 import { formatDate } from '@/lib/utils'
 import RealtimeNotificationBell from '@/components/ui/RealtimeNotificationBell'
-import GlobalSearch from '@/components/ui/GlobalSearch'
 
 interface TopBarProps {
   user: UserProfile
@@ -13,8 +12,12 @@ interface TopBarProps {
 }
 
 export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
+  const triggerCommandPalette = () => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))
+  }
+
   return (
-    <header className="h-[60px] bg-white/80 backdrop-blur-xl border-b border-gray-200/60 flex items-center px-4 lg:px-6 gap-4 sticky top-0 z-10">
+    <header className="h-[56px] bg-white/90 backdrop-blur-xl border-b border-gray-200/60 flex items-center px-4 lg:px-6 gap-3 sticky top-0 z-10">
       {/* Mobile hamburger */}
       <button
         onClick={onMenuClick}
@@ -24,10 +27,17 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
         <Menu size={20} />
       </button>
 
-      {/* Search */}
-      <div className="flex-1 max-w-lg">
-        <GlobalSearch />
-      </div>
+      {/* Search trigger — opens CommandPalette */}
+      <button
+        onClick={triggerCommandPalette}
+        className="flex-1 max-w-md h-9 flex items-center gap-2.5 px-3 text-sm text-gray-400 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:border-gray-300 transition-all cursor-text"
+      >
+        <Search size={15} className="text-gray-400 flex-shrink-0" />
+        <span className="flex-1 text-left">Search vendors, items, POs...</span>
+        <kbd className="hidden sm:flex items-center gap-0.5 h-5 px-1.5 text-[10px] font-medium text-gray-400 bg-white border border-gray-200 rounded shadow-sm">
+          <span className="text-[11px]">⌘</span>K
+        </kbd>
+      </button>
 
       <div className="flex items-center gap-2 ml-auto">
         {/* Date */}
@@ -39,11 +49,11 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
         <RealtimeNotificationBell userId={user.id} />
 
         {/* Divider */}
-        <div className="w-px h-7 bg-gray-200 hidden md:block" />
+        <div className="w-px h-6 bg-gray-200 hidden md:block" />
 
         {/* User */}
         <div className="flex items-center gap-2.5 pl-1">
-          <div className="w-8 h-8 bg-gradient-to-br from-[#1B3A6B] to-[#234880] rounded-xl flex items-center justify-center shadow-md shadow-[#1B3A6B]/10">
+          <div className="w-8 h-8 bg-gradient-to-br from-navy-600 to-navy-700 rounded-xl flex items-center justify-center shadow-sm">
             <span className="text-white text-[10px] font-bold tracking-wide">
               {user.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
             </span>
