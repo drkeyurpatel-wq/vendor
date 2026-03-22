@@ -12,6 +12,7 @@ import {
   FileCheck, Layers, Timer, Activity, ChevronRight, Box
 } from 'lucide-react'
 import SeedDataBanner from '@/components/ui/SeedDataBanner'
+import DashboardChartsWrapper from '@/components/dashboard/DashboardChartsWrapper'
 
 // ─── Shared UI helpers ───────────────────────────────────────
 
@@ -25,18 +26,24 @@ function StatCard({ label, value, sub, icon, bg, href, alert: hasAlert }: {
   alert?: boolean
 }) {
   return (
-    <Link href={href} className="stat-card hover:shadow-md transition-shadow group">
-      <div className="flex items-start justify-between mb-3">
-        <div className={cn('p-2.5 rounded-xl', bg)}>
+    <Link href={href} className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-20 h-20 rounded-full bg-gradient-to-br from-gray-50 to-transparent -translate-y-8 translate-x-8 pointer-events-none" />
+      <div className="flex items-start justify-between mb-3 relative">
+        <div className={cn('p-2.5 rounded-xl transition-transform duration-200 group-hover:scale-110', bg)}>
           {icon}
         </div>
         {hasAlert && (
-          <span className="w-2 h-2 bg-red-500 rounded-full mt-1 animate-pulse" />
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+          </span>
         )}
       </div>
-      <div className="text-2xl font-bold text-gray-900">{value}</div>
-      <div className="text-sm font-medium text-gray-700 mt-0.5">{label}</div>
-      <div className="text-xs text-gray-500 mt-0.5">{sub}</div>
+      <div className="relative">
+        <div className="text-2xl font-bold text-gray-900 tracking-tight">{value}</div>
+        <div className="text-sm font-medium text-gray-700 mt-0.5">{label}</div>
+        <div className="text-xs text-gray-500 mt-0.5">{sub}</div>
+      </div>
     </Link>
   )
 }
@@ -284,10 +291,10 @@ async function GroupAdminDashboard({ profile }: { profile: any }) {
 
   return (
     <div>
-      <div className="page-header">
+      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
-          <h1 className="page-title">Group Dashboard</h1>
-          <p className="page-subtitle">
+          <h1 className="text-2xl font-bold text-navy-600 tracking-tight">Group Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">
             {formatDate(new Date())} · Welcome back, {profile.full_name.split(' ')[0]}
           </p>
         </div>
@@ -369,48 +376,36 @@ async function GroupAdminDashboard({ profile }: { profile: any }) {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {centreStats.map(centre => (
-              <div key={centre.id} className="stat-card">
+              <Link key={centre.id} href={`/purchase-orders?centre=${centre.id}`} className="bg-white rounded-xl border border-gray-200/80 shadow-card p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="badge bg-[#EEF2F9] text-[#1B3A6B]">{centre.code}</span>
+                  <span className="badge bg-[#EEF2F9] text-[#1B3A6B] font-semibold">{centre.code}</span>
                   {centre.pending > 0 && (
-                    <span className="badge bg-yellow-100 text-yellow-800">{centre.pending} pending</span>
+                    <span className="badge bg-yellow-100 text-yellow-800 text-[9px]">{centre.pending} pending</span>
                   )}
                 </div>
                 <div className="text-lg font-bold text-gray-900">{formatLakhs(centre.spend)}</div>
                 <div className="text-xs text-gray-500">{centre.poCount} POs this month</div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       )}
 
-      {/* Monthly Spend Trend — stat card format */}
-      <div className="mb-6">
-        <h2 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-          <TrendingUp size={18} className="text-[#0D7E8A]" />
-          Spend by Centre (MTD)
-        </h2>
-        <div className="card p-5">
-          <div className="space-y-3">
-            {centreStats.map(centre => {
-              const maxSpend = Math.max(...centreStats.map(c => c.spend), 1)
-              const pct = (centre.spend / maxSpend) * 100
-              return (
-                <div key={centre.id} className="flex items-center gap-3">
-                  <span className="w-12 text-xs font-semibold text-gray-600">{centre.code}</span>
-                  <div className="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-[#1B3A6B]"
-                      style={{ width: `${Math.max(pct, 1)}%` }}
-                    />
-                  </div>
-                  <span className="w-20 text-right text-sm font-semibold text-gray-700">{formatLakhs(centre.spend)}</span>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
+      {/* Recharts — Spend by Centre + PO Pipeline */}
+      <DashboardChartsWrapper
+        centreData={centreStats.map(c => ({ centre: c.code, amount: c.spend }))}
+        pipelineData={(() => {
+          const statusMap = new Map<string, number>()
+          allCentreStats?.forEach((po: any) => statusMap.set(po.status, (statusMap.get(po.status) || 0) + 1))
+          return [
+            { status: 'pending_approval', label: 'Pending Approval', count: statusMap.get('pending_approval') || 0 },
+            { status: 'approved', label: 'Approved', count: statusMap.get('approved') || 0 },
+            { status: 'sent_to_vendor', label: 'Sent to Vendor', count: statusMap.get('sent_to_vendor') || 0 },
+            { status: 'partially_received', label: 'Partially Received', count: statusMap.get('partially_received') || 0 },
+            { status: 'fully_received', label: 'Fully Received', count: statusMap.get('fully_received') || 0 },
+          ].filter(d => d.count > 0)
+        })()}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* POs Awaiting Approval */}
