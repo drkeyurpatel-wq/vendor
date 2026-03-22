@@ -152,8 +152,6 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
     !item.roles || item.roles.includes(user.role)
   )
 
-  const sidebarWidth = collapsed ? 'w-[68px]' : 'w-[260px]'
-
   return (
     <>
       {/* Mobile overlay */}
@@ -165,14 +163,15 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
       )}
 
       <aside className={cn(
-        'min-h-screen flex flex-col flex-shrink-0 z-50 transition-all duration-300 ease-out-expo',
-        'fixed lg:static lg:translate-x-0',
+        'min-h-screen flex flex-col flex-shrink-0 z-50 transition-all duration-300',
         'bg-gradient-to-b from-[#1B3A6B] via-[#1a3766] to-[#152E56]',
-        mobileOpen ? 'translate-x-0 shadow-2xl w-[260px]' : '-translate-x-full',
-        `lg:${sidebarWidth}`,
-        // On desktop, always show
+        // Mobile: fixed, slide in/out
+        'fixed lg:static',
+        mobileOpen ? 'translate-x-0 shadow-2xl w-[260px]' : '-translate-x-full w-[260px]',
+        // Desktop: always visible, collapse width
         'lg:translate-x-0',
-      )} style={{ width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? (collapsed ? 68 : 260) : (mobileOpen ? 260 : 0) }}
+        collapsed ? 'lg:w-[68px]' : 'lg:w-[260px]',
+      )}
         role="complementary" aria-label="Sidebar navigation"
       >
         {/* Logo */}

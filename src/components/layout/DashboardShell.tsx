@@ -17,17 +17,22 @@ interface DashboardShellProps {
 export default function DashboardShell({ user, children }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+  const [hasHydrated, setHasHydrated] = useState(false)
   const { isOnline } = useOnlineStatus()
 
-  // Persist sidebar state
+  // Restore sidebar state after hydration
   useEffect(() => {
     const saved = localStorage.getItem('vpms-sidebar-collapsed')
     if (saved === 'true') setCollapsed(true)
+    setHasHydrated(true)
   }, [])
 
+  // Only persist AFTER initial hydration (prevents saving default on first load)
   useEffect(() => {
-    localStorage.setItem('vpms-sidebar-collapsed', String(collapsed))
-  }, [collapsed])
+    if (hasHydrated) {
+      localStorage.setItem('vpms-sidebar-collapsed', String(collapsed))
+    }
+  }, [collapsed, hasHydrated])
 
   useEffect(() => {
     registerServiceWorker()
