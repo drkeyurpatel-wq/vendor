@@ -12,6 +12,8 @@ function getAgingBucket(daysOverdue: number): { label: string; class: string } {
   return { label: '>90 days', class: 'bg-red-100 text-red-800' }
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function VendorOutstandingPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

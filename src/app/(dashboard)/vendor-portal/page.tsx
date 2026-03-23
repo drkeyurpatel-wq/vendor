@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { cn, formatDate, formatLakhs, PO_STATUS_COLORS, PAYMENT_STATUS_COLORS } from '@/lib/utils'
 import { ShoppingCart, FileText, CreditCard, Package, AlertTriangle } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function VendorPortalPage() {
   const supabase = await createClient()
 
