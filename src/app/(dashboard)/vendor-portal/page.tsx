@@ -73,6 +73,7 @@ export default async function VendorPortalPage() {
     return s
   }, 0) ?? 0
   const paidAmount = invoices?.reduce((s, i: any) => s + (i.paid_amount || 0), 0) ?? 0
+  const pendingAckCount = pos?.filter((p: any) => p.status === 'sent_to_vendor').length ?? 0
 
   return (
     <div>
@@ -114,6 +115,17 @@ export default async function VendorPortalPage() {
           </div>
           <div className="text-2xl font-bold text-red-600">{formatLakhs(outstanding)}</div>
         </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex gap-3 mb-6 flex-wrap">
+        <Link href="/vendor-portal/invoices/upload" className="btn-primary text-sm"><FileText size={14} /> Upload Invoice</Link>
+        {pendingAckCount > 0 && (
+          <Link href="/vendor-portal/orders?status=sent_to_vendor" className="text-sm px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700 font-medium">
+            {pendingAckCount} PO{pendingAckCount > 1 ? 's' : ''} to acknowledge →
+          </Link>
+        )}
+        <Link href="/vendor-portal/outstanding" className="btn-secondary text-sm">View Outstanding</Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

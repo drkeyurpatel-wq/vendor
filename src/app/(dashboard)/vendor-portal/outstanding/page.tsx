@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cn, formatDate, formatLakhs, formatCurrency } from '@/lib/utils'
 import { AlertTriangle, Clock, IndianRupee } from 'lucide-react'
+import VendorDisputeButton from '@/components/ui/VendorDisputeButton'
 
 function getAgingBucket(daysOverdue: number): { label: string; class: string } {
   if (daysOverdue <= 0) return { label: 'Current', class: 'bg-green-100 text-green-800' }
@@ -183,6 +184,7 @@ export default async function VendorOutstandingPage() {
                   <th className="text-right">Balance</th>
                   <th>Days Overdue</th>
                   <th>Aging</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -202,6 +204,7 @@ export default async function VendorOutstandingPage() {
                       {inv.daysOverdue > 0 ? `${inv.daysOverdue}d overdue` : `${Math.abs(inv.daysOverdue)}d remaining`}
                     </td>
                     <td><span className={cn('badge', inv.bucket.class)}>{inv.bucket.label}</span></td>
+                    <td><VendorDisputeButton invoiceId={inv.id} invoiceRef={inv.invoice_ref} /></td>
                   </tr>
                 ))}
               </tbody>

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { cn, formatDate } from '@/lib/utils'
 import { FileText, Plus, Search, Filter } from 'lucide-react'
+import RateContractQuickAction from '@/components/ui/RateContractQuickAction'
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
@@ -151,6 +152,7 @@ export default async function RateContractsPage({
                   <th scope="col">Days Left</th>
                   <th scope="col">Status</th>
                   <th scope="col">Centre</th>
+                  <th scope="col"></th>
                 </tr>
               </thead>
               <tbody>
@@ -213,6 +215,9 @@ export default async function RateContractsPage({
                       </td>
                       <td className="text-sm text-gray-600">
                         {rc.centre?.code || 'All'}
+                      </td>
+                      <td>
+                        <RateContractQuickAction contractId={rc.id} contractNumber={rc.contract_number} currentStatus={rc.status} />
                       </td>
                     </tr>
                   )

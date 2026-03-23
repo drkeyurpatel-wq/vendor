@@ -170,6 +170,7 @@ export default async function VendorOrdersPage({
                     <th>Items</th>
                     <th>Amount</th>
                     <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -188,6 +189,15 @@ export default async function VendorOrdersPage({
                         <span className={cn('badge', PO_STATUS_COLORS[po.status as keyof typeof PO_STATUS_COLORS])}>
                           {po.status.replace(/_/g, ' ')}
                         </span>
+                      </td>
+                      <td>
+                        {po.status === 'sent_to_vendor' ? (
+                          <Link href={`/vendor-portal/orders/${po.id}`} className="text-xs font-medium text-teal-600 bg-teal-50 hover:bg-teal-100 px-2 py-1 rounded-lg transition-colors">
+                            Acknowledge →
+                          </Link>
+                        ) : (
+                          <Link href={`/vendor-portal/orders/${po.id}`} className="text-xs text-gray-500 hover:underline">View</Link>
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -12,6 +12,10 @@ export default async function PaymentsPage({
   const params = await searchParams
   const supabase = await createClient()
 
+  const { data: profile } = await supabase
+    .from('user_profiles').select('role')
+    .eq('id', (await supabase.auth.getUser()).data.user!.id).single()
+
   let query = supabase
     .from('payment_batches')
     .select('*', { count: 'exact' })
@@ -95,7 +99,7 @@ export default async function PaymentsPage({
         ))}
       </div>
 
-      <PaymentListClient batches={batches ?? []} />
+      <PaymentListClient batches={batches ?? []} userRole={profile?.role || 'store_staff'} />
     </div>
   )
 }

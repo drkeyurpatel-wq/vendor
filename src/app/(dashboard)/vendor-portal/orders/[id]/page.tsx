@@ -107,7 +107,7 @@ export default async function VendorPODetailPage({
             Download Word
           </a>
           {canAcknowledge && (
-            <AcknowledgePOButton poId={po.id} />
+            <AcknowledgePOButton poId={po.id} poNumber={po.po_number} poStatus={po.status} vendorId={vendor?.id || ''} />
           )}
         </div>
       </div>

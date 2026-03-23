@@ -18,7 +18,7 @@ interface BulkAction {
 
 interface Props {
   selectedIds: string[]
-  entityType: 'purchase_order' | 'grn' | 'invoice' | 'vendor'
+  entityType: 'purchase_order' | 'grn' | 'invoice' | 'vendor' | 'payment_batch' | 'stock_transfer' | 'indent'
   tableName: string
   actions: BulkAction[]
   onClear: () => void

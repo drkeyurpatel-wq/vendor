@@ -4,6 +4,7 @@ import { formatDate } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import { AlertTriangle, Clock, FileCheck, FileWarning, Bell, Search } from 'lucide-react'
 import Link from 'next/link'
+import DocumentAlertActions from '@/components/ui/DocumentAlertActions'
 
 const DOC_TYPE_LABELS: Record<string, string> = {
   gstin_certificate: 'GSTIN Certificate',
@@ -286,7 +287,8 @@ export default async function DocumentAlertsPage({
                         )}
                       </td>
                       <td>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1 items-center">
+                          <DocumentAlertActions alertId={doc.id} vendorName={vendor?.legal_name || ''} documentType={DOC_TYPE_LABELS[doc.document_type] || doc.document_type} userRole={profile.role} />
                           {(vendor?.primary_contact_email || vendor?.primary_contact_phone) && (
                             <a
                               href={vendor?.primary_contact_email

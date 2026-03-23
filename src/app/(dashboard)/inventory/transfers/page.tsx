@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { cn, formatDate, formatLakhs } from '@/lib/utils'
 import { ArrowLeftRight, Plus } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
+import TransferActions from '@/components/ui/TransferActions'
 
 const TRANSFER_STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
@@ -25,6 +26,10 @@ export default async function StockTransfersPage({
   const params = await searchParams
   const currentPage = Math.max(1, parseInt(params.page || '1', 10))
   const supabase = await createClient()
+
+  const { data: profile } = await supabase
+    .from('user_profiles').select('role')
+    .eq('id', (await supabase.auth.getUser()).data.user!.id).single()
 
   let query = supabase
     .from('stock_transfers')
@@ -139,6 +144,7 @@ export default async function StockTransfersPage({
                     <th>Value</th>
                     <th>Status</th>
                     <th>Created</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -183,6 +189,11 @@ export default async function StockTransfersPage({
                       </td>
                       <td className="text-sm text-gray-500">
                         {t.created_at ? formatDate(t.created_at) : '—'}
+                      </td>
+                      <td>
+                        {profile && !['received', 'cancelled'].includes(t.status) && (
+                          <TransferActions transferId={t.id} transferNumber={t.transfer_number || ''} currentStatus={t.status} userRole={profile.role} />
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { cn, formatDate, formatCurrency, PAYMENT_STATUS_COLORS, MATCH_STATUS_COLORS } from '@/lib/utils'
 import { Package, AlertTriangle, FileText, Plus } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
+import VendorDisputeButton from '@/components/ui/VendorDisputeButton'
 
 const PAYMENT_STATUSES = [
   { value: '', label: 'All' },
@@ -152,6 +153,7 @@ export default async function VendorInvoicesPage({
                     <th>Due Date</th>
                     <th>Payment</th>
                     <th>Match</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -197,6 +199,11 @@ export default async function VendorInvoicesPage({
                           <span className={cn('badge', MATCH_STATUS_COLORS[inv.match_status as keyof typeof MATCH_STATUS_COLORS])}>
                             {inv.match_status?.replace(/_/g, ' ')}
                           </span>
+                        </td>
+                        <td>
+                          {inv.payment_status !== 'paid' && inv.payment_status !== 'disputed' && (
+                            <VendorDisputeButton invoiceId={inv.id} invoiceRef={inv.invoice_ref} />
+                          )}
                         </td>
                       </tr>
                     )
