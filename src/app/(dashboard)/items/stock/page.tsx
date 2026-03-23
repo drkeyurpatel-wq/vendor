@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Layers } from 'lucide-react'
 import StockListClient from './StockListClient'
+import AutoReorderPanel from '@/components/ui/AutoReorderPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,6 +78,13 @@ export default async function StockLevelsPage({
               {c.code}
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* Auto-Reorder (admin/purchase manager only) */}
+      {profile?.role && ['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(profile.role) && (
+        <div className="mb-6">
+          <AutoReorderPanel />
         </div>
       )}
 

@@ -7,6 +7,10 @@
     {
       "path": "/api/documents/expiry-check",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/reorder",
+      "schedule": "0 7 * * 1-6"
     }
   ]
 }
