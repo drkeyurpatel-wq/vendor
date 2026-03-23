@@ -98,7 +98,10 @@ body {
 }
 .form-input {
   width: 100%;
-  padding: 9px 14px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  padding-left: 14px;
+  padding-right: 14px;
   border: 1.5px solid #e2e8f0;
   border-radius: var(--radius-sm);
   font-size: 14px;
@@ -130,7 +133,10 @@ body {
 }
 .form-select {
   width: 100%;
-  padding: 9px 14px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  padding-left: 14px;
+  padding-right: 36px;
   border: 1.5px solid #e2e8f0;
   border-radius: var(--radius-sm);
   font-size: 14px;
@@ -141,7 +147,6 @@ body {
   background-position: right 10px center;
   background-repeat: no-repeat;
   background-size: 18px 18px;
-  padding-right: 36px;
   transition: all 0.2s ease;
 }
 .form-select:hover { border-color: #cbd5e1; }
