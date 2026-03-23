@@ -13,9 +13,9 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline'",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://dwukvdtacwvnudqjlwrb.supabase.co",
-              "font-src 'self' data: https://fonts.gstatic.com",
+              "font-src 'self' data:",
               "connect-src 'self' https://dwukvdtacwvnudqjlwrb.supabase.co wss://dwukvdtacwvnudqjlwrb.supabase.co",
               "frame-ancestors 'none'",
               "base-uri 'self'",
