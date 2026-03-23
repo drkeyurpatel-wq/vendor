@@ -84,7 +84,7 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
 
     const { data } = await supabase
       .from('activity_log')
-      .select('id, action, entity_type, entity_id, details, created_at, is_read, user:user_profiles!activity_log_user_id_fkey(full_name)')
+      .select('id, action, entity_type, entity_id, details, created_at, is_read')
       .or(`target_user_id.eq.${userId},target_user_id.is.null`)
       .gte('created_at', sevenDaysAgo)
       .order('created_at', { ascending: false })
