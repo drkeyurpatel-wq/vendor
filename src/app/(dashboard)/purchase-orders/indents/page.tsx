@@ -79,7 +79,7 @@ export default async function IndentsPage({
         </div>
       )}
 
-      <IndentListClient indents={indents ?? []} />
+      <IndentListClient indents={indents ?? []} userRole={profile?.role || 'store_staff'} />
     </div>
   )
 }

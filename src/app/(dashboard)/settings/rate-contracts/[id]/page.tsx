@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { cn, formatDate, formatCurrency } from '@/lib/utils'
 import Link from 'next/link'
 import { ArrowLeft, FileText, AlertTriangle, CheckCircle } from 'lucide-react'
+import RateContractActions from '@/components/ui/RateContractActions'
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
@@ -23,6 +24,11 @@ export default async function RateContractDetailPage({
 }) {
   const { id } = await params
   const supabase = await createClient()
+
+  const { data: { user: authUser } } = await supabase.auth.getUser()
+  const { data: profile } = authUser
+    ? await supabase.from('user_profiles').select('id, role').eq('id', authUser.id).single()
+    : { data: null }
 
   const { data: contract, error } = await supabase
     .from('rate_contracts')
@@ -101,6 +107,18 @@ export default async function RateContractDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Actions */}
+      {profile && (
+        <div className="card p-5 mb-6">
+          <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-3">Actions</h3>
+          <RateContractActions
+            contractId={contract.id} contractNumber={contract.contract_number}
+            currentStatus={contract.status} vendorId={contract.vendor_id}
+            userRole={profile.role}
+          />
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">

@@ -6,10 +6,15 @@ import {
   ArrowLeft, Package, AlertTriangle, Thermometer, Pill, ShieldAlert,
   Building2, Beaker, Factory, Layers, Tag, FlaskConical
 } from 'lucide-react'
+import ItemDetailActions from '@/components/ui/ItemDetailActions'
 
 export default async function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+
+  const { data: { user: authUser } } = await supabase.auth.getUser()
+  if (!authUser) redirect('/items')
+  const { data: profile } = await supabase.from('user_profiles').select('id, role').eq('id', authUser.id).single()
 
   const { data: item, error } = await supabase
     .from('items')
@@ -126,6 +131,20 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
           </div>
         )}
       </div>
+
+      {/* Actions: edit, deactivate, reorder levels */}
+      {profile && (
+        <ItemDetailActions
+          itemId={item.id} itemCode={item.item_code} itemName={item.generic_name}
+          isActive={item.is_active} userRole={profile.role}
+          stockLevels={(stockLevels ?? []).map((sl: any) => ({
+            id: sl.id, centre_id: sl.centre_id,
+            centre_code: sl.centre?.code || '', centre_name: sl.centre?.name || '',
+            current_stock: sl.current_stock || 0, reorder_level: sl.reorder_level || 0,
+            max_level: sl.max_level || 0, unit: item.unit,
+          }))}
+        />
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
