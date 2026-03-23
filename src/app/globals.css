@@ -87,78 +87,84 @@ body {
 }
 
 /* ═══ Form Controls ═══ */
-.form-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 6px;
-  line-height: 1.5;
-  letter-spacing: 0.01em;
+@layer components {
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+  }
 }
-.form-input {
-  width: 100%;
-  padding-top: 9px;
-  padding-bottom: 9px;
-  padding-left: 14px;
-  padding-right: 14px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  color: #111827;
-  background: white;
-  transition: all 0.2s ease;
+@layer components {
+  .form-input {
+    width: 100%;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: 14px;
+    padding-right: 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: #111827;
+    background: white;
+    transition: all 0.2s ease;
+  }
+  .form-input::placeholder { color: #94a3b8; }
+  .form-input:hover { border-color: #cbd5e1; }
+  .form-input:focus,
+  .form-input:focus-visible {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(13,126,138,0.12);
+  }
+  .form-input[aria-invalid="true"] {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+  }
+  .form-input[aria-invalid="true"]:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.12);
+  }
+  .form-input:disabled {
+    background: #f8fafc;
+    color: #94a3b8;
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 }
-.form-input::placeholder { color: #94a3b8; }
-.form-input:hover { border-color: #cbd5e1; }
-.form-input:focus,
-.form-input:focus-visible {
-  outline: none;
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(13,126,138,0.12);
-}
-.form-input[aria-invalid="true"] {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
-}
-.form-input[aria-invalid="true"]:focus {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220,38,38,0.12);
-}
-.form-input:disabled {
-  background: #f8fafc;
-  color: #94a3b8;
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-.form-select {
-  width: 100%;
-  padding-top: 9px;
-  padding-bottom: 9px;
-  padding-left: 14px;
-  padding-right: 36px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  color: #111827;
-  background: white;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 10px center;
-  background-repeat: no-repeat;
-  background-size: 18px 18px;
-  transition: all 0.2s ease;
-}
-.form-select:hover { border-color: #cbd5e1; }
-.form-select:focus,
-.form-select:focus-visible {
-  outline: none;
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(13,126,138,0.12);
-}
-.form-select[aria-invalid="true"] {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+@layer components {
+  .form-select {
+    width: 100%;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: 14px;
+    padding-right: 36px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: #111827;
+    background: white;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 18px 18px;
+    transition: all 0.2s ease;
+  }
+  .form-select:hover { border-color: #cbd5e1; }
+  .form-select:focus,
+  .form-select:focus-visible {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(13,126,138,0.12);
+  }
+  .form-select[aria-invalid="true"] {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+  }
 }
 
 /* ═══ Buttons ═══ */
