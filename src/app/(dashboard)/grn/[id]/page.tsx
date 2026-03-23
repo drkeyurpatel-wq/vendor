@@ -53,7 +53,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
     .from('grn_items')
     .select('*, item:items(item_code, generic_name, unit, manufacturer)')
     .eq('grn_id', id)
-    .order('created_at')
+    .order('id')
 
   const items = grnItems ?? []
 
