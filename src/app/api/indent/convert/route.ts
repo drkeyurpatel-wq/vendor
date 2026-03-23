@@ -47,12 +47,14 @@ export async function POST(req: NextRequest) {
     if (activeContracts.length > 0) {
       const vendorGroups: Record<string, { vendor_id: string; rate: number; vendor_name: string }> = {}
       for (const ac of activeContracts) {
-        const vid = ac.contract?.vendor?.id
+        const contract = ac.contract as any
+        const vendor = Array.isArray(contract?.vendor) ? contract.vendor[0] : contract?.vendor
+        const vid = vendor?.id
         if (vid && !vendorGroups[vid]) {
           vendorGroups[vid] = {
             vendor_id: vid,
             rate: ac.rate,
-            vendor_name: ac.contract?.vendor?.legal_name || 'Unknown',
+            vendor_name: vendor?.legal_name || 'Unknown',
           }
         }
       }
