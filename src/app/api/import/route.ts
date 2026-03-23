@@ -666,6 +666,7 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData()
   const file = formData.get('file') as File | null
   const importType = formData.get('type') as ImportType | null
+  const columnMappingStr = formData.get('column_mapping') as string | null
 
   if (!file) {
     return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
@@ -679,12 +680,41 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `Invalid type. Valid: ${validTypes.join(', ')}` }, { status: 400 })
   }
 
+  // Parse column mapping if provided
+  let columnMapping: Record<string, string> | null = null
+  if (columnMappingStr) {
+    try {
+      columnMapping = JSON.parse(columnMappingStr)
+    } catch {
+      // Ignore invalid mapping, use default column names
+    }
+  }
+
   // Parse file
   let rows: Record<string, string>[]
   try {
     rows = await parseFile(file)
   } catch {
     return NextResponse.json({ error: 'Failed to parse file. Ensure it is a valid .xlsx or .csv file' }, { status: 400 })
+  }
+
+  // Apply column mapping: remap source columns to expected target columns
+  if (columnMapping && Object.keys(columnMapping).length > 0) {
+    rows = rows.map(row => {
+      const mapped: Record<string, string> = {}
+      for (const [targetCol, sourceCol] of Object.entries(columnMapping!)) {
+        if (sourceCol && row[sourceCol] !== undefined) {
+          mapped[targetCol] = row[sourceCol]
+        }
+      }
+      // Also include any unmapped columns with their original names
+      for (const [key, value] of Object.entries(row)) {
+        if (!Object.values(columnMapping!).includes(key)) {
+          mapped[key] = value
+        }
+      }
+      return mapped
+    })
   }
 
   if (rows.length === 0) {

@@ -8,7 +8,9 @@ import { ArrowLeft, Save, Loader2, FileText } from 'lucide-react'
 import toast from 'react-hot-toast'
 import FieldError from '@/components/ui/FieldError'
 import InvoiceOCRUpload from '@/components/ui/InvoiceOCRUpload'
+import InvoiceLineItems, { InvoiceLineItem } from '@/components/ui/InvoiceLineItems'
 import { format } from 'date-fns'
+import { fireNotification } from '@/lib/notifications'
 
 interface GRNOption {
   id: string
@@ -17,8 +19,8 @@ interface GRNOption {
   po_id: string
   vendor_id: string
   centre_id: string
-  vendor: { legal_name: string; credit_period_days: number } | { legal_name: string; credit_period_days: number }[] | null
-  centre: { code: string; name: string } | { code: string; name: string }[] | null
+  vendor: { legal_name: string; credit_period_days: number; state?: string } | { legal_name: string; credit_period_days: number; state?: string }[] | null
+  centre: { code: string; name: string; state?: string } | { code: string; name: string; state?: string }[] | null
 }
 
 export default function NewInvoicePage() {
@@ -37,6 +39,8 @@ export default function NewInvoicePage() {
   const [dueDate, setDueDate] = useState('')
   const [documentUrl, setDocumentUrl] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([])
+  const [supplyType, setSupplyType] = useState<'intra_state' | 'inter_state'>('intra_state')
 
   function handleOCRExtracted(data: any, fileUrl: string) {
     setDocumentUrl(fileUrl)
@@ -48,9 +52,18 @@ export default function NewInvoicePage() {
     }
   }
 
+  // Auto-calculate totals from line items
+  useEffect(() => {
+    if (lineItems.length > 0) {
+      const total = lineItems.reduce((s, i) => s + i.total_amount, 0)
+      const gst = lineItems.reduce((s, i) => s + i.cgst_amount + i.sgst_amount + i.igst_amount, 0)
+      setTotalAmount(String(Math.round(total * 100) / 100))
+      setGstAmount(String(Math.round(gst * 100) / 100))
+    }
+  }, [lineItems])
+
   useEffect(() => {
     async function load() {
-      // Fetch GRNs that do NOT already have an invoice
       const { data: existingInvoiceGrnIds } = await supabase
         .from('invoices')
         .select('grn_id')
@@ -59,17 +72,12 @@ export default function NewInvoicePage() {
         .map((inv: any) => inv.grn_id)
         .filter(Boolean)
 
-      let query = supabase
+      const query = supabase
         .from('grns')
-        .select('id, grn_number, grn_date, po_id, vendor_id, centre_id, vendor:vendors(legal_name, credit_period_days), centre:centres(code, name)')
+        .select('id, grn_number, grn_date, po_id, vendor_id, centre_id, vendor:vendors(legal_name, credit_period_days, state), centre:centres(code, name, state)')
         .in('status', ['submitted', 'verified'])
         .is('deleted_at', null)
         .order('grn_date', { ascending: false })
-
-      if (usedGrnIds.length > 0) {
-        // Supabase doesn't have .not('id', 'in', [...]) natively in all versions,
-        // so we filter client-side for reliability
-      }
 
       const { data: allGrns } = await query
 
@@ -89,9 +97,19 @@ export default function NewInvoicePage() {
     if (!grn) {
       setSelectedGRN(null)
       setDueDate('')
+      setLineItems([])
       return
     }
     setSelectedGRN(grn)
+
+    // Determine supply type from vendor state vs centre state
+    const vendorState = (grn.vendor as any)?.state
+    const centreState = (grn.centre as any)?.state
+    if (vendorState && centreState && vendorState !== centreState) {
+      setSupplyType('inter_state')
+    } else {
+      setSupplyType('intra_state')
+    }
 
     // Auto-calculate due_date = grn_date + vendor.credit_period_days
     const creditDays = (grn.vendor as any)?.credit_period_days ?? 30
@@ -115,11 +133,10 @@ export default function NewInvoicePage() {
       return
     }
 
-    // TypeScript narrowing: selectedGRN is guaranteed non-null after validation
     if (!selectedGRN) return
     setLoading(true)
 
-    // Credit check: verify vendor is not over credit limit or has overdue invoices
+    // Credit check
     try {
       const creditRes = await fetch(`/api/credit/check?vendor_id=${selectedGRN.vendor_id}`)
       const creditData = await creditRes.json()
@@ -165,6 +182,11 @@ export default function NewInvoicePage() {
 
     const creditDays = (selectedGRN.vendor as any)?.credit_period_days ?? 30
 
+    // Calculate subtotal (taxable amount before GST)
+    const subtotal = lineItems.length > 0
+      ? lineItems.reduce((s, i) => s + i.taxable_amount, 0)
+      : (parseFloat(totalAmount) - (gstAmount ? parseFloat(gstAmount) : 0))
+
     const { data: invoice, error } = await supabase.from('invoices').insert({
       invoice_ref: invoiceRef,
       grn_id: selectedGRN.id,
@@ -173,6 +195,7 @@ export default function NewInvoicePage() {
       centre_id: selectedGRN.centre_id,
       vendor_invoice_no: vendorInvoiceNo.trim(),
       vendor_invoice_date: vendorInvoiceDate,
+      subtotal: Math.round(subtotal * 100) / 100,
       total_amount: parseFloat(totalAmount),
       gst_amount: gstAmount ? parseFloat(gstAmount) : 0,
       paid_amount: 0,
@@ -189,6 +212,33 @@ export default function NewInvoicePage() {
       return
     }
 
+    // Insert invoice line items
+    if (lineItems.length > 0 && invoice) {
+      const itemsToInsert = lineItems.map(li => ({
+        invoice_id: invoice.id,
+        item_id: li.item_id || null,
+        po_item_id: li.po_item_id || null,
+        grn_item_id: li.grn_item_id || null,
+        description: li.description || li.generic_name,
+        hsn_code: li.hsn_code,
+        quantity: li.quantity,
+        rate: li.rate,
+        taxable_amount: li.taxable_amount,
+        cgst_percent: li.cgst_percent,
+        cgst_amount: li.cgst_amount,
+        sgst_percent: li.sgst_percent,
+        sgst_amount: li.sgst_amount,
+        igst_percent: li.igst_percent,
+        igst_amount: li.igst_amount,
+        total_amount: li.total_amount,
+      }))
+
+      const { error: itemError } = await supabase.from('invoice_items').insert(itemsToInsert)
+      if (itemError) {
+        console.warn('Failed to insert invoice items:', itemError.message)
+      }
+    }
+
     // Trigger 3-way matching
     try {
       await fetch('/api/invoices/match', {
@@ -197,9 +247,27 @@ export default function NewInvoicePage() {
         body: JSON.stringify({ invoice_id: invoice.id }),
       })
     } catch {
-      // Non-blocking — matching can be retried later
       console.warn('3-way match trigger failed, can be retried')
     }
+
+    // Audit log
+    try {
+      await supabase.from('audit_logs').insert({
+        action: 'invoice_created',
+        entity_type: 'invoice',
+        entity_id: invoice.id,
+        details: { invoice_ref: invoiceRef, line_items_count: lineItems.length },
+      })
+    } catch {
+      // Non-blocking
+    }
+
+    fireNotification({
+      action: 'invoice_created',
+      entity_type: 'invoice',
+      entity_id: invoice.id,
+      details: { invoice_ref: invoiceRef },
+    })
 
     toast.success(`Invoice ${invoiceRef} created successfully`)
     router.push('/finance/invoices')
@@ -214,7 +282,7 @@ export default function NewInvoicePage() {
   }
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       <div className="page-header">
         <div>
           <Link href="/finance/invoices" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-2">
@@ -260,7 +328,7 @@ export default function NewInvoicePage() {
           )}
 
           {selectedGRN && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
               <div>
                 <span className="text-xs text-gray-500">Vendor</span>
                 <p className="text-sm font-medium text-gray-900">{(selectedGRN.vendor as any)?.legal_name}</p>
@@ -272,6 +340,10 @@ export default function NewInvoicePage() {
               <div>
                 <span className="text-xs text-gray-500">Credit Period</span>
                 <p className="text-sm font-medium text-gray-900">{(selectedGRN.vendor as any)?.credit_period_days ?? 30} days</p>
+              </div>
+              <div>
+                <span className="text-xs text-gray-500">Supply Type</span>
+                <p className="text-sm font-medium text-gray-900">{supplyType === 'inter_state' ? 'Inter-State (IGST)' : 'Intra-State (CGST+SGST)'}</p>
               </div>
             </div>
           )}
@@ -320,7 +392,9 @@ export default function NewInvoicePage() {
                 placeholder="0.00"
                 required
                 aria-invalid={!!fieldErrors.totalAmount}
+                readOnly={lineItems.length > 0}
               />
+              {lineItems.length > 0 && <p className="text-xs text-[#0D7E8A] mt-1">Auto-calculated from line items</p>}
               <FieldError message={fieldErrors.totalAmount} />
             </div>
             <div>
@@ -333,7 +407,9 @@ export default function NewInvoicePage() {
                 value={gstAmount}
                 onChange={e => setGstAmount(e.target.value)}
                 placeholder="0.00"
+                readOnly={lineItems.length > 0}
               />
+              {lineItems.length > 0 && <p className="text-xs text-[#0D7E8A] mt-1">Auto-calculated from line items</p>}
             </div>
             <div>
               <label className="form-label">Due Date</label>
@@ -346,6 +422,20 @@ export default function NewInvoicePage() {
               <p className="text-xs text-gray-400 mt-1">Auto-calculated from GRN date + vendor credit period</p>
             </div>
           </div>
+        </div>
+
+        {/* Invoice Line Items */}
+        <div className="card p-6">
+          <h2 className="font-semibold text-gray-900 mb-1 pb-3 border-b border-gray-100">Invoice Line Items</h2>
+          <p className="text-xs text-gray-500 mb-4">
+            Add line items with HSN codes for GST compliance. Items auto-populate when a GRN is selected.
+          </p>
+          <InvoiceLineItems
+            items={lineItems}
+            onChange={setLineItems}
+            supplyType={supplyType}
+            grnId={selectedGRN?.id}
+          />
         </div>
 
         <div className="flex gap-3 pb-6 flex-wrap">

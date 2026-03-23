@@ -5,6 +5,7 @@ import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import OfflineIndicator from '@/components/ui/OfflineIndicator'
 import CommandPalette from '@/components/ui/CommandPalette'
+import SessionHeartbeat from '@/components/SessionHeartbeat'
 import { UserProfile } from '@/types/database'
 import { registerServiceWorker, syncOfflineQueue } from '@/lib/service-worker'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -79,6 +80,7 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
 
       {/* Command Palette — available everywhere */}
       <CommandPalette />
+      <SessionHeartbeat />
     </div>
   )
 }

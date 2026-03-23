@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Menu, Search, LogOut, Settings, User, ChevronDown, Building2 } from 'lucide-react'
 import { UserProfile } from '@/types/database'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatDateTime } from '@/lib/utils'
 import RealtimeNotificationBell from '@/components/ui/RealtimeNotificationBell'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -108,6 +108,11 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
                   <div className="flex items-center gap-1.5 mt-2.5 px-2.5 py-1.5 bg-gray-50 rounded-lg text-xs text-gray-600">
                     <Building2 size={12} className="text-gray-400" />
                     {user.centre.name}
+                  </div>
+                )}
+                {(user as any).last_login_at && (
+                  <div className="text-[10px] text-gray-400 mt-1.5 px-2.5">
+                    Last login: {formatDateTime(new Date((user as any).last_login_at))}
                   </div>
                 )}
               </div>
