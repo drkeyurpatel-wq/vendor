@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback, useTransition } from 'react'
+import { useState, useMemo, useCallback, useTransition, useEffect } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -135,6 +135,35 @@ export default function DataTable<TData>({
   const [showColumns, setShowColumns] = useState(false)
   const [isPending, startTransition] = useTransition()
 
+  // Auto-hide non-essential columns on mobile
+  useEffect(() => {
+    function handleResize() {
+      const isMobile = window.innerWidth < 768
+      if (!isMobile) {
+        // Reset all visibility on desktop
+        setColumnVisibility({})
+        return
+      }
+      // On mobile: hide columns marked with meta.hideOnMobile, or auto-hide middle columns if >5
+      const newVis: VisibilityState = {}
+      const visibleCols = columns.filter(c => (c as any).id !== 'select')
+      visibleCols.forEach((col, idx) => {
+        const colId = (col as any).accessorKey || (col as any).id || ''
+        const meta = (col as any).meta as any
+        if (meta?.hideOnMobile) {
+          newVis[colId] = false
+        } else if (visibleCols.length > 5 && idx >= 3 && idx < visibleCols.length - 1) {
+          // Auto-hide middle columns if too many (keep first 3 + last)
+          if (!meta?.alwaysShow) newVis[colId] = false
+        }
+      })
+      setColumnVisibility(newVis)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [columns])
+
   const isServerPaginated = totalRows !== undefined && onServerPageChange !== undefined
 
   const table = useReactTable({
@@ -206,9 +235,9 @@ export default function DataTable<TData>({
     <div className={cn('bg-white rounded-xl border border-gray-200/80 shadow-card overflow-hidden', className)}>
       {/* Toolbar */}
       {(showSearch || showColumnToggle || showExport) && (
-        <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3 flex-wrap">
+        <div className="px-3 md:px-4 py-3 border-b border-gray-100 flex items-center gap-2 md:gap-3 flex-wrap">
           {showSearch && (
-            <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <div className="relative flex-1 min-w-[160px] md:min-w-[200px] max-w-sm">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               <input
                 type="text"
@@ -345,15 +374,14 @@ export default function DataTable<TData>({
 
       {/* Pagination */}
       {showPagination && totalRowCount > 0 && (
-        <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+        <div className="px-3 md:px-4 py-3 border-t border-gray-100 flex items-center justify-between gap-2 md:gap-4 flex-wrap">
           <div className="text-xs text-gray-500">
-            Showing <span className="font-medium text-gray-700">{startRow}</span> to{' '}
-            <span className="font-medium text-gray-700">{endRow}</span> of{' '}
-            <span className="font-medium text-gray-700">{totalRowCount.toLocaleString('en-IN')}</span> results
+            <span className="font-medium text-gray-700">{startRow}</span>–<span className="font-medium text-gray-700">{endRow}</span> of{' '}
+            <span className="font-medium text-gray-700">{totalRowCount.toLocaleString('en-IN')}</span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            {/* Page size selector */}
+            {/* Page size selector — hidden on mobile */}
             <select
               value={currentPageSize}
               onChange={e => {
@@ -364,18 +392,18 @@ export default function DataTable<TData>({
                   table.setPageSize(size)
                 }
               }}
-              className="h-8 px-2 text-xs border border-gray-200 rounded-lg bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+              className="hidden md:block h-8 px-2 text-xs border border-gray-200 rounded-lg bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
             >
               {[10, 25, 50, 100].map(size => (
                 <option key={size} value={size}>{size} / page</option>
               ))}
             </select>
 
-            <div className="flex items-center gap-0.5 ml-2">
+            <div className="flex items-center gap-0.5 ml-1 md:ml-2">
               <button
                 onClick={() => isServerPaginated ? onServerPageChange?.(0) : table.setPageIndex(0)}
                 disabled={currentPage === 0}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="hidden md:flex w-8 h-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 title="First page"
               >
                 <ChevronsLeft size={15} />
@@ -383,7 +411,7 @@ export default function DataTable<TData>({
               <button
                 onClick={() => isServerPaginated ? onServerPageChange?.(currentPage - 1) : table.previousPage()}
                 disabled={currentPage === 0}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 md:w-8 md:h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 title="Previous page"
               >
                 <ChevronLeft size={15} />
@@ -412,7 +440,7 @@ export default function DataTable<TData>({
               <button
                 onClick={() => isServerPaginated ? onServerPageChange?.(currentPage + 1) : table.nextPage()}
                 disabled={currentPage >= totalPageCount - 1}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 md:w-8 md:h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 title="Next page"
               >
                 <ChevronRight size={15} />
@@ -420,7 +448,7 @@ export default function DataTable<TData>({
               <button
                 onClick={() => isServerPaginated ? onServerPageChange?.(totalPageCount - 1) : table.setPageIndex(totalPageCount - 1)}
                 disabled={currentPage >= totalPageCount - 1}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="hidden md:flex w-8 h-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 title="Last page"
               >
                 <ChevronsRight size={15} />
