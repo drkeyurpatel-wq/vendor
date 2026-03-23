@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, XCircle, AlertTriangle, ClipboardCheck, RotateCcw } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
+import { fireNotification } from '@/lib/notifications'
 
 interface Props {
   grnId: string
@@ -87,6 +88,7 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
     })
 
     toast.success(`GRN ${grnNumber} → ${newStatus.replace(/_/g, ' ')}`)
+    fireNotification({ action: `grn_${newStatus}`, entity_type: 'grn', entity_id: grnId, details: { grn_number: grnNumber } })
     setDialog(null); setComment(''); router.refresh()
   }
 

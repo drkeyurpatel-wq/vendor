@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Send, XCircle, Copy, Lock, Truck, Printer, RotateCcw } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
+import { fireNotification } from '@/lib/notifications'
 
 interface Props {
   poId: string
@@ -49,6 +50,7 @@ export default function POStatusActions({ poId, poNumber, currentStatus, vendorE
     }) // Don't fail on audit log error
 
     toast.success(`PO ${poNumber} → ${newStatus.replace(/_/g, ' ')}`)
+    fireNotification({ action: `po_${newStatus}`, entity_type: 'purchase_order', entity_id: poId, details: { po_number: poNumber } })
     setDialog(null)
     setComment('')
     router.refresh()

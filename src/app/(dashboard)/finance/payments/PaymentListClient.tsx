@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import BulkActionBar from '@/components/ui/BulkActionBar'
+import { fireNotification } from '@/lib/notifications'
 
 const BATCH_STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
@@ -66,6 +67,7 @@ function InlineStatusButton({ batchId, batchNumber, currentStatus }: { batchId: 
 
     try { await supabase.from('audit_logs').insert({ entity_type: 'payment_batch', entity_id: batchId, action: `batch_${next.status}`, details: { batch_number: batchNumber } }) } catch {}
     toast.success(`${batchNumber} → ${next.status.replace(/_/g, ' ')}`)
+    if (next.status === 'completed') fireNotification({ action: 'payment_completed', entity_type: 'payment_batch', entity_id: batchId, details: { batch_number: batchNumber } })
     setLoading(false); router.refresh()
   }
 

@@ -53,7 +53,25 @@ export default function IndentActions({ indentId, indentNumber, currentStatus, c
     setDialog(null); setComment(''); setLoading(false); router.refresh()
   }
 
-  function convertToPO() {
+  async function convertToPO() {
+    // Try smart conversion via API (auto-assigns L1 vendors)
+    setLoading(true)
+    try {
+      const res = await fetch('/api/indent/convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ indent_id: indentId }),
+      })
+      const data = await res.json()
+      if (res.ok && data.po_id) {
+        toast.success(`PO ${data.po_number} created from ${indentNumber}`)
+        router.push(`/purchase-orders/${data.po_id}`)
+        return
+      }
+      // Fallback: manual PO creation
+      toast('Auto-conversion unavailable. Redirecting to manual PO form.', { icon: '📋' })
+    } catch {}
+    setLoading(false)
     router.push(`/purchase-orders/new?indent=${indentId}`)
   }
 

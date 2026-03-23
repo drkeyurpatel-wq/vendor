@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, XCircle, AlertTriangle, CreditCard, Scale, Ban } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
+import { fireNotification } from '@/lib/notifications'
 
 interface Props {
   invoiceId: string
@@ -57,6 +58,7 @@ export default function InvoiceActions({
     })
 
     toast.success(`Invoice ${invoiceRef} → ${newStatus}`)
+    fireNotification({ action: `invoice_${newStatus}`, entity_type: 'invoice', entity_id: invoiceId, details: { invoice_ref: invoiceRef } })
     setDialog(null); setComment(''); router.refresh()
   }
 

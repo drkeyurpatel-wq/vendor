@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatDate, formatCurrency } from '@/lib/utils'
-import { ArrowLeft, ClipboardList, AlertTriangle, CheckCircle, XCircle, ShoppingCart } from 'lucide-react'
+import { ArrowLeft, ClipboardList, AlertTriangle, CheckCircle, XCircle, ShoppingCart, Printer, Download } from 'lucide-react'
 import IndentActions from './IndentActions'
 
 export const dynamic = 'force-dynamic'
@@ -92,15 +92,20 @@ export default async function IndentDetailPage({ params }: { params: Promise<{ i
           </div>
 
           {/* Actions */}
-          {profile && (
-            <IndentActions
-              indentId={indent.id}
-              indentNumber={indent.indent_number}
-              currentStatus={indent.status}
-              centreId={indent.centre_id}
-              userRole={profile.role}
-            />
-          )}
+          <div className="flex flex-col gap-2 items-end">
+            <div className="flex gap-2">
+              <a href={`/api/pdf/indent?id=${id}`} target="_blank" className="btn-secondary text-sm"><Printer size={14} /> PDF</a>
+            </div>
+            {profile && (
+              <IndentActions
+                indentId={indent.id}
+                indentNumber={indent.indent_number}
+                currentStatus={indent.status}
+                centreId={indent.centre_id}
+                userRole={profile.role}
+              />
+            )}
+          </div>
         </div>
 
         {indent.notes && (
