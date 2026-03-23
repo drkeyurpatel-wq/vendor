@@ -32,8 +32,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
       *,
       vendor:vendors(id, vendor_code, legal_name),
       centre:centres(code, name),
-      po:purchase_orders(id, po_number, total_amount),
-      qc_checked_by_user:user_profiles!grns_qc_checked_by_fkey(full_name)
+      po:purchase_orders(id, po_number, total_amount)
     `)
     .eq('id', id)
     .single()
@@ -42,6 +41,13 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
 
   const { data: { user: authUser } } = await supabase.auth.getUser()
   const { data: profile } = authUser ? await supabase.from('user_profiles').select('id, role').eq('id', authUser.id).single() : { data: null }
+
+  // Fetch QC user separately (FK may not exist)
+  let qcUserName: string | null = null
+  if (grn.qc_checked_by) {
+    const { data: qcUser } = await supabase.from('user_profiles').select('full_name').eq('id', grn.qc_checked_by).single()
+    qcUserName = qcUser?.full_name || null
+  }
 
   const { data: grnItems } = await supabase
     .from('grn_items')
@@ -228,10 +234,10 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
                 <span className="font-medium">{formatDateTime(grn.verified_at)}</span>
               </div>
             )}
-            {grn.qc_checked_by_user?.full_name && (
+            {qcUserName && (
               <div className="flex justify-between">
                 <span className="text-gray-500">QC Checked By:</span>
-                <span className="font-medium">{grn.qc_checked_by_user.full_name}</span>
+                <span className="font-medium">{qcUserName}</span>
               </div>
             )}
             {grn.qc_date && (
