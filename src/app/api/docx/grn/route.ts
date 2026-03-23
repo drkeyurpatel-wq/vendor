@@ -17,7 +17,8 @@ const TEAL = '0D7E8A'
 const LIGHT_NAVY = 'EEF2F9'
 const WHITE = 'FFFFFF'
 
-function formatINR(amount: number): string {
+function formatINR(amount: number | null | undefined): string {
+  if (amount == null || isNaN(amount)) return '₹0.00'
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(amount)
 }
 

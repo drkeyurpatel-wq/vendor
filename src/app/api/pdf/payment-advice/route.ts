@@ -52,7 +52,8 @@ function numberToWordsINR(amount: number): string {
   return words + ' Only'
 }
 
-function formatINR(amount: number): string {
+function formatINR(amount: number | null | undefined): string {
+  if (amount == null || isNaN(amount)) return '₹0.00'
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',

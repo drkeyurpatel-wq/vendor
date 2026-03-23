@@ -17,7 +17,8 @@ const WHITE: [number, number, number] = [255, 255, 255]
 const BLACK: [number, number, number] = [0, 0, 0]
 const GRAY: [number, number, number] = [107, 114, 128]
 
-function formatINR(amount: number): string {
+function formatINR(amount: number | null | undefined): string {
+  if (amount == null || isNaN(amount)) return '₹0.00'
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',

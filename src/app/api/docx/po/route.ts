@@ -52,7 +52,8 @@ function numberToWordsINR(amount: number): string {
   return words + ' Only'
 }
 
-function formatINR(amount: number): string {
+function formatINR(amount: number | null | undefined): string {
+  if (amount == null || isNaN(amount)) return '₹0.00'
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
@@ -314,16 +315,16 @@ export async function GET(request: NextRequest) {
   ]
   if (po.discount_amount > 0) summaryLines.push(['Discount', '(-) ' + formatINR(po.discount_amount)])
   if (isIGST) {
-    summaryLines.push(['IGST', formatINR(po.igst_amount)])
+    summaryLines.push(['IGST', formatINR(po.igst_amount || 0)])
   } else {
-    summaryLines.push(['CGST', formatINR(po.cgst_amount)])
-    summaryLines.push(['SGST', formatINR(po.sgst_amount)])
+    summaryLines.push(['CGST', formatINR(po.cgst_amount || 0)])
+    summaryLines.push(['SGST', formatINR(po.sgst_amount || 0)])
   }
   if (po.freight_amount > 0) summaryLines.push(['Freight', formatINR(po.freight_amount)])
   if (po.loading_charges > 0) summaryLines.push(['Loading', formatINR(po.loading_charges)])
   if (po.insurance_charges > 0) summaryLines.push(['Insurance', formatINR(po.insurance_charges)])
   if (po.other_charges > 0) summaryLines.push(['Other Charges', formatINR(po.other_charges)])
-  if (po.round_off !== 0) summaryLines.push(['Round Off', formatINR(po.round_off)])
+  if (po.round_off != null && po.round_off !== 0) summaryLines.push(['Round Off', formatINR(po.round_off)])
   summaryLines.push(['Grand Total', formatINR(po.net_amount || po.total_amount)])
 
   const summaryParagraphs: Paragraph[] = []

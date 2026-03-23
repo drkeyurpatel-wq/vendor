@@ -62,7 +62,8 @@ function numberToWordsINR(amount: number): string {
   return words + ' Only'
 }
 
-function formatINR(amount: number): string {
+function formatINR(amount: number | null | undefined): string {
+  if (amount == null || isNaN(amount)) return '₹0.00'
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
@@ -230,7 +231,30 @@ export async function GET(request: NextRequest) {
 
   // ── Items Table ──
   const items = po.items || []
-  const isIGST = po.igst_amount > 0
+  const isIGST = (po.igst_amount || 0) > 0
+
+  // Compute tax totals from line items if PO-level is null
+  let computedSubtotal = 0
+  let computedCGST = 0
+  let computedSGST = 0
+  let computedIGST = 0
+  items.forEach((item: any) => {
+    const lineTotal = (item.rate || 0) * (item.ordered_qty || 0)
+    const gstPct = item.gst_percent || 0
+    computedSubtotal += lineTotal
+    if (isIGST) {
+      computedIGST += lineTotal * gstPct / 100
+    } else {
+      computedCGST += lineTotal * gstPct / 200
+      computedSGST += lineTotal * gstPct / 200
+    }
+  })
+
+  const finalSubtotal = po.subtotal || computedSubtotal
+  const finalCGST = po.cgst_amount != null ? po.cgst_amount : computedCGST
+  const finalSGST = po.sgst_amount != null ? po.sgst_amount : computedSGST
+  const finalIGST = po.igst_amount != null ? po.igst_amount : computedIGST
+  const finalTotal = po.net_amount || po.total_amount || (finalSubtotal + finalCGST + finalSGST + finalIGST)
 
   const tableHead = isIGST
     ? [['S.No', 'Item Description', 'HSN', 'Qty', 'Unit', 'Rate', 'Disc%', 'IGST%', 'IGST', 'Amount']]
@@ -284,16 +308,16 @@ export async function GET(request: NextRequest) {
       cellPadding: 2,
     },
     columnStyles: {
-      0: { halign: 'center', cellWidth: 10 },
-      1: { cellWidth: 46 },
+      0: { halign: 'center', cellWidth: 9 },
+      1: { cellWidth: 40 },
       2: { halign: 'center', cellWidth: 16 },
-      3: { halign: 'right', cellWidth: 12 },
-      4: { halign: 'center', cellWidth: 12 },
-      5: { halign: 'right', cellWidth: 20 },
-      6: { halign: 'center', cellWidth: 12 },
-      7: { halign: 'center', cellWidth: 14 },
-      8: { halign: 'center', cellWidth: 14 },
-      9: { halign: 'right', cellWidth: 24 },
+      3: { halign: 'right', cellWidth: 10 },
+      4: { halign: 'center', cellWidth: 11 },
+      5: { halign: 'right', cellWidth: 22 },
+      6: { halign: 'center', cellWidth: 11 },
+      7: { halign: 'center', cellWidth: 12 },
+      8: { halign: 'center', cellWidth: 12 },
+      9: { halign: 'right', cellWidth: 28 },
     },
     margin: { left: margin, right: margin },
     alternateRowStyles: { fillColor: [248, 250, 252] },
@@ -316,22 +340,22 @@ export async function GET(request: NextRequest) {
   doc.setFont('helvetica', 'normal')
 
   const summaryLines: [string, string][] = [
-    ['Subtotal', formatINR(po.subtotal)],
+    ['Subtotal', formatINR(finalSubtotal)],
   ]
-  if (po.discount_amount > 0) {
+  if ((po.discount_amount || 0) > 0) {
     summaryLines.push(['Discount', '(-) ' + formatINR(po.discount_amount)])
   }
   if (isIGST) {
-    summaryLines.push(['IGST', formatINR(po.igst_amount)])
+    summaryLines.push(['IGST', formatINR(finalIGST)])
   } else {
-    summaryLines.push(['CGST', formatINR(po.cgst_amount)])
-    summaryLines.push(['SGST', formatINR(po.sgst_amount)])
+    summaryLines.push(['CGST', formatINR(finalCGST)])
+    summaryLines.push(['SGST', formatINR(finalSGST)])
   }
-  if (po.freight_amount > 0) summaryLines.push(['Freight', formatINR(po.freight_amount)])
-  if (po.loading_charges > 0) summaryLines.push(['Loading', formatINR(po.loading_charges)])
-  if (po.insurance_charges > 0) summaryLines.push(['Insurance', formatINR(po.insurance_charges)])
-  if (po.other_charges > 0) summaryLines.push(['Other Charges', formatINR(po.other_charges)])
-  if (po.round_off !== 0) summaryLines.push(['Round Off', formatINR(po.round_off)])
+  if ((po.freight_amount || 0) > 0) summaryLines.push(['Freight', formatINR(po.freight_amount)])
+  if ((po.loading_charges || 0) > 0) summaryLines.push(['Loading', formatINR(po.loading_charges)])
+  if ((po.insurance_charges || 0) > 0) summaryLines.push(['Insurance', formatINR(po.insurance_charges)])
+  if ((po.other_charges || 0) > 0) summaryLines.push(['Other Charges', formatINR(po.other_charges)])
+  if (po.round_off != null && po.round_off !== 0) summaryLines.push(['Round Off', formatINR(po.round_off)])
 
   summaryLines.forEach(([label, value], i) => {
     const lineY = y + 7 + i * 5
@@ -348,7 +372,7 @@ export async function GET(request: NextRequest) {
   doc.setFontSize(9)
   doc.setFont('helvetica', 'bold')
   doc.text('Grand Total', labelX, totalY)
-  doc.text(formatINR(po.net_amount || po.total_amount), valueX, totalY, { align: 'right' })
+  doc.text(formatINR(finalTotal), valueX, totalY, { align: 'right' })
 
   // Amount in words — left side
   doc.setTextColor(...BLACK)
@@ -357,7 +381,7 @@ export async function GET(request: NextRequest) {
   doc.text('Amount in Words:', margin, y + 4)
   doc.setFont('helvetica', 'italic')
   doc.setFontSize(7)
-  const amountWords = numberToWordsINR(po.net_amount || po.total_amount)
+  const amountWords = numberToWordsINR(finalTotal)
   const wordLines = doc.splitTextToSize(amountWords, summaryX - margin - 8)
   doc.text(wordLines, margin, y + 9)
 
