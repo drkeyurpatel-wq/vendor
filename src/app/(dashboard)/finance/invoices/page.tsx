@@ -5,6 +5,8 @@ import { Plus } from 'lucide-react'
 import InvoiceListClient from './InvoiceListClient'
 import DateRangeFilter from '@/components/ui/DateRangeFilter'
 
+export const dynamic = 'force-dynamic'
+
 export default async function InvoicesPage({
   searchParams,
 }: {

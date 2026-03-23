@@ -34,6 +34,8 @@ function ScoreBar({ score, label }: { score: number | null; label: string }) {
   )
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function VendorPerformancePage({
   searchParams,
 }: {

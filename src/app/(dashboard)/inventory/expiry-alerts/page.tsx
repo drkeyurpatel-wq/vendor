@@ -12,6 +12,8 @@ const ALERT_LEVEL_COLORS: Record<string, string> = {
 
 const ALERT_LEVELS = ['expired', 'expiring_30_days', 'expiring_90_days', 'expiring_180_days']
 
+export const dynamic = 'force-dynamic'
+
 export default async function ExpiryAlertsPage({
   searchParams,
 }: {

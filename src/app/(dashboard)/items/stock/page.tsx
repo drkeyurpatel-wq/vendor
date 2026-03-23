@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils'
 import { Layers } from 'lucide-react'
 import StockListClient from './StockListClient'
 
+export const dynamic = 'force-dynamic'
+
 export default async function StockLevelsPage({
   searchParams,
 }: {

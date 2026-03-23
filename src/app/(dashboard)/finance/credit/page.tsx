@@ -5,6 +5,8 @@ import { PAYMENT_STATUS_COLORS } from '@/lib/utils'
 import { AlertTriangle, Clock, CheckCircle } from 'lucide-react'
 import CreditAgingCharts from './CreditAgingCharts'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CreditPeriodPage() {
   const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]

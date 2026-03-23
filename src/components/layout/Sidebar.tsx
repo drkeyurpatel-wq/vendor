@@ -90,8 +90,13 @@ const NAV: NavItem[] = [
     label: 'Reports', icon: <BarChart2 size={18} />,
     children: [
       { label: 'Overview', href: '/reports' },
-      { label: 'AI Analytics', href: '/analytics' },
+      { label: 'Vendor Overdue', href: '/reports/vendor-overdue' },
+      { label: 'GST Summary', href: '/reports/gst-summary' },
+      { label: 'Centre Spend', href: '/reports/centre-wise-spend' },
+      { label: 'PO Aging', href: '/reports/po-aging' },
+      { label: 'Item Purchase History', href: '/reports/item-purchase-history' },
       { label: 'Vendor Performance', href: '/reports/vendor-performance' },
+      { label: 'AI Analytics', href: '/analytics' },
     ]
   },
   {

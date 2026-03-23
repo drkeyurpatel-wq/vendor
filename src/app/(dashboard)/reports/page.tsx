@@ -4,6 +4,8 @@ import { formatLakhs, formatCurrency } from '@/lib/utils'
 import { ShoppingCart, TrendingUp, Users, Package, AlertTriangle, IndianRupee, FileCheck, Truck } from 'lucide-react'
 import ReportsCharts from './ReportsCharts'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ReportsPage() {
   const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]
@@ -149,6 +151,55 @@ export default async function ReportsPage() {
         pipelineData={pipelineData}
         agingData={agingBuckets}
       />
+
+      {/* Report Links */}
+      <div className="mt-8 mb-2">
+        <h2 className="text-lg font-bold text-navy-600 mb-4">Detailed Reports</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Link href="/reports/vendor-overdue" className="card p-5 hover:shadow-card-hover transition-all group">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center"><AlertTriangle size={20} className="text-red-500" /></div>
+              <h3 className="font-semibold text-gray-900 group-hover:text-teal-600">Vendor Overdue Report</h3>
+            </div>
+            <p className="text-sm text-gray-500">Outstanding invoices grouped by vendor with aging buckets, email/WhatsApp reminders</p>
+          </Link>
+          <Link href="/reports/gst-summary" className="card p-5 hover:shadow-card-hover transition-all group">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center"><IndianRupee size={20} className="text-teal-500" /></div>
+              <h3 className="font-semibold text-gray-900 group-hover:text-teal-600">GST Summary (GSTR-2)</h3>
+            </div>
+            <p className="text-sm text-gray-500">Month-wise GSTIN-wise ITC data — taxable value, CGST, SGST, IGST split by vendor</p>
+          </Link>
+          <Link href="/reports/centre-wise-spend" className="card p-5 hover:shadow-card-hover transition-all group">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center"><TrendingUp size={20} className="text-blue-500" /></div>
+              <h3 className="font-semibold text-gray-900 group-hover:text-teal-600">Centre-wise Spend</h3>
+            </div>
+            <p className="text-sm text-gray-500">Monthly PO spend breakdown across SHI, VAS, MOD, UDA, GAN with Recharts trend</p>
+          </Link>
+          <Link href="/reports/po-aging" className="card p-5 hover:shadow-card-hover transition-all group">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center"><ShoppingCart size={20} className="text-orange-500" /></div>
+              <h3 className="font-semibold text-gray-900 group-hover:text-teal-600">PO Aging</h3>
+            </div>
+            <p className="text-sm text-gray-500">Open POs by age — 0-7d, 8-15d, 16-30d, 31-60d, 60d+ with centre filter</p>
+          </Link>
+          <Link href="/reports/item-purchase-history" className="card p-5 hover:shadow-card-hover transition-all group">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center"><Package size={20} className="text-purple-500" /></div>
+              <h3 className="font-semibold text-gray-900 group-hover:text-teal-600">Item Purchase History</h3>
+            </div>
+            <p className="text-sm text-gray-500">Per-item purchase trends — avg/min/max rate, qty, rate variation flags (&gt;20%)</p>
+          </Link>
+          <Link href="/reports/vendor-performance" className="card p-5 hover:shadow-card-hover transition-all group">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center"><Users size={20} className="text-green-500" /></div>
+              <h3 className="font-semibold text-gray-900 group-hover:text-teal-600">Vendor Performance</h3>
+            </div>
+            <p className="text-sm text-gray-500">Delivery compliance, rejection rate, quality scores, return trends per vendor</p>
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }

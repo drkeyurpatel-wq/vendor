@@ -6,11 +6,14 @@ import Pagination from '@/components/ui/Pagination'
 
 const PAGE_SIZE = 50
 
+export const dynamic = 'force-dynamic'
+
 export default async function VendorPaymentsPage({
   searchParams,
 }: {
-  searchParams: { page?: string }
+  searchParams: Promise<{ page?: string }>
 }) {
+  const params = await searchParams
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -48,7 +51,7 @@ export default async function VendorPaymentsPage({
     )
   }
 
-  const currentPage = parseInt(searchParams.page || '1', 10)
+  const currentPage = parseInt(params.page || '1', 10)
 
   // Fetch payment batch items for this vendor
   // payment_batch_items are linked to invoices which have vendor_id

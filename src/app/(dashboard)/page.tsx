@@ -181,6 +181,8 @@ function LowStockTable({ items }: { items: any[] }) {
 
 // ─── Main Dashboard ──────────────────────────────────────────
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

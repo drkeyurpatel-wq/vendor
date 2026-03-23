@@ -6,6 +6,8 @@ import GRNListClient from './GRNListClient'
 
 const GRN_STATUSES = ['draft', 'submitted', 'verified', 'discrepancy']
 
+export const dynamic = 'force-dynamic'
+
 export default async function GRNListPage({
   searchParams,
 }: {

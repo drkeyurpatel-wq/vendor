@@ -6,6 +6,8 @@ import IndentListClient from './IndentListClient'
 
 const STATUSES = ['draft', 'submitted', 'approved', 'rejected', 'converted_to_po']
 
+export const dynamic = 'force-dynamic'
+
 export default async function IndentsPage({
   searchParams,
 }: {

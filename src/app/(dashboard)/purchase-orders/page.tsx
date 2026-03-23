@@ -6,6 +6,8 @@ import POListClient from './POListClient'
 
 const STATUSES = ['pending_approval', 'approved', 'sent_to_vendor', 'partially_received', 'fully_received', 'cancelled']
 
+export const dynamic = 'force-dynamic'
+
 export default async function PurchaseOrdersPage({
   searchParams,
 }: {

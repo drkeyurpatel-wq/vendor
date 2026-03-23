@@ -5,6 +5,8 @@ import { VENDOR_STATUS_COLORS } from '@/lib/utils'
 import { Plus, Users } from 'lucide-react'
 import VendorListClient from './VendorListClient'
 
+export const dynamic = 'force-dynamic'
+
 export default async function VendorsPage({
   searchParams,
 }: {

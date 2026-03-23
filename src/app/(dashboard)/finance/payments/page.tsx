@@ -4,6 +4,8 @@ import { cn, formatLakhs } from '@/lib/utils'
 import { Plus, Wallet, AlertTriangle, Calendar } from 'lucide-react'
 import PaymentListClient from './PaymentListClient'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PaymentsPage({
   searchParams,
 }: {

@@ -30,6 +30,8 @@ function getDocStatus(expiresAt: string | null): { label: string; color: string;
   return { label: 'Valid', color: 'bg-green-100 text-green-800', daysRemaining }
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function DocumentAlertsPage({
   searchParams,
 }: {

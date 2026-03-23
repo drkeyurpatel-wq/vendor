@@ -17,6 +17,8 @@ const TYPE_LABELS: Record<string, string> = {
   spot: 'Spot',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function RateContractsPage({
   searchParams,
 }: {

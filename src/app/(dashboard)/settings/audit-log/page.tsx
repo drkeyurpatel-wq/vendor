@@ -29,6 +29,8 @@ const ENTITY_LINKS: Record<string, (id: string) => string> = {
 
 const PAGE_SIZE = 50
 
+export const dynamic = 'force-dynamic'
+
 export default async function AuditLogPage({
   searchParams,
 }: {

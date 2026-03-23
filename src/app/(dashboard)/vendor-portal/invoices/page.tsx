@@ -17,11 +17,14 @@ const PAYMENT_STATUSES = [
 
 const PAGE_SIZE = 50
 
+export const dynamic = 'force-dynamic'
+
 export default async function VendorInvoicesPage({
   searchParams,
 }: {
-  searchParams: { page?: string; payment_status?: string }
+  searchParams: Promise<{ page?: string; payment_status?: string }>
 }) {
+  const params = await searchParams
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -59,8 +62,8 @@ export default async function VendorInvoicesPage({
     )
   }
 
-  const currentPage = parseInt(searchParams.page || '1', 10)
-  const paymentFilter = searchParams.payment_status || ''
+  const currentPage = parseInt(params.page || '1', 10)
+  const paymentFilter = params.payment_status || ''
 
   // Count
   let countQuery = supabase

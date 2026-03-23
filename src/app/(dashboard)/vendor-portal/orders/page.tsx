@@ -19,11 +19,14 @@ const PO_STATUSES = [
 
 const PAGE_SIZE = 50
 
+export const dynamic = 'force-dynamic'
+
 export default async function VendorOrdersPage({
   searchParams,
 }: {
-  searchParams: { page?: string; status?: string; search?: string }
+  searchParams: Promise<{ page?: string; status?: string; search?: string }>
 }) {
+  const params = await searchParams
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -61,9 +64,9 @@ export default async function VendorOrdersPage({
     )
   }
 
-  const currentPage = parseInt(searchParams.page || '1', 10)
-  const statusFilter = searchParams.status || ''
-  const searchQuery = searchParams.search || ''
+  const currentPage = parseInt(params.page || '1', 10)
+  const statusFilter = params.status || ''
+  const searchQuery = params.search || ''
 
   // Build query for count
   let countQuery = supabase
