@@ -21,39 +21,41 @@ export default async function ItemPurchaseHistory({
   const startDate = new Date(now.getFullYear(), now.getMonth() - monthsBack + 1, 1).toISOString().split('T')[0]
 
   // Get PO items with parent PO and item details
-  let query = supabase
+  // Note: Supabase JS join filters are unreliable — fetch all and filter in JS
+  const { data: poItems } = await supabase
     .from('purchase_order_items')
-    .select('ordered_qty, rate, total_amount, item:items(id, item_code, generic_name, unit), po:purchase_orders!inner(po_date, status, deleted_at, centre:centres(code))')
-    .neq('po.status', 'cancelled')
-    .is('po.deleted_at', null)
+    .select('ordered_qty, rate, total_amount, item:items(id, item_code, generic_name, unit), po:purchase_orders(po_date, status, deleted_at, centre:centres(code))')
     .order('created_at', { ascending: false })
     .limit(5000)
 
+  // Filter to valid POs and date range in JS (reliable)
+  const validItems = (poItems || []).filter((pi: any) => {
+    if (!pi.item || !pi.po) return false
+    if (pi.po.status === 'cancelled') return false
+    if (pi.po.deleted_at) return false
+    if (pi.po.po_date < startDate) return false
+    return true
+  })
+
+  // If searching, filter by item match
+  let filteredItems = validItems
   if (params.q) {
-    // Search items first
-    const { data: matchedItems } = await supabase
-      .from('items')
-      .select('id')
-      .or(`generic_name.ilike.%${params.q}%,item_code.ilike.%${params.q}%,brand_name.ilike.%${params.q}%`)
-      .limit(50)
-    if (matchedItems && matchedItems.length > 0) {
-      query = query.in('item_id', matchedItems.map(i => i.id))
-    }
+    const q = params.q.toLowerCase()
+    filteredItems = validItems.filter((pi: any) =>
+      pi.item.generic_name?.toLowerCase().includes(q) ||
+      pi.item.item_code?.toLowerCase().includes(q)
+    )
   }
 
-  const { data: poItems } = await query
-
-  // Filter to date range and group by item
+  // Group by item
   const itemMap = new Map<string, {
     item: any; totalQty: number; totalValue: number; orderCount: number;
     avgRate: number; minRate: number; maxRate: number; lastOrderDate: string;
     centres: Set<string>; monthlyQty: Record<string, number>
   }>()
 
-  ;(poItems || []).forEach((pi: any) => {
-    if (!pi.item || !pi.po) return
+  ;(filteredItems).forEach((pi: any) => {
     const poDate = pi.po.po_date
-    if (poDate < startDate) return
 
     const key = pi.item.id
     if (!itemMap.has(key)) {
