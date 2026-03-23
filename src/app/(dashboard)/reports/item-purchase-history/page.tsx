@@ -23,9 +23,9 @@ export default async function ItemPurchaseHistory({
   // Get PO items with parent PO and item details
   let query = supabase
     .from('purchase_order_items')
-    .select('quantity, rate, total_amount, item:items(id, item_code, generic_name, unit), po:purchase_orders(po_date, status, centre:centres(code))')
-    .not('po.status', 'eq', 'cancelled')
-    .not('po.deleted_at', 'is', null) // This won't work perfectly but gets close
+    .select('ordered_qty, rate, total_amount, item:items(id, item_code, generic_name, unit), po:purchase_orders!inner(po_date, status, deleted_at, centre:centres(code))')
+    .neq('po.status', 'cancelled')
+    .is('po.deleted_at', null)
     .order('created_at', { ascending: false })
     .limit(5000)
 
@@ -64,7 +64,7 @@ export default async function ItemPurchaseHistory({
       })
     }
     const g = itemMap.get(key)!
-    const qty = pi.quantity || 0
+    const qty = pi.ordered_qty || 0
     const rate = pi.rate || 0
     g.totalQty += qty
     g.totalValue += pi.total_amount || (qty * rate)
