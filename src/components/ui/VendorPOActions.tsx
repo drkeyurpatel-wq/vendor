@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, AlertTriangle, MessageCircle, Loader2, X } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { fireNotification } from '@/lib/notifications'
 
 interface Props {
   poId: string
@@ -45,6 +46,7 @@ export default function VendorPOActions({ poId, poNumber, poStatus, vendorId }: 
     } catch {}
 
     toast.success(`PO ${poNumber} acknowledged`)
+    fireNotification({ action: 'vendor_acknowledged', entity_type: 'purchase_order', entity_id: poId, details: { po_number: poNumber } })
     setAction(null); setLoading(false); router.refresh()
   }
 
@@ -74,6 +76,7 @@ export default function VendorPOActions({ poId, poNumber, poStatus, vendorId }: 
     } catch {}
 
     toast.success('Dispute raised')
+    fireNotification({ action: 'vendor_dispute', entity_type: 'purchase_order', entity_id: poId, details: { po_number: poNumber, reason: comment } })
     setAction(null); setComment(''); setLoading(false); router.refresh()
   }
 

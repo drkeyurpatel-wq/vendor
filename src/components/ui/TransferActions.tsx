@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, XCircle, Truck, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
+import { fireNotification } from '@/lib/notifications'
 
 interface Props {
   transferId: string
@@ -39,6 +40,7 @@ export default function TransferActions({ transferId, transferNumber, currentSta
     if (error) { toast.error(error.message); return }
     try { await supabase.from('audit_logs').insert({ entity_type: 'stock_transfer', entity_id: transferId, action: `transfer_${newStatus}`, details: { transfer_number: transferNumber, comment: comment || null } }) } catch {}
     toast.success(`Transfer ${transferNumber} → ${newStatus.replace(/_/g, ' ')}`)
+    fireNotification({ action: `transfer_${newStatus}`, entity_type: 'stock_transfer', entity_id: transferId, details: { transfer_number: transferNumber } })
     setDialog(null); setComment(''); router.refresh()
   }
 

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, XCircle, Send, ShoppingCart, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import { fireNotification } from '@/lib/notifications'
 
 interface Props {
   indentId: string
@@ -50,6 +51,7 @@ export default function IndentActions({ indentId, indentNumber, currentStatus, c
     } catch {}
 
     toast.success(`${indentNumber} → ${newStatus.replace(/_/g, ' ')}`)
+    fireNotification({ action: `indent_${newStatus}`, entity_type: 'purchase_indent', entity_id: indentId, details: { indent_number: indentNumber } })
     setDialog(null); setComment(''); setLoading(false); router.refresh()
   }
 
