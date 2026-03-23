@@ -5,12 +5,8 @@
   "installCommand": "npm install",
   "crons": [
     {
-      "path": "/api/documents/expiry-check",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/reorder",
-      "schedule": "0 7 * * 1-6"
+      "path": "/api/cron/daily",
+      "schedule": "30 1 * * *"
     }
   ]
 }
