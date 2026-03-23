@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, FileText } from 'lucide-react'
 import toast from 'react-hot-toast'
 import FieldError from '@/components/ui/FieldError'
+import InvoiceOCRUpload from '@/components/ui/InvoiceOCRUpload'
 import { format } from 'date-fns'
 
 interface GRNOption {
@@ -34,7 +35,18 @@ export default function NewInvoicePage() {
   const [totalAmount, setTotalAmount] = useState('')
   const [gstAmount, setGstAmount] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [documentUrl, setDocumentUrl] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  function handleOCRExtracted(data: any, fileUrl: string) {
+    setDocumentUrl(fileUrl)
+    if (data.vendor_invoice_no) setVendorInvoiceNo(data.vendor_invoice_no)
+    if (data.invoice_date) setVendorInvoiceDate(data.invoice_date)
+    if (data.total_amount) setTotalAmount(String(data.total_amount))
+    if (data.cgst_amount || data.sgst_amount || data.igst_amount) {
+      setGstAmount(String((data.cgst_amount || 0) + (data.sgst_amount || 0) + (data.igst_amount || 0)))
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -168,6 +180,7 @@ export default function NewInvoicePage() {
       credit_period_days: creditDays,
       match_status: 'pending',
       payment_status: 'unpaid',
+      invoice_file_path: documentUrl || null,
     }).select().single()
 
     if (error) {
@@ -263,6 +276,9 @@ export default function NewInvoicePage() {
             </div>
           )}
         </div>
+
+        {/* Invoice Scan / OCR */}
+        <InvoiceOCRUpload onExtracted={handleOCRExtracted} />
 
         {/* Invoice Details */}
         <div className="card p-6">

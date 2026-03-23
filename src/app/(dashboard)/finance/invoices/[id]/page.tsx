@@ -160,8 +160,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            {invoice.document_url && (
-              <a href={invoice.document_url} target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-1.5">
+            {invoice.invoice_file_path && (
+              <a href={invoice.invoice_file_path} target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-1.5">
                 <Download size={15} /> Download PDF
               </a>
             )}
