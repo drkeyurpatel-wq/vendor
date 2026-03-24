@@ -140,13 +140,13 @@ export default async function CreditPeriodPage() {
                   const daysOverdue = Math.floor((Date.now() - new Date(inv.due_date).getTime()) / (1000*60*60*24))
                   const outstanding = inv.total_amount - (inv.paid_amount ?? 0)
                   return (
-                    <tr key={inv.id}>
+                    <tr key={inv.id} className="hover:bg-gray-50">
                       <td>
                         <div className="font-medium text-gray-900">{inv.vendor?.legal_name}</div>
                         {inv.vendor?.bank_name && <div className="text-xs text-gray-400">{inv.vendor.bank_name}</div>}
                       </td>
                       <td><span className="badge bg-gray-100 text-gray-700">{inv.centre?.code}</span></td>
-                      <td className="font-mono text-xs">{inv.vendor_invoice_no}</td>
+                      <td><Link href={`/finance/invoices/${inv.id}`} className="font-mono text-xs text-teal-600 hover:underline font-semibold">{inv.vendor_invoice_no}</Link></td>
                       <td className="text-sm text-gray-600">{formatDate(inv.vendor_invoice_date)}</td>
                       <td className="text-sm text-red-600 font-medium">{formatDate(inv.due_date)}</td>
                       <td>
@@ -193,10 +193,10 @@ export default async function CreditPeriodPage() {
                 {criticalInvoices?.map((inv: any) => {
                   const daysLeft = Math.ceil((new Date(inv.due_date).getTime() - Date.now()) / (1000*60*60*24))
                   return (
-                    <tr key={inv.id}>
+                    <tr key={inv.id} className="hover:bg-gray-50">
                       <td className="font-medium text-gray-900">{inv.vendor?.legal_name}</td>
                       <td><span className="badge bg-gray-100 text-gray-700">{inv.centre?.code}</span></td>
-                      <td className="font-mono text-xs">{inv.vendor_invoice_no}</td>
+                      <td><Link href={`/finance/invoices/${inv.id}`} className="font-mono text-xs text-teal-600 hover:underline font-semibold">{inv.vendor_invoice_no}</Link></td>
                       <td className="text-sm font-medium text-orange-700">{formatDate(inv.due_date)}</td>
                       <td><span className="badge bg-yellow-100 text-yellow-800">{daysLeft}d left</span></td>
                       <td className="font-semibold text-gray-900">{formatLakhs(inv.total_amount)}</td>
