@@ -67,6 +67,20 @@ export async function GET(request: NextRequest) {
 
   // 4. Vendor scorecard computation (1st of month)
   const dateOfMonth = new Date().getDate()
+
+  // 5. Approval SLA escalation check (daily)
+  try {
+    const res = await fetch(`${baseUrl}/api/approvals/escalate`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${cronSecret}` },
+    })
+    results.sla_escalation = { status: res.status, ok: res.ok }
+    if (res.ok) results.sla_escalation.data = await res.json()
+  } catch (err: any) {
+    results.sla_escalation = { error: err.message }
+  }
+
+  // 6. Vendor scorecard (1st of month only)
   if (dateOfMonth === 1) {
     try {
       const res = await fetch(`${baseUrl}/api/vendors/compute-scores`, {

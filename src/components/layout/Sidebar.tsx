@@ -111,6 +111,9 @@ const NAV: NavItem[] = [
       { label: 'Document Alerts', href: '/settings/document-alerts' },
       { label: 'Data Import', href: '/settings/data-import' },
       { label: 'Audit Log', href: '/settings/audit-log' },
+      { label: 'Audit Trail', href: '/settings/audit-trail' },
+      { label: 'Tally Integration', href: '/settings/tally' },
+      { label: 'Delegations', href: '/settings/delegations' },
     ]
   },
 ]

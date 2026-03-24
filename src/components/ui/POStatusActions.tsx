@@ -7,6 +7,7 @@ import { Send, XCircle, Copy, Lock, Truck, Printer, RotateCcw } from 'lucide-rea
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
 import { fireNotification } from '@/lib/notifications'
+import { trackChanges } from '@/lib/audit-trail'
 
 interface Props {
   poId: string
@@ -41,6 +42,12 @@ export default function POStatusActions({ poId, poNumber, currentStatus, vendorE
     }).eq('id', poId)
 
     if (error) { toast.error(error.message); return }
+
+    // Field-level audit trail
+    trackChanges({ entity_type: 'purchase_order', entity_id: poId, changes: {
+      status: { old: currentStatus, new: newStatus },
+      ...(newStatus === 'cancelled' ? { cancellation_reason: { old: null, new: comment } } : {}),
+    }})
 
     // Log audit
     await supabase.from('audit_logs').insert({
