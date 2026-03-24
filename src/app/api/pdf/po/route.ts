@@ -4,6 +4,7 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
 import { rateLimit } from '@/lib/rate-limit'
+import { renderPDFHeader } from '@/lib/pdf-header'
 
 // ============================================================
 // H1 VPMS — Purchase Order PDF Generator
@@ -122,21 +123,8 @@ export async function GET(request: NextRequest) {
   const contentWidth = pageWidth - margin * 2
   let y = margin
 
-  // ── Company Header ──
-  doc.setFillColor(...NAVY)
-  doc.rect(0, 0, pageWidth, 32, 'F')
-
-  doc.setTextColor(...WHITE)
-  doc.setFontSize(16)
-  doc.setFont('helvetica', 'bold')
-  doc.text('PURCHASE ORDER', pageWidth / 2, 13, { align: 'center' })
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Health1 Super Speciality Hospitals Pvt. Ltd.', pageWidth / 2, 20, { align: 'center' })
-  doc.setFontSize(8)
-  doc.text(po.centre?.address ? `${po.centre.name} | ${po.centre.address}, ${po.centre.city || ''}, ${po.centre.state || ''}` : po.centre?.name || '', pageWidth / 2, 26, { align: 'center' })
-
-  y = 38
+  // ── Company Header with Logo ──
+  y = renderPDFHeader(doc, 'PURCHASE ORDER', po.centre)
 
   // ── PO Details Box ──
   doc.setFillColor(...LIGHT_NAVY)

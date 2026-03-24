@@ -3,10 +3,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   Document, Packer, Paragraph, Table, TableRow, TableCell,
   TextRun, AlignmentType, WidthType, BorderStyle,
-  ShadingType, TableLayoutType,
+  ShadingType, TableLayoutType, ImageRun,
 } from 'docx'
 import { format } from 'date-fns'
 import { rateLimit } from '@/lib/rate-limit'
+import { HEALTH1_LOGO_BASE64 } from '@/lib/logo-base64'
 
 // ============================================================
 // H1 VPMS — GRN DOCX Generator
@@ -76,10 +77,15 @@ export async function GET(request: NextRequest) {
 
   const sections: Paragraph[] = []
 
-  // Title
+  // Title with logo
+  const logoBuffer = Buffer.from(HEALTH1_LOGO_BASE64, 'base64')
   sections.push(
     new Paragraph({
-      children: [new TextRun({ text: 'GOODS RECEIPT NOTE', bold: true, size: 32, color: NAVY, font: 'Calibri' })],
+      children: [
+        new ImageRun({ data: logoBuffer, transformation: { width: 120, height: 71 }, type: 'jpg' }),
+        new TextRun({ text: '   ', size: 32 }),
+        new TextRun({ text: 'GOODS RECEIPT NOTE', bold: true, size: 32, color: NAVY, font: 'Calibri' }),
+      ],
       alignment: AlignmentType.CENTER,
       spacing: { after: 60 },
     }),

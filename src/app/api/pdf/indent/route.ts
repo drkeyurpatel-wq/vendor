@@ -4,6 +4,7 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
 import { rateLimit } from '@/lib/rate-limit'
+import { renderPDFHeader } from '@/lib/pdf-header'
 
 // ============================================================
 // H1 VPMS — Purchase Indent PDF Generator
@@ -66,24 +67,8 @@ export async function GET(request: NextRequest) {
   const contentWidth = pageWidth - margin * 2
   let y = margin
 
-  // ── Header ──
-  doc.setFillColor(...NAVY)
-  doc.rect(0, 0, pageWidth, 32, 'F')
-  doc.setTextColor(...WHITE)
-  doc.setFontSize(16)
-  doc.setFont('helvetica', 'bold')
-  doc.text('PURCHASE INDENT', pageWidth / 2, 13, { align: 'center' })
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Health1 Super Speciality Hospitals Pvt. Ltd.', pageWidth / 2, 20, { align: 'center' })
-  doc.setFontSize(8)
-  const centre = indent.centre
-  const centreAddr = centre?.address
-    ? `${centre.name} | ${centre.address}, ${centre.city || ''}, ${centre.state || ''}`
-    : centre?.name || ''
-  doc.text(centreAddr, pageWidth / 2, 26, { align: 'center' })
-
-  y = 38
+  // ── Header with Logo ──
+  y = renderPDFHeader(doc, 'PURCHASE INDENT', indent.centre)
 
   // ── Indent Details Box ──
   doc.setFillColor(...LIGHT_NAVY)

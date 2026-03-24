@@ -4,6 +4,7 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
 import { rateLimit } from '@/lib/rate-limit'
+import { renderPDFHeader } from '@/lib/pdf-header'
 
 // ============================================================
 // H1 VPMS — Payment Advice PDF Generator
@@ -168,20 +169,8 @@ export async function GET(request: NextRequest) {
 
     let y = margin
 
-    // ── Header ──
-    doc.setFillColor(...NAVY)
-    doc.rect(0, 0, pageWidth, 32, 'F')
-    doc.setTextColor(...WHITE)
-    doc.setFontSize(16)
-    doc.setFont('helvetica', 'bold')
-    doc.text('PAYMENT ADVICE', pageWidth / 2, 13, { align: 'center' })
-    doc.setFontSize(10)
-    doc.setFont('helvetica', 'normal')
-    doc.text('Health1 Super Speciality Hospitals Pvt. Ltd.', pageWidth / 2, 20, { align: 'center' })
-    doc.setFontSize(8)
-    doc.text(`Batch: ${batch.batch_number || id.substring(0, 8)} | Date: ${formatDate(batch.batch_date || batch.created_at)}`, pageWidth / 2, 26, { align: 'center' })
-
-    y = 38
+    // ── Header with Logo ──
+    y = renderPDFHeader(doc, 'PAYMENT ADVICE', null)
 
     // ── Batch & Payment Details ──
     doc.setFillColor(...LIGHT_NAVY)
@@ -383,15 +372,7 @@ export async function GET(request: NextRequest) {
 
   // If no vendor data, generate a simple "no data" page
   if (vendorMap.size === 0) {
-    doc.setFillColor(...NAVY)
-    doc.rect(0, 0, pageWidth, 32, 'F')
-    doc.setTextColor(...WHITE)
-    doc.setFontSize(16)
-    doc.setFont('helvetica', 'bold')
-    doc.text('PAYMENT ADVICE', pageWidth / 2, 13, { align: 'center' })
-    doc.setFontSize(10)
-    doc.setFont('helvetica', 'normal')
-    doc.text('Health1 Super Speciality Hospitals Pvt. Ltd.', pageWidth / 2, 20, { align: 'center' })
+    renderPDFHeader(doc, 'PAYMENT ADVICE', null)
 
     doc.setTextColor(...GRAY)
     doc.setFontSize(12)
