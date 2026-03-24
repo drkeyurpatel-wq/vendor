@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { cn, formatCurrency, formatLakhs, formatDate } from '@/lib/utils'
 import { Shield, CheckCircle, UserCheck, ArrowRight, Clock, ChevronRight } from 'lucide-react'
 import { ROLE_LABELS, PO_APPROVAL_THRESHOLD } from '@/types/database'
@@ -297,9 +298,9 @@ export default async function ApprovalsSettingsPage() {
                   {recentApprovals.map((approval: any) => (
                     <tr key={approval.id}>
                       <td>
-                        <span className="font-mono text-xs font-semibold text-[#1B3A6B]">
+                        <Link href={`/purchase-orders/${approval.po_id}`} className="font-mono text-xs font-semibold text-teal-600 hover:underline">
                           {approval.po?.po_number || '—'}
-                        </span>
+                        </Link>
                       </td>
                       <td className="text-sm font-medium text-gray-900">
                         {approval.po?.total_amount

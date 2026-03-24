@@ -135,7 +135,7 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
             {['approved', 'sent_to_vendor', 'partially_received'].includes(po.status) && (
               <Link href={`/grn/new?po=${po.id}`} className="btn-primary text-sm"><Truck size={15} /> Create GRN</Link>
             )}
-            {po.status === 'draft' && (
+            {['draft', 'pending_approval'].includes(po.status) && (
               <Link href={`/purchase-orders/${id}/edit`} className="btn-secondary text-sm"><Edit size={15} /> Edit</Link>
             )}
             <a href={pdfUrl} target="_blank" className="btn-secondary text-sm"><Printer size={15} /> PDF</a>

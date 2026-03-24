@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import {
   Search, Loader2, TrendingUp, BarChart2, Package, Calendar,
-  Target, ArrowRight, ShieldCheck
+  Target, ArrowRight, ShieldCheck, ShoppingCart
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -406,14 +406,22 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
                     </p>
                   </div>
                 </div>
-                <a
-                  href={`/purchase-orders/indents?auto_item=${data.item.id}${centreId ? `&centre_id=${centreId}` : ''}`}
-                  className="btn-danger flex items-center gap-2 whitespace-nowrap"
-                >
-                  <Package size={16} />
-                  Auto-Generate Indent
-                  <ArrowRight size={14} />
-                </a>
+                <div className="flex gap-2">
+                  <a
+                    href={`/purchase-orders/new?item=${data.item.id}${centreId ? `&centre_id=${centreId}` : ''}`}
+                    className="btn-primary flex items-center gap-2 whitespace-nowrap text-sm"
+                  >
+                    <ShoppingCart size={14} />
+                    Create PO
+                  </a>
+                  <a
+                    href={`/purchase-orders/indents?auto_item=${data.item.id}${centreId ? `&centre_id=${centreId}` : ''}`}
+                    className="btn-secondary flex items-center gap-2 whitespace-nowrap text-sm"
+                  >
+                    <Package size={16} />
+                    Create Indent
+                  </a>
+                </div>
               </div>
             </div>
           )}

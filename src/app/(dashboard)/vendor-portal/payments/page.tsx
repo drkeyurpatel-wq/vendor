@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cn, formatDate, formatCurrency } from '@/lib/utils'
-import { Package, AlertTriangle, CreditCard, IndianRupee } from 'lucide-react'
+import { Package, AlertTriangle, CreditCard, IndianRupee, Download } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
 
 const PAGE_SIZE = 50
@@ -138,6 +138,7 @@ export default async function VendorPaymentsPage({
                     <th>UTR / Reference</th>
                     <th>Mode</th>
                     <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -179,6 +180,14 @@ export default async function VendorPaymentsPage({
                         )}>
                           {pmt.status || 'completed'}
                         </span>
+                      </td>
+                      <td>
+                        {pmt.payment_batch_id && (
+                          <a href={`/api/pdf/payment-advice?id=${pmt.payment_batch_id}`} target="_blank"
+                            className="text-xs font-medium text-teal-600 hover:underline flex items-center gap-1">
+                            <Download size={12} /> Receipt
+                          </a>
+                        )}
                       </td>
                     </tr>
                   ))}
