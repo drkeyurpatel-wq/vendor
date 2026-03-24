@@ -9,7 +9,8 @@ import { reportGenerateSchema } from '@/lib/validations'
 const NAVY: [number, number, number] = [27, 58, 107]
 const WHITE: [number, number, number] = [255, 255, 255]
 
-function formatINR(n: number): string {
+function formatINR(n: number | null | undefined): string {
+  if (n == null || isNaN(n)) return '₹0.00'
   return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 

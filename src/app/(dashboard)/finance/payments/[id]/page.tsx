@@ -188,12 +188,12 @@ export default async function PaymentBatchDetailPage({ params }: { params: Promi
                     <tr key={item.id}>
                       <td className="text-sm text-gray-500">{index + 1}</td>
                       <td>
-                        <span className="font-mono text-xs font-semibold text-[#0D7E8A]">
+                        <Link href={`/finance/invoices/${item.invoice_id}`} className="font-mono text-xs font-semibold text-[#0D7E8A] hover:underline">
                           {invoice?.invoice_ref || '-'}
-                        </span>
+                        </Link>
                       </td>
                       <td>
-                        <div className="text-sm font-medium text-gray-800">{invoice?.vendor?.legal_name || '-'}</div>
+                        <Link href={`/vendors/${invoice?.vendor?.id || '#'}`} className="text-sm font-medium text-gray-800 hover:text-teal-600">{invoice?.vendor?.legal_name || '-'}</Link>
                         <div className="text-xs text-gray-400 font-mono">{invoice?.vendor?.vendor_code || ''}</div>
                       </td>
                       <td className="text-sm text-gray-700">{invoice?.vendor_invoice_no || '-'}</td>

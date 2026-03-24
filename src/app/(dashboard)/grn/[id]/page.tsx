@@ -72,6 +72,14 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
   const hasRejections = totalRejected > 0 || totalDamaged > 0
   const rejectedItems = items.filter((i: any) => (i.rejected_qty > 0 || i.damaged_qty > 0))
 
+  // Fetch linked system invoice
+  const { data: linkedInvoice } = await supabase
+    .from('invoices')
+    .select('id, invoice_ref, total_amount, payment_status')
+    .eq('grn_id', id)
+    .limit(1)
+    .single()
+
   return (
     <div>
       {/* Back link */}
@@ -291,6 +299,29 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
               </div>
             </div>
           </div>
+
+          {/* System Invoice (if created) */}
+          {linkedInvoice && (
+            <div className="card p-5 border-l-4 border-teal-500">
+              <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-3">System Invoice</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Invoice Ref:</span>
+                  <Link href={`/finance/invoices/${linkedInvoice.id}`} className="font-mono text-teal-600 hover:underline font-semibold">{linkedInvoice.invoice_ref}</Link>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Amount:</span>
+                  <span className="font-bold text-[#1B3A6B]">{formatCurrency(linkedInvoice.total_amount)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Payment:</span>
+                  <span className={cn('badge', linkedInvoice.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700')}>
+                    {(linkedInvoice.payment_status || 'unpaid').replace(/_/g, ' ')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Transport card */}
           <div className="card p-5">

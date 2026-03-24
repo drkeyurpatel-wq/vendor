@@ -111,7 +111,8 @@ function wrapTemplate(title: string, bodyContent: string): string {
 </html>`
 }
 
-function formatINR(amount: number): string {
+function formatINR(amount: number | null | undefined): string {
+  if (amount == null || isNaN(amount)) return '₹0'
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',

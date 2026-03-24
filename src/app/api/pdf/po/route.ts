@@ -242,7 +242,7 @@ export async function GET(request: NextRequest) {
   const finalCGST = po.cgst_amount != null ? po.cgst_amount : computedCGST
   const finalSGST = po.sgst_amount != null ? po.sgst_amount : computedSGST
   const finalIGST = po.igst_amount != null ? po.igst_amount : computedIGST
-  const finalTotal = po.net_amount || po.total_amount || (finalSubtotal + finalCGST + finalSGST + finalIGST)
+  const finalTotal = po.net_amount || po.total_amount || (finalSubtotal - (po.discount_amount || 0) + finalCGST + finalSGST + finalIGST + (po.freight_amount || 0) + (po.loading_charges || 0) + (po.insurance_charges || 0) + (po.other_charges || 0))
 
   const tableHead = isIGST
     ? [['S.No', 'Item Description', 'HSN', 'Qty', 'Unit', 'Rate', 'Disc%', 'IGST%', 'IGST', 'Amount']]
