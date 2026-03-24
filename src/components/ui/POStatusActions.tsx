@@ -128,8 +128,23 @@ export default function POStatusActions({ poId, poNumber, currentStatus, vendorE
           </a>
         )}
 
-        {vendorPhone && (
-          <a href={`https://wa.me/${vendorPhone.replace(/\D/g, '')}?text=${encodeURIComponent(`PO ${poNumber} - Please confirm receipt.`)}`}
+        {vendorPhone && currentStatus === 'approved' && (
+          <button onClick={async () => {
+            const pdfUrl = `${window.location.origin}/api/pdf/po?id=${poId}`
+            const msg = `*PURCHASE ORDER — ${poNumber}*\n\nDear Vendor,\n\nPlease find PO ${poNumber} from Health1 Super Speciality Hospitals.\n\n📄 Download PO: ${pdfUrl}\n\nKindly acknowledge receipt and confirm expected delivery date.\n\nRegards,\nHealth1 Purchase Department`
+            window.open(`https://wa.me/${vendorPhone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
+            // Auto-mark as sent
+            await supabase.from('purchase_orders').update({ status: 'sent_to_vendor', sent_to_vendor_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', poId)
+            fireNotification({ action: 'po_sent_to_vendor', entity_type: 'purchase_order', entity_id: poId, details: { po_number: poNumber, via: 'whatsapp' } })
+            toast.success(`PO ${poNumber} sent via WhatsApp`)
+            router.refresh()
+          }} className="text-sm px-3 py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors font-medium flex items-center gap-1.5">
+            <Send size={14} /> Send PO via WhatsApp
+          </button>
+        )}
+
+        {vendorPhone && currentStatus !== 'approved' && (
+          <a href={`https://wa.me/${vendorPhone.replace(/\D/g, '')}?text=${encodeURIComponent(`PO ${poNumber} - Health1 Hospitals. Status: ${currentStatus.replace(/_/g, ' ')}`)}`}
             target="_blank" className="btn-secondary text-sm">
             <Truck size={14} /> WhatsApp
           </a>

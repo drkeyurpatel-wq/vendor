@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { Plus } from 'lucide-react'
 import InvoiceListClient from './InvoiceListClient'
 import DateRangeFilter from '@/components/ui/DateRangeFilter'
+import BatchMatchButton from '@/components/ui/BatchMatchButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,7 +53,10 @@ export default async function InvoicesPage({
           <h1 className="text-2xl font-bold text-navy-600 tracking-tight">Invoices</h1>
           <p className="text-sm text-gray-500 mt-1">{count ?? 0} total invoices</p>
         </div>
-        <Link href="/finance/invoices/new" className="btn-primary"><Plus size={16} /> New Invoice</Link>
+        <div className="flex gap-2">
+          <BatchMatchButton />
+          <Link href="/finance/invoices/new" className="btn-primary"><Plus size={16} /> New Invoice</Link>
+        </div>
       </div>
 
       {/* Match status filter */}

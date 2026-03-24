@@ -52,6 +52,36 @@ export async function GET(request: NextRequest) {
     results.reorder = { skipped: 'Sunday — no reorder' }
   }
 
+  // 3. Batch 3-way match on pending invoices
+  try {
+    const res = await fetch(`${baseUrl}/api/invoices/batch-match`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${cronSecret}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    })
+    results.batch_match = { status: res.status, ok: res.ok }
+    if (res.ok) results.batch_match.data = await res.json()
+  } catch (err: any) {
+    results.batch_match = { error: err.message }
+  }
+
+  // 4. Vendor scorecard computation (1st of month)
+  const dateOfMonth = new Date().getDate()
+  if (dateOfMonth === 1) {
+    try {
+      const res = await fetch(`${baseUrl}/api/vendors/compute-scores`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${cronSecret}` },
+      })
+      results.vendor_scores = { status: res.status, ok: res.ok }
+      if (res.ok) results.vendor_scores.data = await res.json()
+    } catch (err: any) {
+      results.vendor_scores = { error: err.message }
+    }
+  } else {
+    results.vendor_scores = { skipped: 'Runs on 1st of month' }
+  }
+
   return NextResponse.json({
     message: 'Daily cron completed',
     timestamp: new Date().toISOString(),

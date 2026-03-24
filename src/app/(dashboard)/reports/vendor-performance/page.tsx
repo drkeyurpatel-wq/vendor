@@ -4,6 +4,7 @@ import { cn, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import { ArrowLeft, BarChart3, TrendingUp, TrendingDown, Award, AlertTriangle, Search, Calendar } from 'lucide-react'
 import { format, subMonths, startOfMonth } from 'date-fns'
+import ComputeScoresButton from '@/components/ui/ComputeScoresButton'
 
 function scoreColor(score: number): string {
   if (score >= 80) return 'text-green-700 bg-green-100'
@@ -135,6 +136,7 @@ export default async function VendorPerformancePage({
             Monthly performance tracking across delivery, quality, price, and service
           </p>
         </div>
+        <ComputeScoresButton />
       </div>
 
       {/* Summary Stats */}
