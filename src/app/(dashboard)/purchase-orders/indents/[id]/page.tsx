@@ -34,8 +34,6 @@ export default async function IndentDetailPage({ params }: { params: Promise<{ i
     .select(`
       *,
       centre:centres(code, name),
-      requested_by_user:user_profiles!purchase_indents_requested_by_fkey(full_name, role),
-      approved_by_user:user_profiles!purchase_indents_approved_by_fkey(full_name),
       items:purchase_indent_items(
         *,
         item:items(item_code, generic_name, brand_name, unit, manufacturer)
@@ -61,6 +59,18 @@ export default async function IndentDetailPage({ params }: { params: Promise<{ i
   const items = (indent.items || []) as any[]
   const estimatedTotal = items.reduce((s: number, i: any) => s + (i.estimated_value || 0), 0)
 
+  // Fetch users separately (FK constraints may not exist)
+  let requestedByName: string | null = null
+  let approvedByName: string | null = null
+  if (indent.requested_by) {
+    const { data: u } = await supabase.from('user_profiles').select('full_name').eq('id', indent.requested_by).single()
+    requestedByName = u?.full_name || null
+  }
+  if (indent.approved_by) {
+    const { data: u } = await supabase.from('user_profiles').select('full_name').eq('id', indent.approved_by).single()
+    approvedByName = u?.full_name || null
+  }
+
   return (
     <div>
       <Link href="/purchase-orders/indents" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4">
@@ -79,13 +89,13 @@ export default async function IndentDetailPage({ params }: { params: Promise<{ i
             <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-gray-500">
               <span>Centre: <strong>{indent.centre?.code} — {indent.centre?.name}</strong></span>
               <span className="text-gray-300">|</span>
-              <span>Requested by: <strong>{indent.requested_by_user?.full_name}</strong></span>
+              <span>Requested by: <strong>{requestedByName || '—'}</strong></span>
               <span className="text-gray-300">|</span>
               <span>Date: <strong>{formatDate(indent.created_at)}</strong></span>
             </div>
-            {indent.approved_by_user && (
+            {approvedByName && (
               <div className="text-sm text-gray-500 mt-1">
-                Approved by: <strong>{indent.approved_by_user.full_name}</strong>
+                Approved by: <strong>{approvedByName}</strong>
                 {indent.approved_at && <span className="text-gray-400"> on {formatDate(indent.approved_at)}</span>}
               </div>
             )}

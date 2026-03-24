@@ -79,8 +79,15 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
 
   const { data: po, error } = await supabase
     .from('purchase_orders')
-    .select('*, vendor:vendors(id, legal_name, vendor_code, gstin, state, primary_contact_email, primary_contact_phone), centre:centres(code, name, state), created_by_user:user_profiles!created_by(full_name)')
+    .select('*, vendor:vendors(id, legal_name, vendor_code, gstin, state, primary_contact_email, primary_contact_phone), centre:centres(code, name, state)')
     .eq('id', id).single()
+
+  // Fetch created_by user separately (FK may not exist)
+  let createdByName: string | null = null
+  if (po?.created_by) {
+    const { data: cbUser } = await supabase.from('user_profiles').select('full_name').eq('id', po.created_by).single()
+    createdByName = cbUser?.full_name || null
+  }
 
   const [{ data: lineItems }, { data: approvals }, { data: grns }] = await Promise.all([
     supabase.from('purchase_order_items').select('*, item:items(item_code, generic_name, manufacturer)').eq('po_id', id),
@@ -167,7 +174,7 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
             <div className="flex justify-between"><span className="text-gray-500">PO Date:</span><span className="font-medium">{formatDate(po.po_date)}</span></div>
             <div className="flex justify-between"><span className="text-gray-500">Expected Delivery:</span><span className="font-medium">{po.expected_delivery_date ? formatDate(po.expected_delivery_date) : '—'}</span></div>
             <div className="flex justify-between"><span className="text-gray-500">Priority:</span><span className="font-medium capitalize">{po.priority}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Created By:</span><span className="font-medium">{po.created_by_user?.full_name || '—'}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Created By:</span><span className="font-medium">{createdByName || '—'}</span></div>
           </div>
         </div>
         <div className="card p-5">

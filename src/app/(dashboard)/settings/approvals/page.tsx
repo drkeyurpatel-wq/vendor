@@ -127,8 +127,10 @@ export default async function ApprovalsSettingsPage() {
         comments,
         created_at,
         approval_level,
-        approver:user_profiles!po_approvals_approver_id_fkey(full_name, role),
-        po:purchase_orders!po_approvals_po_id_fkey(po_number, total_amount, centre:centres(code))
+        approver_id,
+        po_id,
+        approver:user_profiles(full_name, role),
+        po:purchase_orders(po_number, total_amount, centre:centres(code))
       `)
       .order('created_at', { ascending: false })
       .limit(20),

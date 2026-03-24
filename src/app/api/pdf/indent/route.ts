@@ -47,8 +47,6 @@ export async function GET(request: NextRequest) {
     .select(`
       *,
       centre:centres(name, code, address, city, state),
-      requested_by_user:user_profiles!purchase_indents_requested_by_fkey(full_name),
-      approved_by_user:user_profiles!purchase_indents_approved_by_fkey(full_name),
       items:purchase_indent_items(
         *,
         item:items(generic_name, brand_name, item_code, unit, hsn_code)
@@ -59,6 +57,18 @@ export async function GET(request: NextRequest) {
 
   if (error || !indent) {
     return NextResponse.json({ error: 'Indent not found' }, { status: 404 })
+  }
+
+  // Fetch users separately
+  let requestedByName = ''
+  let approvedByName = ''
+  if (indent.requested_by) {
+    const { data: u } = await supabase.from('user_profiles').select('full_name').eq('id', indent.requested_by).single()
+    requestedByName = u?.full_name || ''
+  }
+  if (indent.approved_by) {
+    const { data: u } = await supabase.from('user_profiles').select('full_name').eq('id', indent.approved_by).single()
+    approvedByName = u?.full_name || ''
   }
 
   const doc = new jsPDF('p', 'mm', 'a4')
@@ -106,9 +116,9 @@ export async function GET(request: NextRequest) {
   doc.setTextColor(...TEAL)
   doc.setFontSize(7.5)
   doc.setFont('helvetica', 'bold')
-  doc.text(`Requested By: ${indent.requested_by_user?.full_name || 'N/A'}`, col1, y + 5.5)
-  if (indent.approved_by_user?.full_name) {
-    doc.text(`Approved By: ${indent.approved_by_user.full_name}`, col2, y + 5.5)
+  doc.text(`Requested By: ${requestedByName || 'N/A'}`, col1, y + 5.5)
+  if (approvedByName) {
+    doc.text(`Approved By: ${approvedByName}`, col2, y + 5.5)
   }
   y += 14
 

@@ -33,7 +33,7 @@ export default async function RateContractsPage({
       id, contract_number, contract_type, valid_from, valid_to, status, created_at,
       vendor:vendors(id, legal_name, vendor_code),
       centre:centres(code, name),
-      approved_by_user:user_profiles!rate_contracts_approved_by_fkey(full_name),
+      approved_by_user:user_profiles(full_name),
       items:rate_contract_items(id)
     `)
     .order('created_at', { ascending: false })

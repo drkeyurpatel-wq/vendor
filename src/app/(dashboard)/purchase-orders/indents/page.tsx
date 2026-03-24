@@ -24,7 +24,7 @@ export default async function IndentsPage({
 
   let query = supabase
     .from('purchase_indents')
-    .select('*, centre:centres(code, name), created_by_user:user_profiles!purchase_indents_created_by_fkey(full_name)', { count: 'exact' })
+    .select('*, centre:centres(code, name)', { count: 'exact' })
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
 

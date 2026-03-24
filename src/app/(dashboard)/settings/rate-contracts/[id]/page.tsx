@@ -36,7 +36,7 @@ export default async function RateContractDetailPage({
       *,
       vendor:vendors(id, legal_name, vendor_code, gstin, city, state),
       centre:centres(code, name),
-      approved_by_user:user_profiles!rate_contracts_approved_by_fkey(full_name),
+      approved_by_user:user_profiles(full_name),
       items:rate_contract_items(
         *,
         item:items(item_code, generic_name, brand_name, unit, hsn_code)
