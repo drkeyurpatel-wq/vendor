@@ -93,7 +93,7 @@ export default async function PaymentBatchDetailPage({ params }: { params: Promi
             >
               <Download size={15} /> Payment Advice
             </a>
-            <BatchActions batchId={batch.id} currentStatus={batch.status} />
+            <BatchActions batchId={batch.id} batchNumber={batch.batch_number} status={batch.status} totalAmount={batch.total_amount || 0} />
           </div>
         </div>
       </div>

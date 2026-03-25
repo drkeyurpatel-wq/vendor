@@ -73,6 +73,7 @@ const NAV: NavItem[] = [
       { label: 'New Invoice', href: '/finance/invoices/new' },
       { label: 'Credit Period', href: '/finance/credit' },
       { label: 'Payment Batches', href: '/finance/payments' },
+      { label: 'Payment Schedule', href: '/finance/payments/schedule' },
       { label: 'New Batch', href: '/finance/payments/new' },
       { label: 'Debit Notes', href: '/finance/debit-notes' },
     ]
