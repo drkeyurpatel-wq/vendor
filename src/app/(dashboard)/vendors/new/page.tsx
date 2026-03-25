@@ -213,6 +213,7 @@ export default function NewVendorPage() {
     try {
       const seqRes = await fetch('/api/sequence?type=vendor')
       const seqData = await seqRes.json()
+      if (!seqRes.ok || !seqData.number) throw new Error(seqData.error || 'Sequence failed')
       vendor_code = seqData.number
     } catch {
       const { count } = await supabase.from('vendors').select('*', { count: 'exact', head: true })

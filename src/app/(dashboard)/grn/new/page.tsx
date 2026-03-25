@@ -97,7 +97,7 @@ export default function NewGRNPage() {
       try {
         let poQuery = supabase
           .from('purchase_orders')
-          .select('id, po_number, vendor_id, centre_id, vendor:vendors(legal_name), centre:centres(code, name), total_amount, status')
+          .select('id, po_number, vendor_id, centre_id, vendor:vendors(legal_name, state), centre:centres(code, name, state), total_amount, status')
           .in('status', ['approved', 'sent_to_vendor', 'partially_received', 'pending_approval'])
           .is('deleted_at', null)
           .order('po_date', { ascending: false })
@@ -396,7 +396,8 @@ export default function NewGRNPage() {
     try {
       const seqRes = await fetch(`/api/sequence?type=grn&centre_code=${centreCode}`)
       const seqData = await seqRes.json()
-      grnNumber = seqData.number || generateGRNNumber(centreCode, Date.now() % 1000)
+      if (!seqRes.ok || !seqData.number) throw new Error(seqData.error || 'Sequence failed')
+      grnNumber = seqData.number
     } catch {
       const { count } = await supabase.from('grns').select('*', { count: 'exact', head: true })
       grnNumber = generateGRNNumber(centreCode, (count ?? 0) + 1)

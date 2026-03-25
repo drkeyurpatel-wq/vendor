@@ -122,7 +122,8 @@ export default function NewPOPage() {
     try {
       const seqRes = await fetch(`/api/sequence?type=po&centre_code=${centreCode}`)
       const seqData = await seqRes.json()
-      poNumber = seqData.number || generatePONumber(centreCode, Date.now() % 1000)
+      if (!seqRes.ok || !seqData.number) throw new Error(seqData.error || 'Sequence failed')
+      poNumber = seqData.number
     } catch {
       const { count } = await supabase.from('purchase_orders').select('*', { count: 'exact', head: true })
       poNumber = generatePONumber(centreCode, (count ?? 0) + 1)

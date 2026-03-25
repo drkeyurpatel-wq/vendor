@@ -155,6 +155,7 @@ export default function NewInvoicePage() {
     try {
       const seqRes = await fetch(`/api/sequence?type=invoice&centre_code=${centreCode}`)
       const seqData = await seqRes.json()
+      if (!seqRes.ok || !seqData.number) throw new Error(seqData.error || 'Sequence failed')
       invoiceRef = seqData.number
     } catch {
       const now = new Date()
@@ -164,6 +165,9 @@ export default function NewInvoicePage() {
     }
 
     const creditDays = (selectedGRN.vendor as any)?.credit_period_days ?? 30
+    const parsedTotal = parseFloat(totalAmount)
+    const parsedGst = gstAmount ? parseFloat(gstAmount) : 0
+    const subtotal = Math.round((parsedTotal - parsedGst) * 100) / 100
 
     const { data: invoice, error } = await supabase.from('invoices').insert({
       invoice_ref: invoiceRef,
@@ -173,8 +177,9 @@ export default function NewInvoicePage() {
       centre_id: selectedGRN.centre_id,
       vendor_invoice_no: vendorInvoiceNo.trim(),
       vendor_invoice_date: vendorInvoiceDate,
-      total_amount: parseFloat(totalAmount),
-      gst_amount: gstAmount ? parseFloat(gstAmount) : 0,
+      subtotal,
+      total_amount: parsedTotal,
+      gst_amount: parsedGst,
       paid_amount: 0,
       due_date: dueDate,
       credit_period_days: creditDays,

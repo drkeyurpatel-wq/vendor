@@ -48,10 +48,40 @@ export async function GET(req: NextRequest) {
     centre_code: centreCode,
   })
 
-  if (error) {
-    // Fallback: use count-based if the RPC doesn't exist yet
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!error && data) {
+    return NextResponse.json({ number: data })
   }
 
-  return NextResponse.json({ number: data })
+  // Fallback: count-based numbering if RPC/sequence doesn't exist
+  try {
+    const tableMap: Record<string, string> = {
+      vendor: 'vendors', item: 'items', po: 'purchase_orders',
+      grn: 'grns', indent: 'purchase_indents', invoice: 'invoices', batch: 'payment_batches',
+    }
+    const table = tableMap[type]
+    if (!table) {
+      return NextResponse.json({ error: `No fallback for type: ${type}` }, { status: 500 })
+    }
+    const { count } = await supabase.from(table).select('*', { count: 'exact', head: true })
+    const seq = (count ?? 0) + 1
+    const ym = new Date().toISOString().slice(2, 4) + String(new Date().getMonth() + 1).padStart(2, '0')
+
+    const formatMap: Record<string, string> = {
+      vendor: `H1V-${String(seq).padStart(4, '0')}`,
+      item: `H1I-${String(seq).padStart(5, '0')}`,
+      po: `H1-${centreCode}-PO-${ym}-${String(seq).padStart(3, '0')}`,
+      grn: `H1-${centreCode}-GRN-${ym}-${String(seq).padStart(3, '0')}`,
+      indent: `H1-${centreCode}-IND-${ym}-${String(seq).padStart(3, '0')}`,
+      invoice: `H1-${centreCode}-INV-${ym}-${String(seq).padStart(3, '0')}`,
+      batch: `H1-PAY-${ym}-${String(seq).padStart(3, '0')}`,
+    }
+
+    const number = formatMap[type]
+    if (number) {
+      return NextResponse.json({ number })
+    }
+    return NextResponse.json({ error: error?.message || 'Sequence failed' }, { status: 500 })
+  } catch (fallbackErr: any) {
+    return NextResponse.json({ error: error?.message || fallbackErr?.message || 'Sequence failed' }, { status: 500 })
+  }
 }
