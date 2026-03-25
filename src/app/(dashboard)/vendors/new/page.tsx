@@ -209,6 +209,26 @@ export default function NewVendorPage() {
 
     setLoading(true)
 
+    // Duplicate check: GSTIN and PAN must be unique
+    if (form.gstin.trim()) {
+      const { data: existingGstin } = await supabase.from('vendors')
+        .select('id, vendor_code, legal_name').eq('gstin', form.gstin.trim().toUpperCase())
+        .is('deleted_at', null).limit(1)
+      if (existingGstin && existingGstin.length > 0) {
+        toast.error(`GSTIN already registered to ${existingGstin[0].vendor_code} — ${existingGstin[0].legal_name}`)
+        setLoading(false); return
+      }
+    }
+    if (form.pan.trim()) {
+      const { data: existingPan } = await supabase.from('vendors')
+        .select('id, vendor_code, legal_name').eq('pan', form.pan.trim().toUpperCase())
+        .is('deleted_at', null).limit(1)
+      if (existingPan && existingPan.length > 0) {
+        toast.error(`PAN already registered to ${existingPan[0].vendor_code} — ${existingPan[0].legal_name}`)
+        setLoading(false); return
+      }
+    }
+
     let vendor_code: string
     try {
       const seqRes = await fetch('/api/sequence?type=vendor')

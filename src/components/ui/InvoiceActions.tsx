@@ -52,7 +52,7 @@ export default function InvoiceActions({
 
     if (error) { toast.error(error.message); return }
 
-    await supabase.from('audit_logs').insert({
+    await supabase.from('activity_log').insert({
       entity_type: 'invoice', entity_id: invoiceId,
       action: `invoice_${newStatus}`, details: { invoice_ref: invoiceRef, comment: comment || null },
     })
@@ -63,47 +63,21 @@ export default function InvoiceActions({
   }
 
   async function run3WayMatch() {
-    if (!poId || !grnId) {
-      toast.error('PO or GRN not linked — cannot run 3-way match')
-      return
+    try {
+      const res = await fetch('/api/invoices/match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoice_id: invoiceId }),
+      })
+      const data = await res.json()
+      if (!res.ok) { toast.error(data.error || 'Match failed'); return }
+
+      const icon = data.match_status === 'matched' ? '✅' : data.match_status === 'partial_match' ? '⚠️' : '❌'
+      toast.success(`${icon} 3-way match: ${data.match_status.replace(/_/g, ' ')} — ${data.summary?.matched || 0}/${data.summary?.total_items || 0} items matched`)
+      setDialog(null); router.refresh()
+    } catch {
+      toast.error('3-way match failed — please retry')
     }
-
-    // Fetch PO total, GRN total, Invoice total
-    const [{ data: po }, { data: grn }] = await Promise.all([
-      supabase.from('purchase_orders').select('total_amount').eq('id', poId).single(),
-      supabase.from('grns').select('vendor_invoice_amount').eq('id', grnId).single(),
-    ])
-
-    const poAmt = po?.total_amount || 0
-    const grnAmt = grn?.vendor_invoice_amount || 0
-    const invAmt = totalAmount
-
-    // Match logic: all three within 1% tolerance
-    const tolerance = 0.01
-    const poGrnMatch = Math.abs(poAmt - grnAmt) / Math.max(poAmt, 1) <= tolerance
-    const poInvMatch = Math.abs(poAmt - invAmt) / Math.max(poAmt, 1) <= tolerance
-    const grnInvMatch = Math.abs(grnAmt - invAmt) / Math.max(grnAmt, 1) <= tolerance
-
-    let newMatchStatus: string
-    if (poGrnMatch && poInvMatch && grnInvMatch) {
-      newMatchStatus = 'matched'
-    } else if (poGrnMatch || poInvMatch || grnInvMatch) {
-      newMatchStatus = 'partial_match'
-    } else {
-      newMatchStatus = 'mismatch'
-    }
-
-    const { error } = await supabase.from('invoices').update({
-      match_status: newMatchStatus,
-      match_details: { po_amount: poAmt, grn_amount: grnAmt, invoice_amount: invAmt, tolerance: `${tolerance * 100}%` },
-      updated_at: new Date().toISOString(),
-    }).eq('id', invoiceId)
-
-    if (error) { toast.error(error.message); return }
-
-    const icon = newMatchStatus === 'matched' ? '✅' : newMatchStatus === 'partial_match' ? '⚠️' : '❌'
-    toast.success(`${icon} 3-way match: ${newMatchStatus.replace(/_/g, ' ')} (PO: ₹${poAmt.toLocaleString()}, GRN: ₹${grnAmt.toLocaleString()}, Inv: ₹${invAmt.toLocaleString()})`)
-    setDialog(null); router.refresh()
   }
 
   async function recordPayment() {
@@ -125,7 +99,7 @@ export default function InvoiceActions({
 
     if (error) { toast.error(error.message); return }
 
-    await supabase.from('audit_logs').insert({
+    await supabase.from('activity_log').insert({
       entity_type: 'invoice', entity_id: invoiceId,
       action: 'payment_recorded',
       details: { invoice_ref: invoiceRef, amount: amt, total_paid: newPaid, payment_status: newStatus },

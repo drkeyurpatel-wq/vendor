@@ -45,7 +45,7 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
 
     if (error) { toast.error(error.message); return }
 
-    // If verified, update PO received quantities
+    // If verified, update PO received quantities and stock
     if (newStatus === 'verified' && lineItems.length > 0) {
       for (const li of lineItems) {
         if (li.item_id && li.received_qty > 0) {
@@ -59,13 +59,25 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
             await supabase.from('purchase_order_items').update({ received_qty: newRecv }).eq('id', poItem.id)
           }
 
-          // Update stock
-          await supabase.from('item_centre_stock').upsert({
-            item_id: li.item_id, centre_id: centreId,
-            current_stock: li.received_qty,
-            last_grn_date: new Date().toISOString().split('T')[0],
-            last_grn_rate: li.rate || 0,
-          }, { onConflict: 'item_id,centre_id' })
+          // Update stock — ADDITIVE, not overwrite
+          const { data: existing } = await supabase.from('item_centre_stock')
+            .select('id, current_stock')
+            .eq('item_id', li.item_id).eq('centre_id', centreId).single()
+
+          if (existing) {
+            await supabase.from('item_centre_stock').update({
+              current_stock: (existing.current_stock || 0) + li.received_qty,
+              last_grn_date: new Date().toISOString().split('T')[0],
+              last_grn_rate: li.rate || 0,
+            }).eq('id', existing.id)
+          } else {
+            await supabase.from('item_centre_stock').insert({
+              item_id: li.item_id, centre_id: centreId,
+              current_stock: li.received_qty,
+              last_grn_date: new Date().toISOString().split('T')[0],
+              last_grn_rate: li.rate || 0,
+            })
+          }
         }
       }
 
@@ -82,10 +94,10 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
       }
     }
 
-    await supabase.from('audit_logs').insert({
+    try { await supabase.from('activity_log').insert({
       entity_type: 'grn', entity_id: grnId,
       action: `grn_${newStatus}`, details: { grn_number: grnNumber, comment: comment || null },
-    })
+    }) } catch { /* non-critical */ }
 
     toast.success(`GRN ${grnNumber} → ${newStatus.replace(/_/g, ' ')}`)
     fireNotification({ action: `grn_${newStatus}`, entity_type: 'grn', entity_id: grnId, details: { grn_number: grnNumber } })
@@ -101,10 +113,10 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
 
     if (error) { toast.error(error.message); return }
 
-    await supabase.from('audit_logs').insert({
+    try { await supabase.from('activity_log').insert({
       entity_type: 'grn', entity_id: grnId,
       action: `qc_${newStatus}`, details: { grn_number: grnNumber, comment: comment || null },
-    })
+    }) } catch { /* non-critical */ }
 
     toast.success(`QC ${newStatus} for ${grnNumber}`)
     setDialog(null); setComment(''); router.refresh()

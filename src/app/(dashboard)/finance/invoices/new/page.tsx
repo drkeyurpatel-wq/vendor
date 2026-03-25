@@ -63,7 +63,7 @@ export default function NewInvoicePage() {
       let query = supabase
         .from('grns')
         .select('id, grn_number, grn_date, po_id, vendor_id, centre_id, vendor:vendors(legal_name, credit_period_days), centre:centres(code, name)')
-        .in('status', ['verified', 'submitted'])
+        .in('status', ['verified'])
         .is('deleted_at', null)
         .order('grn_date', { ascending: false })
 
@@ -207,6 +207,29 @@ export default function NewInvoicePage() {
       toast.error(error.message)
       setLoading(false)
       return
+    }
+
+    // Auto-populate invoice line items from GRN items (enables proper 3-way matching)
+    try {
+      const { data: grnItems } = await supabase.from('grn_items')
+        .select('item_id, accepted_qty, rate, gst_percent, total_amount, hsn_code')
+        .eq('grn_id', selectedGRN.id)
+        .gt('accepted_qty', 0)
+
+      if (grnItems && grnItems.length > 0) {
+        const invoiceLineItems = grnItems.map((gi: any) => ({
+          invoice_id: invoice.id,
+          item_id: gi.item_id,
+          qty: gi.accepted_qty,
+          rate: gi.rate,
+          gst_percent: gi.gst_percent || 0,
+          total_amount: gi.total_amount || (gi.accepted_qty * gi.rate),
+          hsn_code: gi.hsn_code || null,
+        }))
+        await supabase.from('invoice_items').insert(invoiceLineItems)
+      }
+    } catch {
+      // Non-critical — 3-way match will use totals as fallback
     }
 
     // Trigger 3-way matching

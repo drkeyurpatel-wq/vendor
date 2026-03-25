@@ -98,7 +98,7 @@ export default function NewGRNPage() {
         let poQuery = supabase
           .from('purchase_orders')
           .select('id, po_number, vendor_id, centre_id, vendor:vendors(legal_name, state), centre:centres(code, name, state), total_amount, status')
-          .in('status', ['approved', 'sent_to_vendor', 'partially_received', 'pending_approval'])
+          .in('status', ['approved', 'sent_to_vendor', 'partially_received'])
           .is('deleted_at', null)
           .order('po_date', { ascending: false })
           .limit(50)
@@ -483,84 +483,11 @@ export default function NewGRNPage() {
     const { error: itemError } = await supabase.from('grn_items').insert(grnItems)
     if (itemError) { toast.error(`GRN items failed: ${itemError.message}`); setLoading(false); return }
 
-    // Update PO item received quantities
-    for (const li of lineItems) {
-      if (li.accepted_qty > 0) {
-        const newReceived = li.already_received + li.accepted_qty
-        await supabase.from('purchase_order_items')
-          .update({ received_qty: newReceived })
-          .eq('id', li.po_item_id)
-      }
-    }
+    // NOTE: PO received quantities are NOT updated here.
+    // They update only when the GRN is verified via GRNStatusActions.
 
-    // Update stock via DB function (atomic, writes stock_ledger too)
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-
-    // Try v2 first, then v1, then manual fallback
-    let stockUpdated = false
-    const { error: stockErrorV2 } = await supabase.rpc('update_stock_from_grn_v2', {
-      p_grn_id: grn.id,
-      p_user_id: authUser?.id,
-    })
-    if (!stockErrorV2) {
-      stockUpdated = true
-    } else {
-      const { error: stockErrorV1 } = await supabase.rpc('update_stock_from_grn', {
-        p_grn_id: grn.id,
-        p_user_id: authUser?.id,
-      })
-      if (!stockErrorV1) {
-        stockUpdated = true
-      }
-    }
-
-    if (!stockUpdated) {
-      console.error('Stock RPC unavailable, using manual fallback')
-      // Fallback: manual stock updates
-      for (const li of lineItems) {
-        if (li.accepted_qty > 0) {
-          const { data: existing } = await supabase
-            .from('item_centre_stock')
-            .select('id, current_stock')
-            .eq('item_id', li.item_id)
-            .eq('centre_id', centreId)
-            .single()
-
-          if (existing) {
-            await supabase.from('item_centre_stock')
-              .update({
-                current_stock: existing.current_stock + li.accepted_qty,
-                last_grn_date: grnDate,
-                last_grn_rate: li.rate,
-              })
-              .eq('id', existing.id)
-          } else {
-            await supabase.from('item_centre_stock').insert({
-              item_id: li.item_id,
-              centre_id: centreId,
-              current_stock: li.accepted_qty,
-              reorder_level: 0,
-              max_level: 0,
-              safety_stock: 0,
-              last_grn_date: grnDate,
-              last_grn_rate: li.rate,
-            })
-          }
-
-          await supabase.from('stock_ledger').insert({
-            item_id: li.item_id,
-            centre_id: centreId,
-            transaction_type: 'grn',
-            quantity: li.accepted_qty,
-            balance_after: (existing?.current_stock || 0) + li.accepted_qty,
-            reference_id: grn.id,
-            reference_number: grnNumber,
-            notes: li.batch_no.trim() ? `Batch: ${li.batch_no.trim()}` : null,
-            created_by: authUser?.id,
-          })
-        }
-      }
-    }
+    // NOTE: Stock is NOT updated here. Stock updates happen only when
+    // the GRN is verified via GRNStatusActions, preventing double-counting.
 
     // Update PO status
     const { data: allPOItems } = await supabase
