@@ -62,7 +62,7 @@ export default function NewInvoicePage() {
       let query = supabase
         .from('grns')
         .select('id, grn_number, grn_date, po_id, vendor_id, centre_id, vendor:vendors(legal_name, credit_period_days), centre:centres(code, name)')
-        .in('status', ['submitted', 'verified'])
+        .in('status', ['verified', 'submitted'])
         .is('deleted_at', null)
         .order('grn_date', { ascending: false })
 
