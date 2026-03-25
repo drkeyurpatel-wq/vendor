@@ -17,6 +17,10 @@ interface GRNOption {
   po_id: string
   vendor_id: string
   centre_id: string
+  total_amount: number | null
+  cgst_amount: number | null
+  sgst_amount: number | null
+  igst_amount: number | null
   vendor: { legal_name: string; credit_period_days: number } | { legal_name: string; credit_period_days: number }[] | null
   centre: { code: string; name: string } | { code: string; name: string }[] | null
 }
@@ -62,7 +66,7 @@ export default function NewInvoicePage() {
 
       let query = supabase
         .from('grns')
-        .select('id, grn_number, grn_date, po_id, vendor_id, centre_id, vendor:vendors(legal_name, credit_period_days), centre:centres(code, name)')
+        .select('id, grn_number, grn_date, po_id, vendor_id, centre_id, total_amount, cgst_amount, sgst_amount, igst_amount, vendor:vendors(legal_name, credit_period_days), centre:centres(code, name)')
         .in('status', ['verified'])
         .is('deleted_at', null)
         .order('grn_date', { ascending: false })
@@ -84,7 +88,12 @@ export default function NewInvoicePage() {
         if (preselectedGrnId) {
           const found = eligible.find((g: any) => g.id === preselectedGrnId) as GRNOption | undefined
           if (found) {
+            // Set grns first so handleGRNSelect can find it
+            setGrns(eligible as GRNOption[])
             setSelectedGRN(found)
+            if (found.total_amount) setTotalAmount(String(found.total_amount))
+            const gstAmt = (found.cgst_amount || 0) + (found.sgst_amount || 0) + (found.igst_amount || 0)
+            if (gstAmt > 0) setGstAmount(String(gstAmt))
             const creditDays = (found.vendor as any)?.credit_period_days ?? 30
             const grnDateObj = new Date(found.grn_date)
             const calculatedDue = new Date(grnDateObj)
@@ -107,6 +116,11 @@ export default function NewInvoicePage() {
       return
     }
     setSelectedGRN(grn)
+
+    // Auto-populate amounts from GRN
+    if (grn.total_amount) setTotalAmount(String(grn.total_amount))
+    const gstAmt = (grn.cgst_amount || 0) + (grn.sgst_amount || 0) + (grn.igst_amount || 0)
+    if (gstAmt > 0) setGstAmount(String(gstAmt))
 
     // Auto-calculate due_date = grn_date + vendor.credit_period_days
     const creditDays = (grn.vendor as any)?.credit_period_days ?? 30

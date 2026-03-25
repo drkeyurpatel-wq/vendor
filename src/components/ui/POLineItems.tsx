@@ -42,6 +42,8 @@ export interface LineItem {
   // Rate contract
   contract_rate?: number | null
   rate_warning?: string | null
+  // Price history (last 3 PO rates for this vendor+item)
+  price_history?: { rate: number; date: string; po_number: string }[]
   // Delivery
   delivery_date: string
 }
@@ -154,17 +156,26 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
     const conversionFactor = selected.qty_conversion || 1
     const purchaseUnit = selected.purchase_unit || selected.unit
 
-    // Fetch last PO rate for this vendor+item (for price fence reference)
+    // Fetch last 3 PO rates for this vendor + item (for price fence)
     let lastPORate: number | null = null
+    let priceHistory: { rate: number; date: string; po_number: string }[] = []
     if (vendorId) {
       try {
-        const { data: lastPO } = await supabase
+        const { data: history } = await supabase
           .from('purchase_order_items')
-          .select('rate')
+          .select('rate, po:purchase_orders!inner(po_number, po_date, vendor_id)')
           .eq('item_id', selected.id)
-          .limit(5)
-        // Filter to this vendor's POs (simple approach - get any recent rate)
-        if (lastPO?.[0]?.rate) lastPORate = lastPO[0].rate
+          .eq('po.vendor_id', vendorId)
+          .order('id', { ascending: false })
+          .limit(3)
+        if (history && history.length > 0) {
+          priceHistory = history.map((h: any) => ({
+            rate: h.rate,
+            date: Array.isArray(h.po) ? h.po[0]?.po_date : h.po?.po_date || '',
+            po_number: Array.isArray(h.po) ? h.po[0]?.po_number : h.po?.po_number || '',
+          }))
+          lastPORate = history[0].rate
+        }
       } catch { /* non-critical */ }
     }
 
@@ -202,6 +213,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
       total_amount: 0,
       contract_rate: referenceRate,
       rate_warning: null,
+      price_history: priceHistory,
       delivery_date: '',
     }, supplyType)
     onChange([...items, newItem])
@@ -236,7 +248,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
   return (
     <div>
       <div className="mb-4">
-        <ItemSearch onSelect={addItem} excludeIds={excludeIds} placeholder="Add item — search by name or code..." />
+        <ItemSearch onSelect={addItem} excludeIds={excludeIds} vendorId={vendorId} placeholder="Add item — search by name or code..." />
       </div>
 
       {items.length > 0 && (
@@ -284,6 +296,16 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                         <div className="flex items-center gap-1 mt-0.5">
                           <CheckCircle2 size={10} className="text-green-500" />
                           <span className="text-[10px] text-green-600">Contract: ₹{item.contract_rate.toFixed(2)}/{item.purchase_unit || item.unit}</span>
+                        </div>
+                      )}
+                      {item.price_history && item.price_history.length > 0 && (
+                        <div className="mt-1 space-y-0.5">
+                          <div className="text-[9px] text-gray-400 font-semibold uppercase">Last {item.price_history.length} PO rate{item.price_history.length > 1 ? 's' : ''}:</div>
+                          {item.price_history.map((ph, i) => (
+                            <div key={i} className="text-[10px] text-gray-500">
+                              ₹{ph.rate.toFixed(2)} <span className="text-gray-300">—</span> {ph.po_number}
+                            </div>
+                          ))}
                         </div>
                       )}
                     </td>

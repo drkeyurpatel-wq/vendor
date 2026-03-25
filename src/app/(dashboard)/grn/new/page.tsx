@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, AlertTriangle, WifiOff, CloudOff } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, AlertTriangle, WifiOff, CloudOff, ChevronDown, ChevronUp } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { generateGRNNumber, formatCurrency } from '@/lib/utils'
 import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
@@ -74,6 +74,7 @@ export default function NewGRNPage() {
   const [highlightedItemIdx, setHighlightedItemIdx] = useState<number | null>(null)
 
   // Transport details
+  const [showTransport, setShowTransport] = useState(false)
   const [dcNumber, setDcNumber] = useState('')
   const [dcDate, setDcDate] = useState('')
   const [lrNumber, setLrNumber] = useState('')
@@ -630,13 +631,18 @@ export default function NewGRNPage() {
 
         {/* Transport & Vendor Invoice — side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Transport Details */}
-          <div className="card p-6">
-            <fieldset>
-              <legend className="font-semibold mb-4 pb-3 border-b border-gray-100 w-full" style={{ color: '#1B3A6B' }}>
-                Transport Details
-              </legend>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Transport Details — collapsible */}
+          <div className="card overflow-hidden">
+            <button type="button" onClick={() => setShowTransport(!showTransport)}
+              className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors">
+              <span className="font-semibold text-sm" style={{ color: '#1B3A6B' }}>
+                Transport Details {(dcNumber || lrNumber || ewayBillNo) && <span className="text-green-600 text-xs ml-2">● filled</span>}
+              </span>
+              {showTransport ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+            </button>
+            {showTransport && (
+              <div className="px-6 pb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="grn-dc-number" className="form-label">DC Number</label>
                   <input id="grn-dc-number" className="form-input" value={dcNumber} onChange={e => setDcNumber(e.target.value)} placeholder="Delivery challan #" />
@@ -662,7 +668,8 @@ export default function NewGRNPage() {
                   <input id="grn-eway-bill" className="form-input" value={ewayBillNo} onChange={e => setEwayBillNo(e.target.value)} placeholder="E-way bill #" />
                 </div>
               </div>
-            </fieldset>
+              </div>
+            )}
           </div>
 
           {/* Vendor Invoice */}

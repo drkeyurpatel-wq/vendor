@@ -55,7 +55,7 @@ export default function NewPOPage() {
       if (vendorId) {
         const { data: v } = await supabase
           .from('vendors')
-          .select('id, vendor_code, legal_name, trade_name, state, trade_discount_percent, cash_discount_percent, payment_terms, tds_applicable, tds_section, tds_rate, category:vendor_categories(name)')
+          .select('id, vendor_code, legal_name, trade_name, state, trade_discount_percent, cash_discount_percent, payment_terms, tds_applicable, tds_section, tds_rate, minimum_order_value, credit_limit, category:vendor_categories(name)')
           .eq('id', vendorId)
           .single()
         if (v) {
@@ -66,6 +66,20 @@ export default function NewPOPage() {
     }
     load()
   }, [])
+
+  // When vendor is selected via search, fetch full details (MOV, credit limit, state, TDS)
+  useEffect(() => {
+    if (!vendor?.id || vendor.state !== undefined) return // already has full details
+    async function fetchVendorDetails() {
+      const { data: v } = await supabase
+        .from('vendors')
+        .select('state, trade_discount_percent, cash_discount_percent, payment_terms, tds_applicable, tds_section, tds_rate, minimum_order_value, credit_limit')
+        .eq('id', vendor.id)
+        .single()
+      if (v) setVendor((prev: any) => ({ ...prev, ...v }))
+    }
+    fetchVendorDetails()
+  }, [vendor?.id])
 
   // Auto-detect supply type from vendor + centre state
   useEffect(() => {
@@ -86,6 +100,35 @@ export default function NewPOPage() {
     if (!centreId) { toast.error('Please select a centre'); return }
     if (items.length === 0) { toast.error('Add at least one item'); return }
     if (items.some(i => i.rate <= 0)) { toast.error('All items must have a rate > 0'); return }
+
+    // Calculate PO total for checks
+    const poTotal = items.reduce((s, i) => s + i.total_amount, 0)
+
+    // B10: Minimum Order Value check
+    if (vendor.minimum_order_value && poTotal < vendor.minimum_order_value) {
+      const proceed = window.confirm(
+        `PO total ₹${poTotal.toLocaleString()} is below vendor's minimum order value ₹${vendor.minimum_order_value.toLocaleString()}.\n\nContinue anyway?`
+      )
+      if (!proceed) return
+    }
+
+    // M1: Credit limit check
+    if (vendor.credit_limit && vendor.credit_limit > 0) {
+      try {
+        const { data: unpaidInvoices } = await supabase
+          .from('invoices')
+          .select('total_amount, paid_amount')
+          .eq('vendor_id', vendor.id)
+          .neq('payment_status', 'paid')
+        const outstanding = unpaidInvoices?.reduce((s, i: any) => s + ((i.total_amount || 0) - (i.paid_amount || 0)), 0) ?? 0
+        if (outstanding + poTotal > vendor.credit_limit) {
+          const proceed = window.confirm(
+            `⚠️ CREDIT LIMIT WARNING\n\nOutstanding: ₹${outstanding.toLocaleString()}\nThis PO: ₹${poTotal.toLocaleString()}\nTotal: ₹${(outstanding + poTotal).toLocaleString()}\nCredit Limit: ₹${vendor.credit_limit.toLocaleString()}\n\nExceeds limit by ₹${(outstanding + poTotal - vendor.credit_limit).toLocaleString()}. Continue?`
+          )
+          if (!proceed) return
+        }
+      } catch { /* non-critical */ }
+    }
 
     // Duplicate PO detection — non-blocking (wrapped in try/catch)
     try {

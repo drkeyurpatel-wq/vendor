@@ -19,12 +19,13 @@ interface Props {
   onSelect: (item: ItemResult) => void
   excludeIds?: string[]
   placeholder?: string
+  vendorId?: string
 }
 
-export default function ItemSearch({ onSelect, excludeIds = [], placeholder = 'Search item by name or code...' }: Props) {
+export default function ItemSearch({ onSelect, excludeIds = [], placeholder = 'Search item by name or code...', vendorId }: Props) {
   const supabase = createClient()
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<ItemResult[]>([])
+  const [results, setResults] = useState<(ItemResult & { l_rank?: number | null })[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -47,14 +48,38 @@ export default function ItemSearch({ onSelect, excludeIds = [], placeholder = 'S
         .eq('is_active', true)
         .or(`generic_name.ilike.%${query}%,item_code.ilike.%${query}%,brand_name.ilike.%${query}%`)
         .order('generic_name')
-        .limit(10)
-      const filtered = (data ?? []).filter(i => !excludeIds.includes(i.id))
-      setResults(filtered)
+        .limit(20)
+      let filtered = (data ?? []).filter(i => !excludeIds.includes(i.id))
+
+      // If vendor selected, fetch L-rank mappings and sort mapped items first
+      let vendorItemMap = new Map<string, number | null>()
+      if (vendorId && filtered.length > 0) {
+        const { data: mappings } = await supabase
+          .from('vendor_items')
+          .select('item_id, l_rank')
+          .eq('vendor_id', vendorId)
+          .in('item_id', filtered.map(i => i.id))
+        mappings?.forEach((m: any) => vendorItemMap.set(m.item_id, m.l_rank))
+      }
+
+      // Sort: mapped items first (by L-rank), then unmapped
+      const enriched = filtered.map(item => ({
+        ...item,
+        l_rank: vendorItemMap.get(item.id) ?? null,
+      }))
+      enriched.sort((a, b) => {
+        if (a.l_rank !== null && b.l_rank === null) return -1
+        if (a.l_rank === null && b.l_rank !== null) return 1
+        if (a.l_rank !== null && b.l_rank !== null) return (a.l_rank || 99) - (b.l_rank || 99)
+        return 0
+      })
+
+      setResults(enriched)
       setLoading(false)
       setOpen(true)
     }, 300)
     return () => clearTimeout(timer)
-  }, [query, excludeIds.join(',')])
+  }, [query, excludeIds.join(','), vendorId])
 
   async function handleBarcodeScan(code: string) {
     setLoading(true)
@@ -94,10 +119,17 @@ export default function ItemSearch({ onSelect, excludeIds = [], placeholder = 'S
             <button
               key={item.id}
               type="button"
-              className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-50 last:border-0"
+              className={`w-full px-4 py-3 text-left hover:bg-blue-50 border-b border-gray-50 last:border-0 ${item.l_rank ? 'bg-green-50/40' : ''}`}
               onClick={() => { onSelect(item); setQuery(''); setOpen(false) }}
             >
               <div className="flex items-center gap-2">
+                {item.l_rank && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                    item.l_rank === 1 ? 'bg-green-100 text-green-800' :
+                    item.l_rank === 2 ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>L{item.l_rank}</span>
+                )}
                 <span className="font-mono text-xs text-gray-500">{item.item_code}</span>
                 <span className="font-medium text-gray-900">{item.generic_name}</span>
                 {item.brand_name && <span className="text-xs text-gray-400">({item.brand_name})</span>}
