@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react'
+import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
 import { format } from 'date-fns'
 
 interface Centre {
@@ -348,15 +349,22 @@ export default function NewRateContractPage() {
             {/* Item Search */}
             <div className="relative mb-4">
               <label htmlFor="item-search" className="form-label">Add Item</label>
-              <input
-                id="item-search"
-                type="text"
-                value={itemSearch}
-                onChange={e => setItemSearch(e.target.value)}
-                placeholder="Search items by name or code..."
-                className="form-input w-full"
-                autoComplete="off"
-              />
+              <div className="flex gap-2">
+                <input
+                  id="item-search"
+                  type="text"
+                  value={itemSearch}
+                  onChange={e => setItemSearch(e.target.value)}
+                  placeholder="Search items by name or code..."
+                  className="form-input w-full"
+                  autoComplete="off"
+                />
+                <BarcodeScanButton onScan={async (code) => {
+                  const { data } = await supabase.from('items').select('id, item_code, generic_name, brand_name, unit, gst_percent, manufacturer').eq('is_active', true).or(`item_code.eq.${code},item_code.ilike.${code}`).limit(1)
+                  if (data?.[0]) { addItem(data[0]); toast.success(`Added: ${data[0].generic_name}`) }
+                  else { setItemSearch(code); toast.error(`No match for "${code}"`) }
+                }} label="Scan" scanType="item" />
+              </div>
               {itemResults.length > 0 && (
                 <div className="absolute z-10 top-full left-0 right-0 bg-white border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
                   {itemResults.map(item => (

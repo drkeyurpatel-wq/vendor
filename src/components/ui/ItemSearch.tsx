@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Search, Loader2 } from 'lucide-react'
+import BarcodeScanButton from './BarcodeScanButton'
 
 interface ItemResult {
   id: string
@@ -55,17 +56,37 @@ export default function ItemSearch({ onSelect, excludeIds = [], placeholder = 'S
     return () => clearTimeout(timer)
   }, [query, excludeIds.join(',')])
 
+  async function handleBarcodeScan(code: string) {
+    setLoading(true)
+    const { data } = await supabase
+      .from('items')
+      .select('id, item_code, generic_name, brand_name, unit, gst_percent, category:item_categories(name)')
+      .eq('is_active', true)
+      .or(`item_code.eq.${code},item_code.ilike.${code}`)
+      .limit(1)
+    setLoading(false)
+    const match = (data ?? []).find(i => !excludeIds.includes(i.id))
+    if (match) {
+      onSelect(match)
+    } else {
+      setQuery(code)
+    }
+  }
+
   return (
     <div ref={ref} className="relative">
-      <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
-        <input
-          className="form-input pl-11"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onFocus={() => results.length > 0 && setOpen(true)}
-          placeholder={placeholder}
-        />
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
+          <input
+            className="form-input pl-11"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onFocus={() => results.length > 0 && setOpen(true)}
+            placeholder={placeholder}
+          />
+        </div>
+        <BarcodeScanButton onScan={handleBarcodeScan} label="Scan" scanType="item" />
       </div>
       {open && results.length > 0 && (
         <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">

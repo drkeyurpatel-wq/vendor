@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, Plus, Trash2, AlertTriangle, Package, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { cn, formatCurrency } from '@/lib/utils'
+import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
 
 interface IndentItem {
   id: string
@@ -245,19 +246,20 @@ export default function NewIndentPage() {
           </div>
 
           {/* Search */}
-          <div className="relative mb-5">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true) }}
-              onFocus={() => searchQuery.length >= 2 && setSearchOpen(true)}
-              placeholder="Search items by name, code, or brand..."
-              className="form-input pl-10"
-            />
+          <div className="flex gap-2 mb-5">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => { setSearchQuery(e.target.value); setSearchOpen(true) }}
+                onFocus={() => searchQuery.length >= 2 && setSearchOpen(true)}
+                placeholder="Search items by name, code, or brand..."
+                className="form-input pl-10"
+              />
 
-            {/* Search dropdown */}
-            {searchOpen && searchQuery.length >= 2 && (
+              {/* Search dropdown */}
+              {searchOpen && searchQuery.length >= 2 && (
               <div className="absolute z-20 top-full mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-elevated max-h-64 overflow-y-auto">
                 {searchLoading ? (
                   <div className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
@@ -297,6 +299,12 @@ export default function NewIndentPage() {
                 )}
               </div>
             )}
+          </div>
+          <BarcodeScanButton onScan={async (code) => {
+            const { data } = await supabase.from('items').select('id, item_code, generic_name, brand_name, unit, gst_percent').eq('is_active', true).or(`item_code.eq.${code},item_code.ilike.${code}`).limit(1)
+            if (data?.[0]) { addItem(data[0]); toast.success(`Added: ${data[0].generic_name}`) }
+            else { setSearchQuery(code); toast.error(`No match for "${code}" — showing search`) }
+          }} label="Scan" scanType="item" />
           </div>
 
           {/* Line items table */}

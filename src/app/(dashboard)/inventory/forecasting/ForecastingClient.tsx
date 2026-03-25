@@ -8,6 +8,7 @@ import {
   Target, ArrowRight, ShieldCheck, ShoppingCart
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
 
 interface ForecastData {
   item: {
@@ -126,19 +127,29 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
           Search Item for Forecast
         </label>
         <div className="relative">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value)
-              searchItems(e.target.value)
-            }}
-            placeholder="Type item name, code, or brand..."
-            className="form-input"
-          />
-          {searching && (
-            <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400" />
-          )}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  searchItems(e.target.value)
+                }}
+                placeholder="Type item name, code, or brand..."
+                className="form-input"
+              />
+              {searching && (
+                <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400" />
+              )}
+            </div>
+            <BarcodeScanButton onScan={async (code) => {
+              const supabase = createClient()
+              const { data } = await supabase.from('items').select('id, item_code, generic_name').eq('is_active', true).or(`item_code.eq.${code},item_code.ilike.${code}`).limit(1)
+              if (data?.[0]) { loadForecast(data[0].id); setSearchQuery(data[0].generic_name); toast.success(`Loading forecast: ${data[0].generic_name}`) }
+              else { setSearchQuery(code); searchItems(code); toast.error(`No match — searching "${code}"`) }
+            }} label="Scan" scanType="item" />
+          </div>
 
           {/* Search Results Dropdown */}
           {searchResults.length > 0 && (

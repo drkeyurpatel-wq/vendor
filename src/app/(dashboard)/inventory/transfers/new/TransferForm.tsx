@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { ArrowLeftRight, Plus, Trash2, Save, Loader2, X, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import FieldError from '@/components/ui/FieldError'
+import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
 
 interface Centre {
   id: string
@@ -231,12 +232,24 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
             Transfer Items ({lines.length})
           </h2>
           {fromCentreId && (
-            <button
-              onClick={() => setShowSearch(!showSearch)}
-              className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
-            >
-              <Plus size={14} /> Add Item
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
+              >
+                <Plus size={14} /> Add Item
+              </button>
+              <BarcodeScanButton onScan={async (code) => {
+                if (!fromCentreId) { toast.error('Select source centre first'); return }
+                const { data } = await supabase.from('item_centre_stock')
+                  .select('item_id, current_stock, item:items(item_code, generic_name, unit)')
+                  .eq('centre_id', fromCentreId)
+                  .gt('current_stock', 0)
+                const match = (data || []).find((s: any) => s.item?.item_code === code || s.item?.item_code?.toLowerCase() === code.toLowerCase())
+                if (match) { addLine(match as any); toast.success(`Added: ${(match as any).item?.generic_name}`) }
+                else { setShowSearch(true); setSearchTerm(code); toast.error(`No stock match for "${code}"`) }
+              }} label="Scan" scanType="item" />
+            </div>
           )}
         </div>
 
