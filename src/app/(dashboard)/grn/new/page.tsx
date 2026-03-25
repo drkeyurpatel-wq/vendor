@@ -402,34 +402,36 @@ export default function NewGRNPage() {
 
     const centreId = selectedPO.centre_id || profile?.centre_id
 
-    const { data: grn, error } = await supabase.from('grns').insert({
-      grn_number: grnNumber,
-      centre_id: centreId,
-      po_id: selectedPO.id,
-      vendor_id: selectedPO.vendor_id,
-      grn_date: grnDate,
-      vendor_invoice_no: vendorInvoiceNo.trim() || null,
-      vendor_invoice_date: vendorInvoiceDate || null,
-      vendor_invoice_amount: vendorInvoiceAmount ? parseFloat(vendorInvoiceAmount) : null,
-      dc_number: dcNumber.trim() || null,
-      dc_date: dcDate || null,
-      lr_number: lrNumber.trim() || null,
-      transport_name: transportName.trim() || null,
-      vehicle_number: vehicleNumber.trim() || null,
-      eway_bill_no: ewayBillNo.trim() || null,
-      status: hasDiscrepancy ? 'discrepancy' : 'submitted',
-      quality_status: 'pending',
-      cgst_amount: Math.round(totalCGST * 100) / 100,
-      sgst_amount: Math.round(totalSGST * 100) / 100,
-      igst_amount: Math.round(totalIGST * 100) / 100,
-      total_amount: Math.round(grandTotal * 100) / 100,
-      discount_amount: 0,
-      net_amount: Math.round(grandTotal * 100) / 100,
-      notes: notes.trim() || null,
-      received_by: profile?.id,
-    }).select().single()
+    try {
+      const { data: grn, error } = await supabase.from('grns').insert({
+        grn_number: grnNumber,
+        centre_id: centreId,
+        po_id: selectedPO.id,
+        vendor_id: selectedPO.vendor_id,
+        grn_date: grnDate,
+        vendor_invoice_no: vendorInvoiceNo.trim() || null,
+        vendor_invoice_date: vendorInvoiceDate || null,
+        vendor_invoice_amount: vendorInvoiceAmount ? parseFloat(vendorInvoiceAmount) : null,
+        dc_number: dcNumber.trim() || null,
+        dc_date: dcDate || null,
+        lr_number: lrNumber.trim() || null,
+        transport_name: transportName.trim() || null,
+        vehicle_number: vehicleNumber.trim() || null,
+        eway_bill_no: ewayBillNo.trim() || null,
+        status: hasDiscrepancy ? 'discrepancy' : 'submitted',
+        quality_status: 'pending',
+        cgst_amount: Math.round(totalCGST * 100) / 100,
+        sgst_amount: Math.round(totalSGST * 100) / 100,
+        igst_amount: Math.round(totalIGST * 100) / 100,
+        total_amount: Math.round(grandTotal * 100) / 100,
+        discount_amount: 0,
+        net_amount: Math.round(grandTotal * 100) / 100,
+        notes: notes.trim() || null,
+        received_by: profile?.id || null,
+      }).select().single()
 
-    if (error) { toast.error(error.message); setLoading(false); return }
+      if (error) { toast.error(`GRN save failed: ${error.message}`); setLoading(false); return }
+      if (!grn) { toast.error('GRN created but no data returned'); setLoading(false); return }
 
     // Insert GRN items
     const grnItems = lineItems
@@ -473,7 +475,7 @@ export default function NewGRNPage() {
       }))
 
     const { error: itemError } = await supabase.from('grn_items').insert(grnItems)
-    if (itemError) { toast.error(itemError.message); setLoading(false); return }
+    if (itemError) { toast.error(`GRN items failed: ${itemError.message}`); setLoading(false); return }
 
     // Update PO item received quantities
     for (const li of lineItems) {
@@ -577,15 +579,14 @@ export default function NewGRNPage() {
         const indentNum = `H1-SH-${new Date().getFullYear().toString().slice(2)}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String((indentCount ?? 0) + 1).padStart(3, '0')}`
         const { data: indent } = await supabase.from('purchase_indents').insert({
           indent_number: indentNum, centre_id: centreId,
-          status: 'approved', priority: 'urgent', department: 'Store',
-          notes: `Auto-generated: short delivery on GRN ${grnNumber} (PO ${selectedPO.po_number}). ${shortItems.length} item(s) short.`,
-          source: 'grn_short_delivery',
+          status: 'approved', priority: 'urgent',
+          notes: `Auto: short delivery on GRN ${grnNumber} (PO ${selectedPO.po_number}). ${shortItems.length} item(s) short.`,
         }).select().single()
         if (indent) {
           await supabase.from('purchase_indent_items').insert(
             shortItems.map(li => ({
               indent_id: indent.id, item_id: li.item_id,
-              requested_qty: li.short_qty, approved_qty: li.short_qty,
+              requested_qty: li.short_qty, unit: li.unit || 'Nos',
               notes: `Short ${li.short_qty} of ${li.ordered_qty} ordered`,
             }))
           )
@@ -605,6 +606,11 @@ export default function NewGRNPage() {
     })
 
     router.push(`/grn/${grn.id}`)
+    } catch (err: any) {
+      console.error('GRN creation error:', err)
+      toast.error(`GRN creation failed: ${err?.message || 'Unknown error'}`)
+      setLoading(false)
+    }
   }
 
   return (
