@@ -91,7 +91,7 @@ const NAV: NavItem[] = [
     label: 'Consignment', icon: <Heart size={18} />,
     children: [
       { label: 'Dashboard', href: '/consignment' },
-      { label: 'Receive Challan', href: '/consignment/deposits' },
+      { label: 'Receive Challan', href: '/consignment/deposits/new' },
       { label: 'Stock View', href: '/consignment/stock' },
       { label: 'Usage Log', href: '/consignment/usage' },
     ]
