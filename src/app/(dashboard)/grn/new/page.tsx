@@ -93,20 +93,26 @@ export default function NewGRNPage() {
         .single()
       if (prof) setProfile(prof)
 
-      // Get eligible POs (approved or sent_to_vendor or partially_received)
-      let poQuery = supabase
-        .from('purchase_orders')
-        .select('id, po_number, vendor_id, centre_id, vendor:vendors(legal_name, state), centre:centres(code, name, state), total_amount, status, supply_type')
-        .in('status', ['approved', 'sent_to_vendor', 'partially_received'])
-        .is('deleted_at', null)
-        .order('po_date', { ascending: false })
+    // Get eligible POs
+      try {
+        let poQuery = supabase
+          .from('purchase_orders')
+          .select('id, po_number, vendor_id, centre_id, vendor:vendors(legal_name), centre:centres(code, name), total_amount, status')
+          .in('status', ['approved', 'sent_to_vendor', 'partially_received', 'pending_approval'])
+          .is('deleted_at', null)
+          .order('po_date', { ascending: false })
+          .limit(50)
 
-      if (prof && prof.centre_id && !['group_admin', 'group_cao'].includes(prof.role)) {
-        poQuery = poQuery.eq('centre_id', prof.centre_id)
+        if (prof && prof.centre_id && !['group_admin', 'group_cao'].includes(prof.role)) {
+          poQuery = poQuery.eq('centre_id', prof.centre_id)
+        }
+
+        const { data: pos, error: poError } = await poQuery
+        if (poError) console.error('PO load error:', poError)
+        if (pos) setEligiblePOs(pos)
+      } catch (err) {
+        console.error('PO load failed:', err)
       }
-
-      const { data: pos } = await poQuery
-      if (pos) setEligiblePOs(pos)
 
       // Pre-select PO from URL
       const poId = searchParams.get('po')
