@@ -87,28 +87,25 @@ export default function NewPOPage() {
     if (items.length === 0) { toast.error('Add at least one item'); return }
     if (items.some(i => i.rate <= 0)) { toast.error('All items must have a rate > 0'); return }
 
-    // Duplicate PO detection — check for open POs with same vendor + items
-    const itemIds = items.map(i => i.item_id)
-    const { data: existingPOs } = await supabase
-      .from('purchase_orders')
-      .select('id, po_number, status, po_date, items:purchase_order_items(item_id)')
-      .eq('vendor_id', vendor.id)
-      .in('status', ['draft', 'pending_approval', 'approved', 'sent_to_vendor'])
-      .is('deleted_at', null)
-      .limit(20)
+    // Duplicate PO detection — non-blocking (wrapped in try/catch)
+    try {
+      const itemIds = items.map(i => i.item_id)
+      const { data: existingPOs } = await supabase
+        .from('purchase_orders')
+        .select('id, po_number, status')
+        .eq('vendor_id', vendor.id)
+        .in('status', ['draft', 'pending_approval', 'approved', 'sent_to_vendor'])
+        .is('deleted_at', null)
+        .limit(10)
 
-    const overlapping = (existingPOs || []).filter(po => {
-      const poItemIds = (po.items || []).map((i: any) => i.item_id)
-      return itemIds.some(id => poItemIds.includes(id))
-    })
-
-    if (overlapping.length > 0) {
-      const poNums = overlapping.map(po => `${po.po_number} (${po.status.replace(/_/g, ' ')})`).join(', ')
-      const proceed = window.confirm(
-        `⚠️ DUPLICATE WARNING\n\nOpen POs with same vendor + overlapping items:\n${poNums}\n\nCreating another PO may result in double ordering. Continue anyway?`
-      )
-      if (!proceed) return
-    }
+      if (existingPOs && existingPOs.length > 0) {
+        const poNums = existingPOs.map(po => `${po.po_number} (${po.status.replace(/_/g, ' ')})`).join(', ')
+        const proceed = window.confirm(
+          `Note: ${existingPOs.length} open PO(s) exist for this vendor:\n${poNums}\n\nContinue creating new PO?`
+        )
+        if (!proceed) return
+      }
+    } catch { /* non-critical — proceed with PO creation */ }
 
     const rateViolations = items.filter(i => i.rate_warning)
     if (rateViolations.length > 0) {
@@ -160,69 +157,80 @@ export default function NewPOPage() {
       ? `[RATE CONTRACT OVERRIDE] ${rateViolations.map(i => `${i.generic_name}: ₹${i.rate} vs contract ₹${i.contract_rate}`).join('; ')}${notes.trim() ? ' | ' + notes.trim() : ''}`
       : notes.trim() || null
 
-    const { data: po, error } = await supabase.from('purchase_orders').insert({
-      po_number: poNumber, centre_id: centreId, vendor_id: vendor.id, status,
-      po_date: new Date().toISOString().split('T')[0],
-      expected_delivery_date: expectedDelivery || null, priority,
-      subtotal, gst_amount: gstAmount, total_amount: totalAmount,
-      cgst_amount: cgstAmount, sgst_amount: sgstAmount, igst_amount: igstAmount,
-      discount_amount: discountAmt, freight_amount: freight, loading_charges: loadChg,
-      insurance_charges: insChg, other_charges: othChg, net_amount: netAmount,
-      terms_and_conditions: termsAndConditions.trim() || null,
-      delivery_instructions: deliveryInstructions.trim() || null,
-      payment_terms: paymentTerms.trim() || null,
-      quotation_ref: quotationRef.trim() || null,
-      quotation_date: quotationDate || null,
-      tds_applicable: vendor.tds_applicable || false,
-      tds_section: vendor.tds_section || null,
-      tds_rate: vendor.tds_rate || null,
-      notes: rateNotes, created_by: profile?.id,
-      current_approval_level: status === 'approved' ? 0 : 1,
-    }).select().single()
+    try {
+      const { data: po, error } = await supabase.from('purchase_orders').insert({
+        po_number: poNumber, centre_id: centreId, vendor_id: vendor.id, status,
+        po_date: new Date().toISOString().split('T')[0],
+        expected_delivery_date: expectedDelivery || null, priority,
+        subtotal, gst_amount: gstAmount, total_amount: totalAmount,
+        cgst_amount: cgstAmount, sgst_amount: sgstAmount, igst_amount: igstAmount,
+        discount_amount: discountAmt, freight_amount: freight, loading_charges: loadChg,
+        insurance_charges: insChg, other_charges: othChg, net_amount: netAmount,
+        terms_and_conditions: termsAndConditions.trim() || null,
+        delivery_instructions: deliveryInstructions.trim() || null,
+        payment_terms: paymentTerms.trim() || null,
+        quotation_ref: quotationRef.trim() || null,
+        quotation_date: quotationDate || null,
+        tds_applicable: vendor.tds_applicable || false,
+        tds_section: vendor.tds_section || null,
+        tds_rate: vendor.tds_rate || null,
+        notes: rateNotes, created_by: profile?.id || null,
+        current_approval_level: status === 'approved' ? 0 : 1,
+      }).select().single()
 
-    if (error) { toast.error(error.message); setLoading(false); return }
+      if (error) { toast.error(`PO header failed: ${error.message}`); setLoading(false); return }
+      if (!po) { toast.error('PO created but no data returned'); setLoading(false); return }
 
-    const lineItems = items.map(item => ({
-      po_id: po.id, item_id: item.item_id,
-      ordered_qty: item.ordered_qty, free_qty: item.free_qty,
-      received_qty: 0, pending_qty: item.ordered_qty,
-      unit: item.unit, purchase_unit: item.purchase_unit,
-      conversion_factor: item.conversion_factor, base_qty: item.base_qty,
-      rate: item.rate, net_rate: item.net_rate, mrp: item.mrp || null,
-      trade_discount_percent: item.trade_discount_percent,
-      trade_discount_amount: item.trade_discount_amount,
-      cash_discount_percent: item.cash_discount_percent,
-      special_discount_percent: item.special_discount_percent,
-      gst_percent: item.gst_percent, gst_amount: item.gst_amount,
-      cgst_percent: item.cgst_percent, sgst_percent: item.sgst_percent,
-      igst_percent: item.igst_percent, cgst_amount: item.cgst_amount,
-      sgst_amount: item.sgst_amount, igst_amount: item.igst_amount,
-      total_amount: item.total_amount, hsn_code: item.hsn_code || null,
-      manufacturer: item.manufacturer || null, delivery_date: item.delivery_date || null,
-    }))
+      const lineItems = items.map(item => ({
+        po_id: po.id, item_id: item.item_id,
+        ordered_qty: item.ordered_qty, free_qty: item.free_qty,
+        received_qty: 0, pending_qty: item.ordered_qty,
+        unit: item.unit, purchase_unit: item.purchase_unit || item.unit,
+        conversion_factor: item.conversion_factor || 1, base_qty: item.base_qty || item.ordered_qty,
+        rate: item.rate, net_rate: item.net_rate, mrp: item.mrp || null,
+        trade_discount_percent: item.trade_discount_percent || 0,
+        trade_discount_amount: item.trade_discount_amount || 0,
+        cash_discount_percent: item.cash_discount_percent || 0,
+        special_discount_percent: item.special_discount_percent || 0,
+        gst_percent: item.gst_percent, gst_amount: item.gst_amount,
+        cgst_percent: item.cgst_percent, sgst_percent: item.sgst_percent,
+        igst_percent: item.igst_percent, cgst_amount: item.cgst_amount,
+        sgst_amount: item.sgst_amount, igst_amount: item.igst_amount,
+        total_amount: item.total_amount, hsn_code: item.hsn_code || null,
+        manufacturer: item.manufacturer || null, delivery_date: item.delivery_date || null,
+      }))
 
-    const { error: itemError } = await supabase.from('purchase_order_items').insert(lineItems)
-    if (itemError) { toast.error(itemError.message); setLoading(false); return }
+      const { error: itemError } = await supabase.from('purchase_order_items').insert(lineItems)
+      if (itemError) { toast.error(`PO line items failed: ${itemError.message}`); setLoading(false); return }
 
-    if (status === 'pending_approval') {
-      await supabase.from('po_approvals').insert({
-        po_id: po.id, approval_level: 1, approver_role: approverRole, status: 'pending',
-      })
+      if (status === 'pending_approval') {
+        try {
+          await supabase.from('po_approvals').insert({
+            po_id: po.id, approval_level: 1, approver_role: approverRole, status: 'pending',
+          })
+        } catch { /* non-critical */ }
+      }
+
+      toast.success(`PO ${poNumber} created`)
+
+      // Notify (fire-and-forget)
+      try {
+        notifyAll({
+          emailType: 'po_created',
+          emailData: { po_id: po.id },
+          action: status === 'pending_approval' ? 'po_submitted' : 'po_created',
+          entity_type: 'purchase_order',
+          entity_id: po.id,
+          details: { po_number: poNumber },
+        })
+      } catch { /* non-critical */ }
+
+      router.push(`/purchase-orders/${po.id}`)
+    } catch (err: any) {
+      console.error('PO creation error:', err)
+      toast.error(`PO creation failed: ${err?.message || 'Unknown error'}`)
+      setLoading(false)
     }
-
-    toast.success(`PO ${poNumber} created`)
-
-    // Notify: email vendor + in-app to approvers
-    notifyAll({
-      emailType: 'po_created',
-      emailData: { po_id: po.id },
-      action: status === 'pending_approval' ? 'po_submitted' : 'po_created',
-      entity_type: 'purchase_order',
-      entity_id: po.id,
-      details: { po_number: poNumber },
-    })
-
-    router.push(`/purchase-orders/${po.id}`)
   }
 
   return (
