@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, FileText } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -23,6 +23,7 @@ interface GRNOption {
 
 export default function NewInvoicePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
   const [loading, setLoading] = useState(false)
@@ -77,6 +78,20 @@ export default function NewInvoicePage() {
         const usedSet = new Set(usedGrnIds)
         const eligible = allGrns.filter((g: any) => !usedSet.has(g.id))
         setGrns(eligible as GRNOption[])
+
+        // Auto-select GRN from URL param (?grn=<id>)
+        const preselectedGrnId = searchParams.get('grn')
+        if (preselectedGrnId) {
+          const found = eligible.find((g: any) => g.id === preselectedGrnId) as GRNOption | undefined
+          if (found) {
+            setSelectedGRN(found)
+            const creditDays = (found.vendor as any)?.credit_period_days ?? 30
+            const grnDateObj = new Date(found.grn_date)
+            const calculatedDue = new Date(grnDateObj)
+            calculatedDue.setDate(calculatedDue.getDate() + creditDays)
+            setDueDate(calculatedDue.toISOString().split('T')[0])
+          }
+        }
       }
 
       setPageLoading(false)

@@ -323,6 +323,20 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
             </div>
           )}
 
+          {/* Create Invoice prompt when GRN is verified/submitted but no invoice yet */}
+          {!linkedInvoice && ['verified', 'submitted'].includes(grn.status) && (
+            <div className="card p-5 border-l-4 border-amber-400 bg-amber-50/30">
+              <h3 className="text-xs uppercase tracking-wide text-amber-700 font-semibold mb-2">Invoice Pending</h3>
+              <p className="text-sm text-gray-600 mb-3">This GRN has been {grn.status} but no invoice has been created yet.</p>
+              <Link
+                href={`/finance/invoices/new?grn=${grn.id}`}
+                className="btn-primary inline-flex items-center gap-1.5 text-sm"
+              >
+                Create Invoice →
+              </Link>
+            </div>
+          )}
+
           {/* Transport card */}
           <div className="card p-5">
             <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-4">Transport Details</h3>
