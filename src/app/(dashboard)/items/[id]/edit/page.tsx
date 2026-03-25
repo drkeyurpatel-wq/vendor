@@ -63,58 +63,66 @@ export default function EditItemPage() {
     if (!form.generic_name?.trim()) { toast.error('Item name is required'); return }
     setLoading(true)
 
-    const gstPercent = parseFloat(form.gst_slab) || 0
-    const payload: any = {
-      generic_name: form.generic_name.trim(),
-      brand_name: form.brand_name?.trim() || null,
-      manufacturer: form.manufacturer?.trim() || null,
-      marketed_by: form.marketed_by?.trim() || null,
-      category_id: form.category_id || null,
-      department: form.department || null,
-      unit: form.unit || 'Nos',
-      purchase_unit: form.purchase_unit || null,
-      issue_unit: form.issue_unit || null,
-      strength: form.strength?.trim() || null,
-      dosage_form: form.dosage_form || null,
-      therapeutic_class: form.therapeutic_class?.trim() || null,
-      hsn_code: form.hsn_code?.trim() || null,
-      gst_percent: gstPercent,
-      gst_slab: form.gst_slab || null,
-      cgst_percent: gstPercent / 2,
-      sgst_percent: gstPercent / 2,
-      igst_percent: gstPercent,
-      default_rate: form.default_rate ? parseFloat(form.default_rate) : null,
-      mrp: form.mrp ? parseFloat(form.mrp) : null,
-      reorder_level: form.reorder_level ? parseInt(form.reorder_level) : 0,
-      min_stock: form.min_stock ? parseInt(form.min_stock) : 0,
-      max_stock: form.max_stock ? parseInt(form.max_stock) : null,
-      safety_stock: form.safety_stock ? parseInt(form.safety_stock) : 0,
-      lead_time_days: form.lead_time_days ? parseInt(form.lead_time_days) : 7,
-      storage_location: form.storage_location?.trim() || null,
-      bin_location: form.bin_location?.trim() || null,
-      shelf_life_days: form.shelf_life_days ? parseInt(form.shelf_life_days) : null,
-      is_active: form.is_active !== false,
-      is_cold_chain: !!form.is_cold_chain,
-      is_narcotic: !!form.is_narcotic,
-      is_high_alert: !!form.is_high_alert,
-      is_consignment: !!form.is_consignment,
-      ecw_item_code: form.ecw_item_code?.trim() || null,
-      tally_item_name: form.tally_item_name?.trim() || null,
-      notes: form.notes?.trim() || null,
-      updated_at: new Date().toISOString(),
+    try {
+      const gstPercent = parseFloat(form.gst_slab) || 0
+      const payload: any = {
+        generic_name: form.generic_name.trim(),
+        brand_name: form.brand_name?.trim() || null,
+        manufacturer: form.manufacturer?.trim() || null,
+        marketed_by: form.marketed_by?.trim() || null,
+        category_id: form.category_id || null,
+        department: form.department || null,
+        unit: form.unit || 'Nos',
+        purchase_unit: form.purchase_unit || null,
+        issue_unit: form.issue_unit || null,
+        strength: form.strength?.trim() || null,
+        dosage_form: form.dosage_form || null,
+        therapeutic_class: form.therapeutic_class?.trim() || null,
+        hsn_code: form.hsn_code?.trim() || null,
+        gst_percent: gstPercent,
+        gst_slab: String(gstPercent) || null,
+        cgst_percent: gstPercent / 2,
+        sgst_percent: gstPercent / 2,
+        igst_percent: gstPercent,
+        default_rate: form.default_rate ? parseFloat(form.default_rate) : null,
+        mrp: form.mrp ? parseFloat(form.mrp) : null,
+        reorder_level: form.reorder_level ? parseInt(form.reorder_level) : 0,
+        min_stock: form.min_stock ? parseInt(form.min_stock) : 0,
+        max_stock: form.max_stock ? parseInt(form.max_stock) : null,
+        safety_stock: form.safety_stock ? parseInt(form.safety_stock) : 0,
+        lead_time_days: form.lead_time_days ? parseInt(form.lead_time_days) : 7,
+        storage_location: form.storage_location?.trim() || null,
+        bin_location: form.bin_location?.trim() || null,
+        shelf_life_days: form.shelf_life_days ? parseInt(form.shelf_life_days) : null,
+        is_active: form.is_active !== false,
+        is_cold_chain: !!form.is_cold_chain,
+        is_narcotic: !!form.is_narcotic,
+        is_high_alert: !!form.is_high_alert,
+        is_consignment: !!form.is_consignment,
+        ecw_item_code: form.ecw_item_code?.trim() || null,
+        tally_item_name: form.tally_item_name?.trim() || null,
+        notes: form.notes?.trim() || null,
+        updated_at: new Date().toISOString(),
+      }
+
+      const { error } = await supabase.from('items').update(payload).eq('id', itemId)
+      if (error) { toast.error(`Save failed: ${error.message}`); setLoading(false); return }
+
+      // Audit trail (non-blocking)
+      try {
+        const changes = computeDiff(original, payload, EDITABLE_FIELDS)
+        if (Object.keys(changes).length > 0) {
+          trackChanges({ entity_type: 'item', entity_id: itemId, changes })
+        }
+      } catch { /* non-critical */ }
+
+      toast.success(`${form.item_code} updated`)
+      router.push(`/items/${itemId}`)
+    } catch (err: any) {
+      console.error('Item edit error:', err)
+      toast.error(`Save failed: ${err?.message || 'Unknown error'}`)
+      setLoading(false)
     }
-
-    // Track changes for audit
-    const changes = computeDiff(original, payload, EDITABLE_FIELDS)
-    if (Object.keys(changes).length > 0) {
-      trackChanges({ entity_type: 'item', entity_id: itemId, changes })
-    }
-
-    const { error } = await supabase.from('items').update(payload).eq('id', itemId)
-    if (error) { toast.error(error.message); setLoading(false); return }
-
-    toast.success(`${form.item_code} updated`)
-    router.push(`/items/${itemId}`)
   }
 
   if (pageLoading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-[#1B3A6B]" /></div>

@@ -48,7 +48,8 @@ const NAV: NavItem[] = [
       { label: 'Add Item', href: '/items/new' },
       { label: 'Categories', href: '/items/categories' },
       { label: 'Stock Levels', href: '/items/stock' },
-      { label: 'Consumption Import', href: '/items/consumption' },
+      { label: 'Consumption Report', href: '/items/consumption' },
+      { label: 'Upload Consumption', href: '/items/consumption/upload' },
     ]
   },
   {

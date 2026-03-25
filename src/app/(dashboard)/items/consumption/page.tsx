@@ -67,7 +67,10 @@ export default async function ConsumptionPage({
           <h1 className="text-2xl font-bold text-[#1B3A6B]">Consumption Analysis</h1>
           <p className="text-sm text-gray-500 mt-1">{sortedItems.length} items — {formatCurrency(totalValue)} total — last {monthsBack} months (from GRN data)</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <Link href="/items/consumption/upload" className="btn-primary text-sm">
+            Upload Consumption
+          </Link>
           {[3, 6, 12].map(m => (
             <Link key={m} href={`/items/consumption?months=${m}${params.centre ? `&centre=${params.centre}` : ''}`}
               className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
