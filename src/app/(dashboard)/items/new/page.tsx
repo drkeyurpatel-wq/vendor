@@ -320,14 +320,6 @@ export default function NewItemPage() {
                   <input className="form-input" disabled value="Auto-generated" />
                 </div>
                 <div>
-                  <label className="form-label">SNOMED CT Code</label>
-                  <input className="form-input" value={form.snomed_ct_code} onChange={e => update('snomed_ct_code', e.target.value)} />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="form-label">SNOMED CT Description</label>
-                  <input className="form-input" value={form.snomed_ct_description} onChange={e => update('snomed_ct_description', e.target.value)} />
-                </div>
-                <div>
                   <label className="form-label">Department *</label>
                   <select className="form-select" value={form.department} onChange={e => update('department', e.target.value)}>
                     {DEPARTMENTS.map(d => <option key={d}>{d}</option>)}
@@ -374,14 +366,6 @@ export default function NewItemPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="form-label">Major Group</label>
-                    <input className="form-input" value={form.major_group} onChange={e => update('major_group', e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="form-label">Minor Group</label>
-                    <input className="form-input" value={form.minor_group} onChange={e => update('minor_group', e.target.value)} />
-                  </div>
-                  <div>
                     <label className="form-label">Strength</label>
                     <input className="form-input" value={form.strength} onChange={e => update('strength', e.target.value)} placeholder="e.g. 500mg" />
                   </div>
@@ -407,10 +391,6 @@ export default function NewItemPage() {
                       <option value="">Select</option>
                       {DOSAGE_FORMS.map(d => <option key={d}>{d}</option>)}
                     </select>
-                  </div>
-                  <div>
-                    <label className="form-label">N.D.C.</label>
-                    <input className="form-input" value={form.ndc_code} onChange={e => update('ndc_code', e.target.value)} />
                   </div>
                   <div>
                     <label className="form-label">R.O.A.</label>
@@ -507,98 +487,29 @@ export default function NewItemPage() {
           <div className="space-y-6">
             <div className="card p-6">
               <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
-                Unit Hierarchy
+                Unit of Measurement
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div>
-                  <label className="form-label">Unit Levels *</label>
-                  <select className="form-select" value={form.unit_levels} onChange={e => update('unit_levels', e.target.value)}>
-                    <option value="1">1 Level</option>
-                    <option value="2">2 Levels</option>
-                    <option value="3">3 Levels</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="form-label">Level 1 Unit *</label>
-                  <select className="form-select" value={form.level1_unit || form.unit} onChange={e => { update('level1_unit', e.target.value); update('unit', e.target.value) }}>
+                  <label className="form-label">Unit *</label>
+                  <select className="form-select" value={form.unit} onChange={e => { update('unit', e.target.value); update('level1_unit', e.target.value) }}>
                     <option value="">Select</option>
                     {allUnits.map(u => <option key={u}>{u}</option>)}
                   </select>
                 </div>
-                {parseInt(form.unit_levels) >= 2 && (
-                  <>
-                    <div>
-                      <label className="form-label">Level 2 Unit</label>
-                      <select className="form-select" value={form.level2_unit} onChange={e => update('level2_unit', e.target.value)}>
-                        <option value="">Select</option>
-                        {allUnits.map(u => <option key={u}>{u}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="form-label">L2 Qty per L1</label>
-                      <input type="number" className="form-input" value={form.level2_qty} onChange={e => update('level2_qty', e.target.value)} min="1" />
-                    </div>
-                  </>
-                )}
-                {parseInt(form.unit_levels) >= 3 && (
-                  <>
-                    <div>
-                      <label className="form-label">Level 3 Unit</label>
-                      <select className="form-select" value={form.level3_unit} onChange={e => update('level3_unit', e.target.value)}>
-                        <option value="">Select</option>
-                        {allUnits.map(u => <option key={u}>{u}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="form-label">L3 Qty per L2</label>
-                      <input type="number" className="form-input" value={form.level3_qty} onChange={e => update('level3_qty', e.target.value)} min="1" />
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Example conversion */}
-              {parseInt(form.unit_levels) >= 2 && form.level1_unit && form.level2_unit && form.level2_qty && (
-                <div className="mt-4 p-3 bg-[#E6F5F6] rounded-lg text-sm">
-                  <span className="font-medium text-[#0D7E8A]">Conversion:</span>{' '}
-                  1 {form.level1_unit} = {form.level2_qty} {form.level2_unit}
-                  {parseInt(form.unit_levels) >= 3 && form.level3_unit && form.level3_qty && (
-                    <> = {parseInt(form.level2_qty) * parseInt(form.level3_qty)} {form.level3_unit}</>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
-                Transaction Units
-              </h3>
-              <p className="text-xs text-gray-500 mb-4">Define which unit is used at each stage of the procurement cycle</p>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2">
                 <div>
-                  <label className="form-label">Purchase Unit *</label>
+                  <label className="form-label">Purchase Unit</label>
                   <select className="form-select" value={form.purchase_unit} onChange={e => update('purchase_unit', e.target.value)}>
-                    <option value="">Same as L1</option>
+                    <option value="">Same as Unit</option>
                     {allUnits.map(u => <option key={u}>{u}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="form-label">Receipt Unit *</label>
-                  <select className="form-select" value={form.receipt_unit} onChange={e => update('receipt_unit', e.target.value)}>
-                    <option value="">Same as L1</option>
-                    {allUnits.map(u => <option key={u}>{u}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="form-label">Issue Unit *</label>
+                  <label className="form-label">Issue Unit</label>
                   <select className="form-select" value={form.issue_unit} onChange={e => update('issue_unit', e.target.value)}>
-                    <option value="">Same as L1</option>
+                    <option value="">Same as Unit</option>
                     {allUnits.map(u => <option key={u}>{u}</option>)}
                   </select>
-                </div>
-                <div>
-                  <label className="form-label">Qty. Conv.</label>
-                  <input type="number" className="form-input" value={form.qty_conversion} onChange={e => update('qty_conversion', e.target.value)} min="0.001" step="0.001" />
                 </div>
               </div>
             </div>
@@ -736,9 +647,44 @@ export default function NewItemPage() {
                   <label className="form-label">E.C. (%)</label>
                   <input type="number" className="form-input" value={form.ec_percent} onChange={e => update('ec_percent', e.target.value)} step="0.01" />
                 </div>
-                <div>
+                <div className="col-span-2">
                   <label className="form-label">HSN Code *</label>
-                  <input className="form-input" value={form.hsn_code} onChange={e => update('hsn_code', e.target.value)} placeholder="e.g. 30049099" />
+                  <input className="form-input" value={form.hsn_code}
+                    onChange={e => {
+                      update('hsn_code', e.target.value)
+                      // Auto-set GST from HSN code
+                      const hsn = e.target.value.trim()
+                      const HSN_GST_MAP: Record<string, string> = {
+                        '3001': '12', '3002': '12', '3003': '12', '3004': '12', '30041': '12', '30042': '12', '30049': '12', '30049099': '12',
+                        '3005': '18', '3006': '18',
+                        '9018': '12', '9019': '12', '9021': '12', '9022': '12', // Medical devices, implants
+                        '9402': '18', // Hospital furniture
+                        '4015': '12', // Gloves
+                        '6307': '12', // Surgical drapes
+                        '8419': '18', // Sterilizers
+                        '8713': '5',  // Wheelchairs
+                        '9401': '18', // Seats
+                      }
+                      // Match from most specific (8-digit) to least (4-digit)
+                      const match = HSN_GST_MAP[hsn] || HSN_GST_MAP[hsn.substring(0, 5)] || HSN_GST_MAP[hsn.substring(0, 4)]
+                      if (match) update('gst_slab', match)
+                    }}
+                    placeholder="e.g. 30049099" list="hsn-suggestions" />
+                  <datalist id="hsn-suggestions">
+                    <option value="30049099">30049099 — Medicaments (drugs)</option>
+                    <option value="30042099">30042099 — Antibiotics</option>
+                    <option value="30051090">30051090 — Dressings</option>
+                    <option value="30061000">30061000 — Surgical sutures</option>
+                    <option value="90183900">90183900 — Needles, catheters, cannulae</option>
+                    <option value="90189099">90189099 — Medical instruments (other)</option>
+                    <option value="90211090">90211090 — Ortho implants</option>
+                    <option value="90221490">90221490 — X-ray equipment</option>
+                    <option value="90185090">90185090 — Ophthalmic instruments</option>
+                    <option value="40151100">40151100 — Surgical gloves</option>
+                    <option value="63079090">63079090 — Surgical drapes</option>
+                    <option value="84198990">84198990 — Sterilizers</option>
+                  </datalist>
+                  {form.hsn_code && <p className="text-[10px] text-teal-600 mt-1">GST auto-set to {form.gst_slab}% from HSN</p>}
                 </div>
                 <div>
                   <label className="form-label">GST Slab *</label>

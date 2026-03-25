@@ -106,30 +106,41 @@ export default function NewVendorPage() {
         if (value.trim().length < 3) return 'Legal name must be at least 3 characters'
         return undefined
       case 'gstin':
-        if (value.trim() && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/i.test(value.trim()))
+        if (!value.trim()) return 'GST number is mandatory'
+        if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/i.test(value.trim()))
           return 'Invalid GSTIN format (e.g. 24AABCU9603R1ZM)'
         return undefined
       case 'pan':
-        if (value.trim() && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(value.trim()))
+        if (!value.trim()) return 'PAN is mandatory'
+        if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(value.trim()))
           return 'Invalid PAN format (e.g. AABCU9603R)'
+        return undefined
+      case 'primary_contact_name':
+        if (!value.trim()) return 'Contact name is mandatory'
+        return undefined
+      case 'primary_contact_phone':
+        if (!value.trim()) return 'Contact phone is mandatory'
+        if (!/^[\d+\-\s()]{10,15}$/.test(value.trim()))
+          return 'Invalid phone number'
+        return undefined
+      case 'primary_contact_email':
+        if (value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()))
+          return 'Invalid email address'
+        return undefined
+      case 'bank_name':
+        if (!value.trim()) return 'Bank name is mandatory'
+        return undefined
+      case 'bank_account_no':
+        if (!value.trim()) return 'Bank account number is mandatory'
+        return undefined
+      case 'bank_ifsc':
+        if (!value.trim()) return 'IFSC code is mandatory'
+        if (!/^[A-Z]{4}0[A-Z0-9]{6}$/i.test(value.trim()))
+          return 'Invalid IFSC code (e.g. SBIN0001234)'
         return undefined
       case 'pincode':
         if (value.trim() && !/^[1-9][0-9]{5}$/.test(value.trim()))
           return 'Invalid pincode (must be 6 digits)'
-        return undefined
-      case 'primary_contact_email':
-      case 'secondary_contact_email':
-        if (value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()))
-          return 'Invalid email address'
-        return undefined
-      case 'primary_contact_phone':
-      case 'secondary_contact_phone':
-        if (value.trim() && !/^[\d+\-\s()]{10,15}$/.test(value.trim()))
-          return 'Invalid phone number'
-        return undefined
-      case 'bank_ifsc':
-        if (value.trim() && !/^[A-Z]{4}0[A-Z0-9]{6}$/i.test(value.trim()))
-          return 'Invalid IFSC code (e.g. SBIN0001234)'
         return undefined
       default:
         return undefined
@@ -173,12 +184,12 @@ export default function NewVendorPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    // Validate all fields
+    // Validate all mandatory fields
     const fieldTabMap: Record<string, string> = {
       legal_name: 'basic', gstin: 'compliance', pan: 'compliance',
-      pincode: 'contact', primary_contact_email: 'contact', primary_contact_phone: 'contact',
-      secondary_contact_email: 'contact', secondary_contact_phone: 'contact',
-      bank_ifsc: 'banking',
+      primary_contact_name: 'contact', primary_contact_phone: 'contact', primary_contact_email: 'contact',
+      pincode: 'contact',
+      bank_name: 'banking', bank_account_no: 'banking', bank_ifsc: 'banking',
     }
     const newErrors: Partial<Record<keyof FormState, string>> = {}
     for (const field of Object.keys(fieldTabMap) as (keyof FormState)[]) {
@@ -376,15 +387,6 @@ export default function NewVendorPage() {
                     <span id="pan-hint" className="sr-only">10-character Permanent Account Number</span>
                     <FieldError message={errors.pan} show={touched.has('pan')} />
                   </div>
-                  <div>
-                    <label htmlFor="gst_return_status" className="form-label">GST Filing Status</label>
-                    <select id="gst_return_status" className="form-select" value={form.gst_return_status} onChange={e => update('gst_return_status', e.target.value)}>
-                      <option value="regular">Regular Filer</option>
-                      <option value="irregular">Irregular</option>
-                      <option value="not_filed">Not Filed</option>
-                      <option value="not_applicable">Not Applicable</option>
-                    </select>
-                  </div>
                 </div>
               </fieldset>
             </div>
@@ -399,16 +401,8 @@ export default function NewVendorPage() {
                   <input className="form-input" value={form.drug_license_no} onChange={e => update('drug_license_no', e.target.value)} />
                 </div>
                 <div>
-                  <label className="form-label">Drug License Expiry</label>
-                  <input type="date" className="form-input" value={form.drug_license_expiry} onChange={e => update('drug_license_expiry', e.target.value)} />
-                </div>
-                <div>
                   <label className="form-label">FSSAI No.</label>
                   <input className="form-input" value={form.fssai_no} onChange={e => update('fssai_no', e.target.value)} />
-                </div>
-                <div>
-                  <label className="form-label">FSSAI Expiry</label>
-                  <input type="date" className="form-input" value={form.fssai_expiry} onChange={e => update('fssai_expiry', e.target.value)} />
                 </div>
               </div>
             </div>
@@ -460,16 +454,6 @@ export default function NewVendorPage() {
                   </div>
                 </div>
               </fieldset>
-            </div>
-
-            <div className="card p-6">
-              <h3 className="font-semibold text-gray-900 mb-3">Secondary Contact</h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div><label className="form-label">Name</label><input className="form-input" value={form.secondary_contact_name} onChange={e => update('secondary_contact_name', e.target.value)} /></div>
-                <div><label className="form-label">Designation</label><input className="form-input" value={form.secondary_contact_designation} onChange={e => update('secondary_contact_designation', e.target.value)} /></div>
-                <div><label className="form-label">Phone</label><input className="form-input" value={form.secondary_contact_phone} onChange={e => update('secondary_contact_phone', e.target.value)} /></div>
-                <div><label className="form-label">Email</label><input type="email" className="form-input" value={form.secondary_contact_email} onChange={e => update('secondary_contact_email', e.target.value)} /></div>
-              </div>
             </div>
 
             <div className="card p-6">
