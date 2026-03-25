@@ -110,15 +110,14 @@ export default function NewGRNPage() {
         const { data: pos, error: poError } = await poQuery
         if (poError) console.error('PO load error:', poError)
         if (pos) setEligiblePOs(pos)
+      // Pre-select PO from URL
+        const poId = searchParams.get('po')
+        if (poId && pos) {
+          const found = pos.find((p: any) => p.id === poId)
+          if (found) loadPOItems(found)
+        }
       } catch (err) {
         console.error('PO load failed:', err)
-      }
-
-      // Pre-select PO from URL
-      const poId = searchParams.get('po')
-      if (poId && pos) {
-        const found = pos.find((p: any) => p.id === poId)
-        if (found) loadPOItems(found)
       }
     }
     load()
