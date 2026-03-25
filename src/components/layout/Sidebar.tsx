@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, Package, ShoppingCart, ClipboardList,
   FileText, CreditCard, BarChart2, Settings, ChevronDown,
   Building2, LogOut, TrendingDown, Warehouse, AlertTriangle,
-  X, PanelLeftClose, PanelLeftOpen, Search,
+  X, PanelLeftClose, PanelLeftOpen, Search, Heart,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -85,6 +85,15 @@ const NAV: NavItem[] = [
       { label: 'Stock Transfers', href: '/inventory/transfers' },
       { label: 'Expiry Alerts', href: '/inventory/expiry-alerts' },
       { label: 'Demand Forecasting', href: '/inventory/forecasting' },
+    ]
+  },
+  {
+    label: 'Consignment', icon: <Heart size={18} />,
+    children: [
+      { label: 'Dashboard', href: '/consignment' },
+      { label: 'Receive Challan', href: '/consignment/deposits' },
+      { label: 'Stock View', href: '/consignment/stock' },
+      { label: 'Usage Log', href: '/consignment/usage' },
     ]
   },
   {
