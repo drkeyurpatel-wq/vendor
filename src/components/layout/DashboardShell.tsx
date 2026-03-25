@@ -9,6 +9,7 @@ import MobileBottomNav from './MobileBottomNav'
 import { UserProfile } from '@/types/database'
 import { registerServiceWorker, syncOfflineQueue } from '@/lib/service-worker'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { Toaster } from 'react-hot-toast'
 
 interface DashboardShellProps {
   user: UserProfile
@@ -81,6 +82,7 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
       {/* Command Palette — available everywhere */}
       <CommandPalette />
       <MobileBottomNav />
+      <Toaster position="top-right" toastOptions={{ duration: 4000, style: { fontSize: '14px' } }} />
     </div>
   )
 }
