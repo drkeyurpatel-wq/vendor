@@ -42,12 +42,12 @@ export default function VendorSearch({ value, onChange, centreId, placeholder = 
       let q = supabase
         .from('vendors')
         .select('id, vendor_code, legal_name, trade_name, category:vendor_categories(name)')
-        .eq('status', 'active')
+        .in('status', ['active', 'pending', 'approved'])
         .is('deleted_at', null)
         .or(`legal_name.ilike.%${query}%,vendor_code.ilike.%${query}%,trade_name.ilike.%${query}%`)
         .order('legal_name')
         .limit(10)
-      if (centreId) q = q.contains('approved_centres', [centreId])
+      // Don't filter by centre — approved_centres=null means all centres
       const { data } = await q
       setResults(data ?? [])
       setLoading(false)

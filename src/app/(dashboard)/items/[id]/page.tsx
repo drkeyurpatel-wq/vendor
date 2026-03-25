@@ -113,7 +113,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
             </div>
           </div>
           <div className="flex gap-2">
-            <Link href={`/items/new`} className="btn-secondary">Edit Item</Link>
+            <Link href={`/items/${id}/edit`} className="btn-secondary">Edit Item</Link>
             <Link href={`/purchase-orders/new`} className="btn-primary">
               <Package size={15} /> Create PO
             </Link>
