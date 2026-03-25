@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Loader2, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import { format } from 'date-fns'
+import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
 
 export default function RecordUsagePage() {
   const router = useRouter()
@@ -106,9 +107,25 @@ export default function RecordUsagePage() {
       {/* Step 1: Select Item */}
       <div className="card p-6 mb-6">
         <h2 className="font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-100">Step 1 — Select Consignment Item</h2>
-        <div className="relative mb-4">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input className="form-input pl-10" placeholder="Search by item name, code, serial number, batch..." value={search} onChange={e => setSearch(e.target.value)} />
+        <div className="flex gap-2 mb-4">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input className="form-input pl-10" placeholder="Search by item name, code, serial number, batch..." value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+          <BarcodeScanButton onScan={(code) => {
+            const match = availableStock.find(s =>
+              s.serial_number === code || s.batch_number === code ||
+              s.item?.item_code === code || s.item?.item_code?.toLowerCase() === code.toLowerCase()
+            )
+            if (match) {
+              setSelectedStock(match)
+              setCentreId(match.deposit?.centre_id || '')
+              toast.success(`Selected: ${match.item?.generic_name} (SN: ${match.serial_number || match.batch_number || 'N/A'})`)
+            } else {
+              setSearch(code)
+              toast.error(`No exact match — showing search results for "${code}"`)
+            }
+          }} label="Scan Item" scanType="item" />
         </div>
         <div className="max-h-64 overflow-y-auto space-y-2">
           {filteredStock.length > 0 ? filteredStock.map(s => {

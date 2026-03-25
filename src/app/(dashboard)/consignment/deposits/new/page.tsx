@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Loader2, Plus, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { formatCurrency } from '@/lib/utils'
+import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
 
 interface StockLine { itemId: string; batchNumber: string; serialNumber: string; expiryDate: string; vendorRate: string; mrp: string; qty: string }
 
@@ -43,6 +44,22 @@ export default function NewConsignmentDepositPage() {
 
   function addLine() { setLines(prev => [...prev, { itemId: '', batchNumber: '', serialNumber: '', expiryDate: '', vendorRate: '', mrp: '', qty: '1' }]) }
   function removeLine(idx: number) { if (lines.length > 1) setLines(prev => prev.filter((_, i) => i !== idx)) }
+
+  function handleBarcodeScan(code: string) {
+    const match = items.find(i => i.item_code === code || i.item_code?.toLowerCase() === code.toLowerCase())
+    if (match) {
+      // Find empty line or add new
+      const emptyIdx = lines.findIndex(l => !l.itemId)
+      if (emptyIdx >= 0) {
+        updateLine(emptyIdx, 'itemId', match.id)
+      } else {
+        setLines(prev => [...prev, { itemId: match.id, batchNumber: '', serialNumber: '', expiryDate: '', vendorRate: '', mrp: '', qty: '1' }])
+      }
+      toast.success(`Added: ${match.generic_name}`)
+    } else {
+      toast.error(`Item not found for barcode: ${code}`)
+    }
+  }
 
   async function handleSubmit() {
     if (!vendorId) { toast.error('Select a vendor'); return }
@@ -126,6 +143,7 @@ export default function NewConsignmentDepositPage() {
           <h2 className="font-semibold text-gray-900">Items Deposited</h2>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500">Total: <strong className="text-[#1B3A6B]">{formatCurrency(totalValue)}</strong></span>
+            <BarcodeScanButton onScan={handleBarcodeScan} label="Scan Item" scanType="item" />
             <button onClick={addLine} className="btn-secondary text-sm"><Plus size={14} /> Add Item</button>
           </div>
         </div>
