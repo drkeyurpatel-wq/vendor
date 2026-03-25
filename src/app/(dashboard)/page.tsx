@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import SeedDataBanner from '@/components/ui/SeedDataBanner'
 import DashboardChartsWrapper from '@/components/dashboard/DashboardChartsWrapper'
+import MyActions from '@/components/dashboard/MyActions'
 
 // ─── Shared UI helpers ───────────────────────────────────────
 
@@ -197,20 +198,21 @@ export default async function DashboardPage() {
   if (!profile) redirect('/login')
 
   const role = profile.role as UserRole
+  const myActions = <MyActions userId={user.id} role={role} centreId={profile.centre_id} userName={profile.full_name} />
 
   switch (role) {
     case 'group_admin':
-      return <GroupAdminDashboard profile={profile} />
+      return <>{myActions}<GroupAdminDashboard profile={profile} /></>
     case 'group_cao':
-      return <GroupCAODashboard profile={profile} />
+      return <>{myActions}<GroupCAODashboard profile={profile} /></>
     case 'unit_cao':
-      return <UnitCAODashboard profile={profile} />
+      return <>{myActions}<UnitCAODashboard profile={profile} /></>
     case 'unit_purchase_manager':
-      return <PurchaseManagerDashboard profile={profile} />
+      return <>{myActions}<PurchaseManagerDashboard profile={profile} /></>
     case 'store_staff':
-      return <StoreStaffDashboard profile={profile} />
+      return <>{myActions}<StoreStaffDashboard profile={profile} /></>
     case 'finance_staff':
-      return <FinanceStaffDashboard profile={profile} />
+      return <>{myActions}<FinanceStaffDashboard profile={profile} /></>
     default:
       redirect('/login')
   }

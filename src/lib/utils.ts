@@ -106,3 +106,33 @@ export const PAYMENT_STATUS_COLORS = {
   disputed: 'bg-orange-100 text-orange-800',
   on_hold: 'bg-gray-100 text-gray-700',
 }
+
+// ─── Financial Year (April–March) ────────────────────────
+export function getCurrentFY(): { label: string; start: string; end: string } {
+  const now = new Date()
+  const year = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1
+  return {
+    label: `FY${String(year).slice(2)}-${String(year + 1).slice(2)}`,
+    start: `${year}-04-01`,
+    end: `${year + 1}-03-31`,
+  }
+}
+
+export function getFYForDate(date: string | Date): { label: string; start: string; end: string } {
+  const d = new Date(date)
+  const year = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1
+  return {
+    label: `FY${String(year).slice(2)}-${String(year + 1).slice(2)}`,
+    start: `${year}-04-01`,
+    end: `${year + 1}-03-31`,
+  }
+}
+
+export function getFYOptions(count = 3): { label: string; start: string; end: string }[] {
+  const current = getCurrentFY()
+  const startYear = parseInt(current.start.substring(0, 4))
+  return Array.from({ length: count }, (_, i) => {
+    const y = startYear - i
+    return { label: `FY${String(y).slice(2)}-${String(y + 1).slice(2)}`, start: `${y}-04-01`, end: `${y + 1}-03-31` }
+  })
+}

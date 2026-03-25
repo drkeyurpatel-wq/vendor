@@ -569,6 +569,31 @@ export default function NewGRNPage() {
 
     toast.success(`GRN ${grnNumber} created successfully`)
 
+    // Auto-create follow-up indent for short deliveries
+    const shortItems = lineItems.filter(li => li.short_qty > 0)
+    if (shortItems.length > 0) {
+      try {
+        const { count: indentCount } = await supabase.from('purchase_indents').select('*', { count: 'exact', head: true })
+        const indentNum = `H1-SH-${new Date().getFullYear().toString().slice(2)}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String((indentCount ?? 0) + 1).padStart(3, '0')}`
+        const { data: indent } = await supabase.from('purchase_indents').insert({
+          indent_number: indentNum, centre_id: centreId,
+          status: 'approved', priority: 'urgent', department: 'Store',
+          notes: `Auto-generated: short delivery on GRN ${grnNumber} (PO ${selectedPO.po_number}). ${shortItems.length} item(s) short.`,
+          source: 'grn_short_delivery',
+        }).select().single()
+        if (indent) {
+          await supabase.from('purchase_indent_items').insert(
+            shortItems.map(li => ({
+              indent_id: indent.id, item_id: li.item_id,
+              requested_qty: li.short_qty, approved_qty: li.short_qty,
+              notes: `Short ${li.short_qty} of ${li.ordered_qty} ordered`,
+            }))
+          )
+          toast(`${shortItems.length} short items → auto-indent ${indentNum} created`, { icon: '📋', duration: 5000 })
+        }
+      } catch { /* non-critical */ }
+    }
+
     // Notify: email vendor (goods received) + in-app to finance
     notifyAll({
       emailType: 'grn_received',

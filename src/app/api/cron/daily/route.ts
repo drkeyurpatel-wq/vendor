@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 // ============================================================
 // H1 VPMS — Combined Daily Cron
@@ -94,6 +95,42 @@ export async function GET(request: NextRequest) {
     }
   } else {
     results.vendor_scores = { skipped: 'Runs on 1st of month' }
+  }
+
+  // 7. Payment due reminders — flag invoices due in next 3 days
+  try {
+    const supabase = await createClient()
+    const threeDaysFromNow = new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0]
+    const today = new Date().toISOString().split('T')[0]
+
+    const { data: dueSoon } = await supabase.from('invoices')
+      .select('id, invoice_ref, total_amount, due_date, vendor:vendors(legal_name)')
+      .eq('payment_status', 'unpaid')
+      .gte('due_date', today)
+      .lte('due_date', threeDaysFromNow)
+      .limit(50)
+
+    if (dueSoon && dueSoon.length > 0) {
+      // Create notifications for upcoming payments
+      const notifications = dueSoon.map((inv: any) => ({
+        action: 'payment_due_reminder',
+        entity_type: 'invoice',
+        entity_id: inv.id,
+        details: {
+          invoice_ref: inv.invoice_ref,
+          amount: inv.total_amount,
+          due_date: inv.due_date,
+          vendor: inv.vendor?.legal_name,
+        },
+        is_read: false,
+      }))
+      await supabase.from('notifications').insert(notifications)
+      results.payment_reminders = { sent: dueSoon.length, total_amount: dueSoon.reduce((s: number, i: any) => s + (i.total_amount || 0), 0) }
+    } else {
+      results.payment_reminders = { sent: 0, message: 'No payments due in next 3 days' }
+    }
+  } catch (err: any) {
+    results.payment_reminders = { error: err.message }
   }
 
   return NextResponse.json({

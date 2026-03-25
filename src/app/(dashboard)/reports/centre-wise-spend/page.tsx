@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { cn, formatCurrency, formatLakhs, formatDate } from '@/lib/utils'
+import { cn, formatCurrency, formatLakhs, formatDate, getCurrentFY, getFYOptions } from '@/lib/utils'
 import { ArrowLeft, Building2, TrendingUp } from 'lucide-react'
 import CentreSpendCharts from './CentreSpendCharts'
 
@@ -10,24 +10,42 @@ export const dynamic = 'force-dynamic'
 export default async function CentreWiseSpendReport({
   searchParams,
 }: {
-  searchParams: Promise<{ months?: string }>
+  searchParams: Promise<{ months?: string; fy?: string }>
 }) {
   const params = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const fyOptions = getFYOptions(3)
   const monthsBack = parseInt(params.months || '3') || 3
   const now = new Date()
-  const startDate = new Date(now.getFullYear(), now.getMonth() - monthsBack + 1, 1).toISOString().split('T')[0]
 
-  const { data: pos } = await supabase
+  let startDate: string
+  let endDate: string | undefined
+  let periodLabel: string
+
+  if (params.fy) {
+    const fy = fyOptions.find(f => f.label === params.fy) || getCurrentFY()
+    startDate = fy.start
+    endDate = fy.end
+    periodLabel = fy.label
+  } else {
+    startDate = new Date(now.getFullYear(), now.getMonth() - monthsBack + 1, 1).toISOString().split('T')[0]
+    periodLabel = `Last ${monthsBack} months`
+  }
+
+  let query = supabase
     .from('purchase_orders')
     .select('po_date, total_amount, status, centre:centres(code, name)')
     .gte('po_date', startDate)
     .is('deleted_at', null)
     .not('status', 'eq', 'cancelled')
     .order('po_date')
+
+  if (endDate) query = query.lte('po_date', endDate)
+
+  const { data: pos } = await query
 
   const { data: centres } = await supabase.from('centres').select('id, code, name').eq('is_active', true).order('code')
 
@@ -67,14 +85,22 @@ export default async function CentreWiseSpendReport({
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-navy-600 tracking-tight">Centre-wise Spend Report</h1>
-          <p className="text-sm text-gray-500 mt-1">{allPOs.length} POs since {formatDate(startDate)} — {formatLakhs(grandTotal)} total</p>
+          <p className="text-sm text-gray-500 mt-1">{allPOs.length} POs — {periodLabel} — {formatLakhs(grandTotal)} total</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {fyOptions.map(fy => (
+            <Link key={fy.label} href={`/reports/centre-wise-spend?fy=${fy.label}`}
+              className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
+                params.fy === fy.label ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-gray-600 border-gray-200')}>
+              {fy.label}
+            </Link>
+          ))}
+          <span className="text-gray-300 self-center">|</span>
           {[3, 6, 12].map(m => (
             <Link key={m} href={`/reports/centre-wise-spend?months=${m}`}
               className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
-                monthsBack === m ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-gray-600 border-gray-200')}>
-              {m} months
+                !params.fy && monthsBack === m ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-gray-600 border-gray-200')}>
+              {m}mo
             </Link>
           ))}
         </div>

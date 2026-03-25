@@ -87,6 +87,29 @@ export default function NewPOPage() {
     if (items.length === 0) { toast.error('Add at least one item'); return }
     if (items.some(i => i.rate <= 0)) { toast.error('All items must have a rate > 0'); return }
 
+    // Duplicate PO detection — check for open POs with same vendor + items
+    const itemIds = items.map(i => i.item_id)
+    const { data: existingPOs } = await supabase
+      .from('purchase_orders')
+      .select('id, po_number, status, po_date, items:purchase_order_items(item_id)')
+      .eq('vendor_id', vendor.id)
+      .in('status', ['draft', 'pending_approval', 'approved', 'sent_to_vendor'])
+      .is('deleted_at', null)
+      .limit(20)
+
+    const overlapping = (existingPOs || []).filter(po => {
+      const poItemIds = (po.items || []).map((i: any) => i.item_id)
+      return itemIds.some(id => poItemIds.includes(id))
+    })
+
+    if (overlapping.length > 0) {
+      const poNums = overlapping.map(po => `${po.po_number} (${po.status.replace(/_/g, ' ')})`).join(', ')
+      const proceed = window.confirm(
+        `⚠️ DUPLICATE WARNING\n\nOpen POs with same vendor + overlapping items:\n${poNums}\n\nCreating another PO may result in double ordering. Continue anyway?`
+      )
+      if (!proceed) return
+    }
+
     const rateViolations = items.filter(i => i.rate_warning)
     if (rateViolations.length > 0) {
       const proceed = window.confirm(
