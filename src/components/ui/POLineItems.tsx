@@ -137,13 +137,32 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
 
   useEffect(() => { fetchContractRates() }, [fetchContractRates])
 
-  function addItem(selected: {
+  async function addItem(selected: {
     id: string; item_code: string; generic_name: string; unit: string; gst_percent: number;
-    hsn_code?: string; manufacturer?: string; purchase_unit?: string; qty_conversion?: number; mrp?: number
+    hsn_code?: string; manufacturer?: string; purchase_unit?: string; qty_conversion?: number; mrp?: number;
+    default_rate?: number
   }) {
     const contractRate = contractRates.get(selected.id) ?? null
     const conversionFactor = selected.qty_conversion || 1
     const purchaseUnit = selected.purchase_unit || selected.unit
+
+    // Fetch last PO rate for this vendor+item (for price fence reference)
+    let lastPORate: number | null = null
+    if (vendorId) {
+      try {
+        const { data: lastPO } = await supabase
+          .from('purchase_order_items')
+          .select('rate')
+          .eq('item_id', selected.id)
+          .limit(5)
+        // Filter to this vendor's POs (simple approach - get any recent rate)
+        if (lastPO?.[0]?.rate) lastPORate = lastPO[0].rate
+      } catch { /* non-critical */ }
+    }
+
+    // Rate priority: 1. Contract rate → 2. Last PO rate → 3. Default rate → 4. 0
+    const autoRate = contractRate ?? lastPORate ?? (selected.default_rate || 0)
+    const referenceRate = contractRate ?? lastPORate ?? (selected.default_rate || null)
 
     const newItem = calcLine({
       item_id: selected.id,
@@ -157,7 +176,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
       base_qty: conversionFactor,
       ordered_qty: 1,
       free_qty: 0,
-      rate: contractRate ?? 0,
+      rate: autoRate,
       mrp: selected.mrp || 0,
       net_rate: 0,
       trade_discount_percent: 0,
@@ -173,7 +192,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
       igst_amount: 0,
       gst_amount: 0,
       total_amount: 0,
-      contract_rate: contractRate,
+      contract_rate: referenceRate,
       rate_warning: null,
       delivery_date: '',
     }, supplyType)

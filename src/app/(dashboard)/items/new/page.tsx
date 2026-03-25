@@ -651,40 +651,40 @@ export default function NewItemPage() {
                   <label className="form-label">HSN Code *</label>
                   <input className="form-input" value={form.hsn_code}
                     onChange={e => {
-                      update('hsn_code', e.target.value)
-                      // Auto-set GST from HSN code
                       const hsn = e.target.value.trim()
                       const HSN_GST_MAP: Record<string, string> = {
                         '3001': '12', '3002': '12', '3003': '12', '3004': '12', '30041': '12', '30042': '12', '30049': '12', '30049099': '12',
                         '3005': '18', '3006': '18',
-                        '9018': '12', '9019': '12', '9021': '12', '9022': '12', // Medical devices, implants
-                        '9402': '18', // Hospital furniture
-                        '4015': '12', // Gloves
-                        '6307': '12', // Surgical drapes
-                        '8419': '18', // Sterilizers
-                        '8713': '5',  // Wheelchairs
-                        '9401': '18', // Seats
+                        '9018': '12', '9019': '12', '9021': '12', '9022': '12',
+                        '9402': '18', '4015': '12', '6307': '12', '8419': '18', '8713': '5', '9401': '18',
                       }
-                      // Match from most specific (8-digit) to least (4-digit)
                       const match = HSN_GST_MAP[hsn] || HSN_GST_MAP[hsn.substring(0, 5)] || HSN_GST_MAP[hsn.substring(0, 4)]
-                      if (match) update('gst_slab', match)
+                      // Batch both updates in single setForm to avoid stale closure
+                      setForm((prev: any) => {
+                        const gst = match ? parseFloat(match) : parseFloat(prev.gst_slab) || 12
+                        return {
+                          ...prev,
+                          hsn_code: e.target.value,
+                          ...(match ? { gst_slab: match, gst_percent: gst, cgst_percent: gst / 2, sgst_percent: gst / 2, igst_percent: gst } : {}),
+                        }
+                      })
                     }}
                     placeholder="e.g. 30049099" list="hsn-suggestions" />
                   <datalist id="hsn-suggestions">
-                    <option value="30049099">30049099 — Medicaments (drugs)</option>
-                    <option value="30042099">30042099 — Antibiotics</option>
-                    <option value="30051090">30051090 — Dressings</option>
-                    <option value="30061000">30061000 — Surgical sutures</option>
-                    <option value="90183900">90183900 — Needles, catheters, cannulae</option>
-                    <option value="90189099">90189099 — Medical instruments (other)</option>
-                    <option value="90211090">90211090 — Ortho implants</option>
-                    <option value="90221490">90221490 — X-ray equipment</option>
-                    <option value="90185090">90185090 — Ophthalmic instruments</option>
-                    <option value="40151100">40151100 — Surgical gloves</option>
-                    <option value="63079090">63079090 — Surgical drapes</option>
-                    <option value="84198990">84198990 — Sterilizers</option>
+                    <option value="30049099" label="Medicaments (drugs) — 12% GST" />
+                    <option value="30042099" label="Antibiotics — 12% GST" />
+                    <option value="30051090" label="Dressings — 18% GST" />
+                    <option value="30061000" label="Surgical sutures — 18% GST" />
+                    <option value="90183900" label="Needles, catheters, cannulae — 12% GST" />
+                    <option value="90189099" label="Medical instruments — 12% GST" />
+                    <option value="90211090" label="Ortho implants — 12% GST" />
+                    <option value="90221490" label="X-ray equipment — 12% GST" />
+                    <option value="90185090" label="Ophthalmic instruments — 12% GST" />
+                    <option value="40151100" label="Surgical gloves — 12% GST" />
+                    <option value="63079090" label="Surgical drapes — 12% GST" />
+                    <option value="84198990" label="Sterilizers — 18% GST" />
                   </datalist>
-                  {form.hsn_code && <p className="text-[10px] text-teal-600 mt-1">GST auto-set to {form.gst_slab}% from HSN</p>}
+                  {form.hsn_code && <p className="text-[10px] text-teal-600 mt-1">GST: {form.gst_slab}%</p>}
                 </div>
                 <div>
                   <label className="form-label">GST Slab *</label>

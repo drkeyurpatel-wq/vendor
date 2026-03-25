@@ -43,7 +43,7 @@ export default function ItemSearch({ onSelect, excludeIds = [], placeholder = 'S
       setLoading(true)
       const { data } = await supabase
         .from('items')
-        .select('id, item_code, generic_name, brand_name, unit, gst_percent, category:item_categories(name)')
+        .select('id, item_code, generic_name, brand_name, unit, gst_percent, default_rate, mrp, hsn_code, manufacturer, purchase_unit, category:item_categories(name)')
         .eq('is_active', true)
         .or(`generic_name.ilike.%${query}%,item_code.ilike.%${query}%,brand_name.ilike.%${query}%`)
         .order('generic_name')
@@ -60,7 +60,7 @@ export default function ItemSearch({ onSelect, excludeIds = [], placeholder = 'S
     setLoading(true)
     const { data } = await supabase
       .from('items')
-      .select('id, item_code, generic_name, brand_name, unit, gst_percent, category:item_categories(name)')
+      .select('id, item_code, generic_name, brand_name, unit, gst_percent, default_rate, mrp, hsn_code, manufacturer, purchase_unit, category:item_categories(name)')
       .eq('is_active', true)
       .or(`item_code.eq.${code},item_code.ilike.${code}`)
       .limit(1)
@@ -104,6 +104,9 @@ export default function ItemSearch({ onSelect, excludeIds = [], placeholder = 'S
               </div>
               <div className="text-xs text-gray-400 mt-0.5">
                 Unit: {item.unit} | GST: {item.gst_percent}%
+                {(item as any).hsn_code && ` | HSN: ${(item as any).hsn_code}`}
+                {(item as any).default_rate > 0 && <span className="text-teal-600 font-semibold"> | ₹{(item as any).default_rate}</span>}
+                {(item as any).mrp > 0 && ` | MRP: ₹${(item as any).mrp}`}
                 {item.category && ` | ${Array.isArray(item.category) ? item.category[0]?.name : item.category.name}`}
               </div>
             </button>
