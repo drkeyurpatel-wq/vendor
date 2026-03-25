@@ -33,12 +33,12 @@ const ROA = [
 ]
 
 const TABS = [
-  { id: 'basic', label: 'Item Details' },
-  { id: 'units', label: 'Unit Details' },
-  { id: 'flags', label: 'Classification & Flags' },
-  { id: 'pricing', label: 'Pricing & Tax' },
-  { id: 'storage', label: 'Storage & Reorder' },
-  { id: 'integration', label: 'Integration' },
+  { id: 'basic', label: 'Item Details', essential: true },
+  { id: 'units', label: 'Unit Details', essential: false },
+  { id: 'flags', label: 'Classification & Flags', essential: false },
+  { id: 'pricing', label: 'Pricing & Tax', essential: true },
+  { id: 'storage', label: 'Storage & Reorder', essential: false },
+  { id: 'integration', label: 'Integration', essential: false },
 ]
 
 // ─── Form State ───────────────────────────────────────────
@@ -91,6 +91,7 @@ export default function NewItemPage() {
   const [loading, setLoading] = useState(false)
   const [categories, setCategories] = useState<{ id: string; name: string; code: string; parent_id: string | null }[]>([])
   const [activeTab, setActiveTab] = useState('basic')
+  const [showAllTabs, setShowAllTabs] = useState(false)
   const [form, setForm] = useState<FormState>(defaultForm)
   const [aliasNames, setAliasNames] = useState<string[]>([])
   const [newAlias, setNewAlias] = useState('')
@@ -296,8 +297,8 @@ export default function NewItemPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b border-gray-200 overflow-x-auto">
-        {TABS.map(tab => (
+      <div className="flex gap-1 mb-4 border-b border-gray-200 overflow-x-auto items-end">
+        {TABS.filter(tab => showAllTabs || tab.essential).map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -310,6 +311,10 @@ export default function NewItemPage() {
             {tab.label}
           </button>
         ))}
+        <button type="button" onClick={() => setShowAllTabs(!showAllTabs)}
+          className="ml-auto px-3 py-2 text-xs text-gray-400 hover:text-[#0D7E8A] whitespace-nowrap border-b-2 border-transparent">
+          {showAllTabs ? '← Essential only' : `+ ${TABS.filter(t => !t.essential).length} more tabs`}
+        </button>
       </div>
 
       <form onSubmit={handleSubmit}>

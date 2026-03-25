@@ -44,6 +44,7 @@ export default function VendorSearch({ value, onChange, centreId, placeholder = 
         .select('id, vendor_code, legal_name, trade_name, category:vendor_categories(name)')
         .in('status', ['active', 'pending', 'approved'])
         .is('deleted_at', null)
+        .neq('onboarding_status', 'quick_draft')
         .or(`legal_name.ilike.%${query}%,vendor_code.ilike.%${query}%,trade_name.ilike.%${query}%`)
         .order('legal_name')
         .limit(10)

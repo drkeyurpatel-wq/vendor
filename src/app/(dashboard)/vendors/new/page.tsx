@@ -87,6 +87,7 @@ export default function NewVendorPage() {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
+  const [quickMode, setQuickMode] = useState(false)
   const [categories, setCategories] = useState<any[]>([])
   const [centres, setCentres] = useState<any[]>([])
   const [selectedCentres, setSelectedCentres] = useState<string[]>([])
@@ -184,13 +185,14 @@ export default function NewVendorPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    // Validate all mandatory fields
-    const fieldTabMap: Record<string, string> = {
-      legal_name: 'basic', gstin: 'compliance', pan: 'compliance',
-      primary_contact_name: 'contact', primary_contact_phone: 'contact', primary_contact_email: 'contact',
-      pincode: 'contact',
-      bank_name: 'banking', bank_account_no: 'banking', bank_ifsc: 'banking',
-    }
+    // Validate mandatory fields — reduced set for quick mode
+    const fieldTabMap: Record<string, string> = quickMode
+      ? { legal_name: 'basic', primary_contact_phone: 'contact' }
+      : {
+          legal_name: 'basic', gstin: 'compliance', pan: 'compliance',
+          primary_contact_name: 'contact', primary_contact_phone: 'contact',
+          bank_name: 'banking', bank_account_no: 'banking', bank_ifsc: 'banking',
+        }
     const newErrors: Partial<Record<keyof FormState, string>> = {}
     for (const field of Object.keys(fieldTabMap) as (keyof FormState)[]) {
       const err = validateField(field, form[field] as string)
@@ -298,10 +300,13 @@ export default function NewVendorPage() {
       // Centres & status
       approved_centres: selectedCentres.length > 0 && selectedCentres.length < centres.length ? selectedCentres : null,
       status: 'pending',
+      onboarding_status: quickMode ? 'quick_draft' : 'complete',
     }).select().single()
 
     if (error) { toast.error(error.message); setLoading(false); return }
-    toast.success(`Vendor ${vendor_code} created`)
+    toast.success(quickMode
+      ? `Vendor ${vendor_code} quick-added. Complete onboarding to create POs.`
+      : `Vendor ${vendor_code} created`)
     router.push(`/vendors/${data.id}`)
   }
 
@@ -313,14 +318,69 @@ export default function NewVendorPage() {
             <ArrowLeft size={14} /> Back to Vendors
           </Link>
           <h1 className="page-title">Add New Vendor</h1>
-          <p className="page-subtitle">Complete vendor onboarding with compliance details</p>
+          <p className="page-subtitle">{quickMode ? 'Quick add — name + phone only. Complete onboarding later.' : 'Full vendor onboarding with compliance details'}</p>
         </div>
-        <button onClick={handleSubmit} disabled={loading} className="btn-primary">
-          {loading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save Vendor</>}
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center bg-gray-100 rounded-lg p-0.5 text-sm">
+            <button type="button" onClick={() => setQuickMode(false)}
+              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${!quickMode ? 'bg-white shadow text-[#1B3A6B]' : 'text-gray-500 hover:text-gray-700'}`}>
+              Full
+            </button>
+            <button type="button" onClick={() => setQuickMode(true)}
+              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${quickMode ? 'bg-white shadow text-[#0D7E8A]' : 'text-gray-500 hover:text-gray-700'}`}>
+              Quick Add
+            </button>
+          </div>
+          <button onClick={handleSubmit} disabled={loading} className="btn-primary">
+            {loading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> {quickMode ? 'Quick Save' : 'Save Vendor'}</>}
+          </button>
+        </div>
       </div>
 
-      {/* Tabs */}
+      {/* Quick mode: simplified form */}
+      {quickMode ? (
+        <form onSubmit={handleSubmit} className="card p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="form-label">Legal Name *</label>
+              <input className="form-input" value={form.legal_name} onChange={e => update('legal_name', e.target.value)}
+                onBlur={() => touch('legal_name')} placeholder="Vendor legal name" autoFocus />
+              <FieldError message={errors.legal_name} show={touched.has('legal_name')} />
+            </div>
+            <div>
+              <label className="form-label">Trade Name</label>
+              <input className="form-input" value={form.trade_name} onChange={e => update('trade_name', e.target.value)}
+                placeholder="Trading as (optional)" />
+            </div>
+            <div>
+              <label className="form-label">Contact Phone *</label>
+              <input className="form-input" value={form.primary_contact_phone} onChange={e => update('primary_contact_phone', e.target.value)}
+                onBlur={() => touch('primary_contact_phone')} placeholder="Mobile / landline" />
+              <FieldError message={errors.primary_contact_phone} show={touched.has('primary_contact_phone')} />
+            </div>
+            <div>
+              <label className="form-label">Contact Name</label>
+              <input className="form-input" value={form.primary_contact_name} onChange={e => update('primary_contact_name', e.target.value)}
+                placeholder="Contact person" />
+            </div>
+            <div>
+              <label className="form-label">GSTIN (optional in quick mode)</label>
+              <input className="form-input font-mono uppercase" value={form.gstin} onChange={e => update('gstin', e.target.value)}
+                placeholder="24AABCU9603R1ZM" maxLength={15} />
+            </div>
+            <div>
+              <label className="form-label">City</label>
+              <input className="form-input" value={form.city} onChange={e => update('city', e.target.value)} placeholder="City" />
+            </div>
+          </div>
+          <div className="pt-4 border-t text-sm text-amber-700 bg-amber-50 -mx-6 -mb-6 px-6 py-3 rounded-b-lg">
+            ⚠️ Quick-added vendors need full onboarding (GST, PAN, bank details) before PO creation is allowed.
+          </div>
+        </form>
+      ) : (
+      <>
+
+      {/* Tabs — full mode only */}
       <div className="flex gap-1 mb-4 border-b border-gray-200 overflow-x-auto" role="tablist" aria-label="Vendor form sections">
         {TABS.map(tab => {
           const tabFieldMap: Record<string, string[]> = {
@@ -692,6 +752,8 @@ export default function NewVendorPage() {
           <Link href="/vendors" className="btn-secondary">Cancel</Link>
         </div>
       </form>
+      </>
+      )}
     </div>
   )
 }

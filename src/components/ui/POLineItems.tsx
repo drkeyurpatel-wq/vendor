@@ -44,6 +44,8 @@ export interface LineItem {
   rate_warning?: string | null
   // Price history (last 3 PO rates for this vendor+item)
   price_history?: { rate: number; date: string; po_number: string }[]
+  // Vendor mapping
+  is_unmapped?: boolean
   // Delivery
   delivery_date: string
 }
@@ -150,8 +152,16 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
   async function addItem(selected: {
     id: string; item_code: string; generic_name: string; unit: string; gst_percent: number;
     hsn_code?: string; manufacturer?: string; purchase_unit?: string; qty_conversion?: number; mrp?: number;
-    default_rate?: number
+    default_rate?: number; l_rank?: number | null
   }) {
+    // Warn if item is not mapped to this vendor
+    if (vendorId && !selected.l_rank) {
+      const proceed = window.confirm(
+        `⚠️ ${selected.generic_name} is NOT mapped to this vendor (no L-rank).\n\nThis PO will require higher-level approval.\nContinue adding?`
+      )
+      if (!proceed) return
+    }
+
     const contractRate = contractRates.get(selected.id) ?? null
     const conversionFactor = selected.qty_conversion || 1
     const purchaseUnit = selected.purchase_unit || selected.unit
@@ -214,6 +224,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
       contract_rate: referenceRate,
       rate_warning: null,
       price_history: priceHistory,
+      is_unmapped: vendorId ? !selected.l_rank : false,
       delivery_date: '',
     }, supplyType)
     onChange([...items, newItem])
@@ -244,6 +255,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
   const gstTotal = items.reduce((s, i) => s + i.gst_amount, 0)
   const grandTotal = items.reduce((s, i) => s + i.total_amount, 0)
   const hasRateWarnings = items.some(i => i.rate_warning)
+  const hasUnmappedItems = items.some(i => i.is_unmapped)
 
   return (
     <div>
@@ -287,11 +299,16 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
               </thead>
               <tbody>
                 {items.map((item, idx) => (
-                  <tr key={item.item_id} className={item.rate_warning ? 'bg-red-50/50' : ''}>
+                  <tr key={item.item_id} className={item.rate_warning ? 'bg-red-50/50' : item.is_unmapped ? 'bg-amber-50/40' : ''}>
                     <td>
                       <div className="font-medium text-gray-900 text-sm">{item.generic_name}</div>
                       <div className="font-mono text-xs text-gray-400">{item.item_code}</div>
                       {item.manufacturer && <div className="text-[10px] text-gray-400">{item.manufacturer}</div>}
+                      {item.is_unmapped && (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">NOT MAPPED</span>
+                        </div>
+                      )}
                       {item.contract_rate && (
                         <div className="flex items-center gap-1 mt-0.5">
                           <CheckCircle2 size={10} className="text-green-500" />
@@ -399,6 +416,15 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
           <AlertTriangle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-red-700">
             <span className="font-semibold">Rate contract violation:</span> Items have rates deviating &gt;±0.5% from contract. Higher-level approval required.
+          </div>
+        </div>
+      )}
+
+      {hasUnmappedItems && (
+        <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
+          <AlertTriangle size={16} className="text-amber-500 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-amber-700">
+            <span className="font-semibold">Unmapped items:</span> {items.filter(i => i.is_unmapped).length} item(s) are not mapped to this vendor. Higher-level approval will be required.
           </div>
         </div>
       )}

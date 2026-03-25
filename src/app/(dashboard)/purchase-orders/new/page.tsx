@@ -197,9 +197,19 @@ export default function NewPOPage() {
       status = 'pending_approval'; approverRole = 'unit_cao'
     }
 
-    const rateNotes = rateViolations.length > 0
-      ? `[RATE CONTRACT OVERRIDE] ${rateViolations.map(i => `${i.generic_name}: ₹${i.rate} vs contract ₹${i.contract_rate}`).join('; ')}${notes.trim() ? ' | ' + notes.trim() : ''}`
-      : notes.trim() || null
+    // Escalate approval if unmapped items
+    const unmappedItems = items.filter(i => i.is_unmapped)
+    if (unmappedItems.length > 0 && status === 'approved') {
+      status = 'pending_approval'; approverRole = 'unit_cao'
+    }
+
+    let poNotes = notes.trim() || null
+    if (rateViolations.length > 0) {
+      poNotes = `[RATE CONTRACT OVERRIDE] ${rateViolations.map(i => `${i.generic_name}: ₹${i.rate} vs contract ₹${i.contract_rate}`).join('; ')}${poNotes ? ' | ' + poNotes : ''}`
+    }
+    if (unmappedItems.length > 0) {
+      poNotes = `[UNMAPPED ITEMS] ${unmappedItems.map(i => i.generic_name).join(', ')}${poNotes ? ' | ' + poNotes : ''}`
+    }
 
     try {
       const { data: po, error } = await supabase.from('purchase_orders').insert({
@@ -218,7 +228,7 @@ export default function NewPOPage() {
         tds_applicable: vendor.tds_applicable || false,
         tds_section: vendor.tds_section || null,
         tds_rate: vendor.tds_rate || null,
-        notes: rateNotes, created_by: profile?.id || null,
+        notes: poNotes, created_by: profile?.id || null,
         current_approval_level: status === 'approved' ? 0 : 1,
       }).select().single()
 
