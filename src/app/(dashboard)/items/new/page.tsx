@@ -133,6 +133,18 @@ export default function NewItemPage() {
     e.preventDefault()
     if (!form.generic_name.trim()) { toast.error('Item Name is required'); return }
 
+    // Margin lock: 10% minimum (except implants/consignment)
+    const isExempt = form.is_consignment || form.item_type === 'implant' || form.department === 'OT'
+    if (form.default_rate && form.mrp && parseFloat(form.mrp) > 0 && !isExempt) {
+      const margin = (1 - parseFloat(form.default_rate) / parseFloat(form.mrp)) * 100
+      if (margin < 10) {
+        const proceed = window.confirm(
+          `⚠️ MARGIN LOCK\n\nMargin is ${margin.toFixed(1)}% (minimum 10%).\nRate: ₹${form.default_rate} | MRP: ₹${form.mrp}\n\nThis item needs CAO approval to proceed. Continue?`
+        )
+        if (!proceed) return
+      }
+    }
+
     setLoading(true)
     try {
       // Generate code via sequence
@@ -618,35 +630,54 @@ export default function NewItemPage() {
           <div className="space-y-6">
             <div className="card p-6">
               <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
-                Other Details
+                Pricing & Margin
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 <div>
-                  <label className="form-label">Default Rate</label>
-                  <input type="number" className="form-input" value={form.default_rate} onChange={e => update('default_rate', e.target.value)} step="0.01" min="0" />
+                  <label className="form-label">Purchase Rate (₹) *</label>
+                  <input type="number" className="form-input" value={form.default_rate} onChange={e => update('default_rate', e.target.value)} step="0.01" min="0" placeholder="Vendor rate" />
                 </div>
                 <div>
-                  <label className="form-label">MRP</label>
-                  <input type="number" className="form-input" value={form.mrp} onChange={e => update('mrp', e.target.value)} step="0.01" min="0" />
-                </div>
-                <div>
-                  <label className="form-label">MUC%</label>
-                  <input type="number" className="form-input" value={form.muc_percent} onChange={e => update('muc_percent', e.target.value)} step="0.01" />
-                </div>
-                <div>
-                  <label className="flex items-center gap-2 text-sm mt-6 cursor-pointer">
-                    <input type="checkbox" checked={form.is_non_disc} onChange={e => update('is_non_disc', e.target.checked)}
-                      className="w-4 h-4 accent-[#0D7E8A]" /> Non Disc.
-                  </label>
+                  <label className="form-label">MRP (₹) *</label>
+                  <input type="number" className="form-input" value={form.mrp} onChange={e => update('mrp', e.target.value)} step="0.01" min="0" placeholder="Max retail price" />
                 </div>
                 <div>
                   <label className="form-label">Margin (%)</label>
-                  <input type="number" className="form-input" value={form.margin_percent} onChange={e => update('margin_percent', e.target.value)} step="0.01" />
+                  <input type="number" className="form-input bg-gray-50" disabled
+                    value={form.default_rate && form.mrp && parseFloat(form.mrp) > 0
+                      ? ((1 - parseFloat(form.default_rate) / parseFloat(form.mrp)) * 100).toFixed(1)
+                      : ''} />
                 </div>
                 <div>
-                  <label className="form-label">E.C. (%)</label>
-                  <input type="number" className="form-input" value={form.ec_percent} onChange={e => update('ec_percent', e.target.value)} step="0.01" />
+                  <label className="flex items-center gap-2 text-sm mt-6 cursor-pointer">
+                    <input type="checkbox" checked={form.is_consignment || false} onChange={e => update('is_consignment', e.target.checked)}
+                      className="w-4 h-4 accent-[#0D7E8A]" /> Implant / Consignment (exempt from margin lock)
+                  </label>
                 </div>
+              </div>
+              {/* Margin validation */}
+              {form.default_rate && form.mrp && parseFloat(form.mrp) > 0 && (() => {
+                const rate = parseFloat(form.default_rate)
+                const mrp = parseFloat(form.mrp)
+                const margin = ((1 - rate / mrp) * 100)
+                const isExempt = form.is_consignment || form.item_type === 'implant' || form.department === 'OT'
+                if (margin < 10 && !isExempt) {
+                  return (
+                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                      <span className="text-red-600 text-sm font-semibold">⚠️ Margin {margin.toFixed(1)}% is below minimum 10%</span>
+                      <span className="text-red-500 text-xs">Rate ₹{rate} on MRP ₹{mrp}. Increase MRP or negotiate lower rate.</span>
+                    </div>
+                  )
+                }
+                if (margin >= 10 && margin < 15) {
+                  return <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-xs">Margin {margin.toFixed(1)}% — acceptable but low. Target ≥15% for consumables.</div>
+                }
+                if (margin >= 15) {
+                  return <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg text-green-700 text-xs">✓ Margin {margin.toFixed(1)}% — healthy</div>
+                }
+                return null
+              })()}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 <div className="col-span-2">
                   <label className="form-label">HSN Code *</label>
                   <input className="form-input" value={form.hsn_code}

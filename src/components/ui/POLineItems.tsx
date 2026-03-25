@@ -88,7 +88,15 @@ function calcLine(item: LineItem, supplyType: string): LineItem {
   if (item.contract_rate && item.rate > 0) {
     const deviation = Math.abs(item.rate - item.contract_rate) / item.contract_rate
     if (deviation > RATE_TOLERANCE) {
-      rateWarning = `Rate deviates ${(deviation * 100).toFixed(1)}% from contract ₹${item.contract_rate.toFixed(2)}`
+      rateWarning = `Rate deviates ${(deviation * 100).toFixed(1)}% from reference ₹${item.contract_rate.toFixed(2)}`
+    }
+  }
+
+  // Margin check: rate vs MRP (10% minimum, except implants marked in item master)
+  if (item.mrp > 0 && item.rate > 0 && !rateWarning) {
+    const margin = (1 - item.rate / item.mrp) * 100
+    if (margin < 10) {
+      rateWarning = `Margin ${margin.toFixed(1)}% below 10% minimum (Rate ₹${item.rate} / MRP ₹${item.mrp})`
     }
   }
 
@@ -307,6 +315,13 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                         <div className="flex items-start gap-1 mt-1 max-w-[140px]">
                           <AlertTriangle size={10} className="text-red-500 mt-0.5 flex-shrink-0" />
                           <span className="text-[9px] text-red-600 leading-tight">{item.rate_warning}</span>
+                        </div>
+                      )}
+                      {item.mrp > 0 && item.rate > 0 && !item.rate_warning && (
+                        <div className="text-[9px] mt-0.5 text-gray-400">
+                          Margin: <span className={((1 - item.rate / item.mrp) * 100) >= 10 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                            {((1 - item.rate / item.mrp) * 100).toFixed(1)}%
+                          </span> (MRP ₹{item.mrp})
                         </div>
                       )}
                     </td>
