@@ -82,6 +82,8 @@ const NAV: NavItem[] = [
     label: 'Inventory', icon: <Warehouse size={18} />,
     children: [
       { label: 'Stock Levels', href: '/items/stock' },
+      { label: 'Sub-Store Stock', href: '/inventory/sub-store' },
+      { label: 'Sub-Store Transfers', href: '/inventory/sub-store/transfer' },
       { label: 'Expiry Alerts', href: '/inventory/expiry-alerts' },
     ]
   },
