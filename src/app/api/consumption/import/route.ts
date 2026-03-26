@@ -247,21 +247,17 @@ export async function POST(req: NextRequest) {
         requested_by: user.id,
         status: 'submitted',
         priority: 'normal',
-        suggested_vendor_id: suggestedVendorId,
         notes: l1Notes,
       }).select().single()
 
       if (indent) {
         const indentItems = itemsList.map((item: { item_id: string; centre_id: string; current_stock: number; reorder_level: number }) => {
-          const l1 = l1VendorMap.get(item.item_id)
           return {
             indent_id: indent.id,
             item_id: item.item_id,
             requested_qty: Math.max(1, item.reorder_level * 2 - item.current_stock),
             unit: 'nos',
             current_stock: item.current_stock,
-            suggested_vendor_id: l1?.vendor_id || null,
-            suggested_rate: l1?.rate || null,
           }
         })
 

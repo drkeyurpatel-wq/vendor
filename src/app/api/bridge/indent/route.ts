@@ -63,9 +63,9 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     centre_id: centre.id,
     status: priority === 'emergency' ? 'approved' : 'pending_approval',
     priority: priority || 'routine',
-    department: department || 'Pharmacy',
+
     notes: `HMIS indent from ${requested_by || department || 'ward'}${reason ? '. Reason: ' + reason : ''}`,
-    source: 'hmis_bridge',
+
   }).select().single()
 
   if (indErr || !indent) return bridgeError('pharmacy_indent', 'Indent creation failed: ' + indErr?.message, 500)

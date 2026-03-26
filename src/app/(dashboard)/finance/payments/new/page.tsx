@@ -142,7 +142,6 @@ export default function NewPaymentPage() {
     const { data: batch, error } = await supabase.from('payment_batches').insert({
       batch_number: batchNumber, batch_date: batchDate,
       total_amount: Math.round(totals.net * 100) / 100,
-      payment_count: selectedLines.length,
       payment_mode: paymentMode, bank_account: bankAccount,
       status: 'pending_approval',
       notes: notes.trim() || null,

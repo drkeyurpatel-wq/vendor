@@ -67,7 +67,6 @@ export default function RateContractActions({ contractId, contractNumber, status
             vendor_id: original.vendor_id, centre_id: original.centre_id,
             contract_type: original.contract_type, status: 'draft',
             valid_from: newStart, valid_to: newEnd.toISOString().split('T')[0],
-            notes: `Renewed from ${contractNumber || contractId}`,
           }).select('id').single()
 
           if (createErr || !newContract) throw createErr || new Error('Failed')

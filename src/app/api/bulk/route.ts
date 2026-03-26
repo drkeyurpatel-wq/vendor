@@ -73,8 +73,10 @@ export async function POST(request: NextRequest) {
 
             const { error: approvalError } = await supabase.from('po_approvals').insert({
               po_id: po.id,
-              approved_by: user.id,
-              action: 'approved',
+              approver_id: user.id,
+              approver_role: role,
+              status: 'approved',
+              actioned_at: now,
               comments: 'Bulk approved',
             })
 

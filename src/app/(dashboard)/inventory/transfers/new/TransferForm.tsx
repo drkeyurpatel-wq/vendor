@@ -140,7 +140,7 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
         transfer_date: now.toISOString().split('T')[0],
         item_count: lines.length,
         total_value: totalValue,
-        remarks: remarks.trim() || null,
+        notes: remarks.trim() || null,
       })
       .select('id')
       .single()

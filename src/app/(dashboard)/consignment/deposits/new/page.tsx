@@ -76,7 +76,7 @@ export default function NewConsignmentDepositPage() {
     const { data: deposit, error } = await supabase.from('consignment_deposits').insert({
       deposit_number: depNumber, vendor_id: vendorId, centre_id: centreId,
       challan_number: challanNumber || null, challan_date: challanDate || null,
-      received_by: user?.id, notes: notes || null, status: 'active', created_by: user?.id,
+      received_by: user?.id, notes: notes || null, status: 'active',
     }).select().single()
 
     if (error || !deposit) { toast.error(error?.message || 'Failed'); setLoading(false); return }

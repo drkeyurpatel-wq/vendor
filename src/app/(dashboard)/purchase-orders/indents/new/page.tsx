@@ -163,11 +163,9 @@ export default function NewIndentPage() {
       indent_number: indentNumber,
       centre_id: centreId,
       requested_by: profile?.id,
-      created_by: profile?.id,
       status: 'submitted',
       priority,
       notes: notes.trim() || null,
-      total_estimated_value: totalEstimated,
     }).select().single()
 
     if (error) { toast.error(error.message); setLoading(false); return }
