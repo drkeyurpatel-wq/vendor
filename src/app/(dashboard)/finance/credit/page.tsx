@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn, formatLakhs, formatDate, formatCurrency } from '@/lib/utils'
 import { PAYMENT_STATUS_COLORS } from '@/lib/utils'
@@ -8,7 +8,7 @@ import CreditAgingCharts from './CreditAgingCharts'
 export const dynamic = 'force-dynamic'
 
 export default async function CreditPeriodPage() {
-  const supabase = await createClient()
+  const { supabase, role, isGroupLevel } = await requireAuth()
   const today = new Date().toISOString().split('T')[0]
 
   const [

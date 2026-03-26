@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import Link from 'next/link'
@@ -14,16 +14,7 @@ export default async function ForecastingPage({
   searchParams: Promise<{ item_id?: string; centre_id?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role, centre_id')
-    .eq('id', user.id)
-    .single()
-
+  const { supabase, user, profile, role, centreId, isGroupLevel } = await requireAuth()
   if (!profile) redirect('/login')
 
   // Fetch centres for filter
@@ -34,7 +25,7 @@ export default async function ForecastingPage({
     .order('code')
 
   // Fetch items that need reordering (below reorder level)
-  const centreFilter = params.centre_id || profile.centre_id
+  const centreFilter = params.centre_id || centreId
   let reorderQuery = supabase
     .from('item_centre_stock')
     .select(`
@@ -122,7 +113,7 @@ export default async function ForecastingPage({
       </div>
 
       {/* Centre Filter */}
-      {profile.role && ['group_admin', 'group_cao'].includes(profile.role) && centres && (
+      {role && isGroupLevel && centres && (
         <div className="mb-5">
           <div className="flex gap-2 flex-wrap">
             <Link
@@ -151,7 +142,7 @@ export default async function ForecastingPage({
       )}
 
       {/* Forecasting Client Component for item selection and forecast display */}
-      <ForecastingClient centreId={params.centre_id || profile.centre_id || ''} />
+      <ForecastingClient centreId={params.centre_id || centreId || ''} />
 
       {/* Reorder Recommendations Table */}
       <div className="mt-8">

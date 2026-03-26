@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatDate, formatCurrency, formatLakhs } from '@/lib/utils'
@@ -15,10 +15,7 @@ function agingBucket(days: number) {
 export const dynamic = 'force-dynamic'
 
 export default async function VendorOverdueReport() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: invoices } = await supabase
     .from('invoices')
     .select('id, invoice_ref, vendor_invoice_no, total_amount, paid_amount, due_date, payment_status, credit_period_days, vendor_invoice_date, vendor:vendors(id, vendor_code, legal_name, primary_contact_email, primary_contact_phone), centre:centres(code)')

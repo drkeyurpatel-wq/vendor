@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate, formatDateTime, formatLakhs } from '@/lib/utils'
@@ -24,7 +24,7 @@ const QC_STATUS_COLORS: Record<string, string> = {
 
 export default async function GRNDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
+  const { supabase, role } = await requireAuth()
 
   const { data: grn, error } = await supabase
     .from('grns')
@@ -38,9 +38,6 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
     .single()
 
   if (!grn || error) redirect('/grn')
-
-  const { data: { user: authUser } } = await supabase.auth.getUser()
-  const { data: profile } = authUser ? await supabase.from('user_profiles').select('id, role').eq('id', authUser.id).single() : { data: null }
 
   // Fetch QC user separately (FK may not exist)
   let qcUserName: string | null = null
@@ -147,17 +144,15 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
       </div>
 
       {/* GRN Actions */}
-      {profile && (
-        <div className="card p-5 mb-6">
-          <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-3">Actions</h3>
-          <GRNStatusActions
-            grnId={grn.id} grnNumber={grn.grn_number} currentStatus={grn.status}
-            qualityStatus={grn.quality_status} poId={grn.po_id} vendorId={grn.vendor_id}
-            centreId={grn.centre_id} userRole={profile.role}
-            lineItems={items.map((i: any) => ({ item_id: i.item_id, received_qty: i.received_qty || i.accepted_qty || 0, rate: i.rate }))}
-          />
-        </div>
-      )}
+      <div className="card p-5 mb-6">
+        <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-3">Actions</h3>
+        <GRNStatusActions
+          grnId={grn.id} grnNumber={grn.grn_number} currentStatus={grn.status}
+          qualityStatus={grn.quality_status} poId={grn.po_id} vendorId={grn.vendor_id}
+          centreId={grn.centre_id} userRole={role}
+          lineItems={items.map((i: any) => ({ item_id: i.item_id, received_qty: i.received_qty || i.accepted_qty || 0, rate: i.rate }))}
+        />
+      </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">

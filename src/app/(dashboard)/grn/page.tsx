@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Plus } from 'lucide-react'
@@ -14,13 +14,7 @@ export default async function GRNListPage({
   searchParams: Promise<{ status?: string; centre?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role, centre_id')
-    .eq('id', (await supabase.auth.getUser()).data.user!.id)
-    .single()
+  const { supabase, role, isGroupLevel } = await requireAuth()
 
   let query = supabase
     .from('grns')
@@ -61,7 +55,7 @@ export default async function GRNListPage({
       </div>
 
       {/* Centre filter */}
-      {profile?.role && ['group_admin', 'group_cao'].includes(profile.role) && (
+      {isGroupLevel && (
         <div className="mb-5 flex gap-2 flex-wrap">
           <Link href={`/grn${params.status ? `?status=${params.status}` : ''}`}
             className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
@@ -78,7 +72,7 @@ export default async function GRNListPage({
         </div>
       )}
 
-      <GRNListClient grns={grns ?? []} userRole={profile?.role || 'store_staff'} />
+      <GRNListClient grns={grns ?? []} userRole={role} />
     </div>
   )
 }

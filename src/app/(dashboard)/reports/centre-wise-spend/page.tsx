@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatLakhs, formatDate, getCurrentFY, getFYOptions } from '@/lib/utils'
@@ -13,10 +13,7 @@ export default async function CentreWiseSpendReport({
   searchParams: Promise<{ months?: string; fy?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const fyOptions = getFYOptions(3)
   const monthsBack = parseInt(params.months || '3') || 3
   const now = new Date()

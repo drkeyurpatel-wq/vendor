@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
@@ -7,10 +7,7 @@ import { ArrowLeft, Calendar, AlertTriangle, Clock, CheckCircle2 } from 'lucide-
 export const dynamic = 'force-dynamic'
 
 export default async function PaymentSchedulePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
   const weekEnd = new Date(today.getTime() + 7 * 86400000).toISOString().split('T')[0]

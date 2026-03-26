@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
@@ -7,10 +7,7 @@ import { ArrowLeft, Package, AlertTriangle } from 'lucide-react'
 export const dynamic = 'force-dynamic'
 
 export default async function ConsignmentStockPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: stock } = await supabase
     .from('consignment_stock')
     .select('*, item:items(item_code, generic_name, unit, manufacturer), deposit:consignment_deposits(deposit_number, challan_number, challan_date, vendor:vendors(legal_name, vendor_code), centre:centres(code, name))')

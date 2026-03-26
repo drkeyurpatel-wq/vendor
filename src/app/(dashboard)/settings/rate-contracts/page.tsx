@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn, formatDate } from '@/lib/utils'
 import { FileText, Plus, Search, Filter } from 'lucide-react'
@@ -25,7 +25,7 @@ export default async function RateContractsPage({
   searchParams: Promise<{ status?: string; vendor?: string; search?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
+  const { supabase, role, isGroupLevel } = await requireAuth()
 
   let query = supabase
     .from('rate_contracts')

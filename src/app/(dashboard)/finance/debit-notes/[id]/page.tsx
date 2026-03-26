@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
@@ -14,10 +14,7 @@ const DN_STATUS_COLORS: Record<string, string> = {
 
 export default async function DebitNoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: dn, error } = await supabase
     .from('debit_notes')
     .select('*, vendor:vendors(id, legal_name, vendor_code, gstin), centre:centres(code, name), invoice:invoices(id, invoice_ref, vendor_invoice_no, total_amount)')

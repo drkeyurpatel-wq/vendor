@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Plus } from 'lucide-react'
@@ -14,11 +14,7 @@ export default async function PurchaseOrdersPage({
   searchParams: Promise<{ status?: string; centre?: string; q?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-
-  const { data: profile } = await supabase
-    .from('user_profiles').select('role, centre_id')
-    .eq('id', (await supabase.auth.getUser()).data.user!.id).single()
+  const { supabase, role, isGroupLevel } = await requireAuth()
 
   let query = supabase
     .from('purchase_orders')
@@ -59,8 +55,8 @@ export default async function PurchaseOrdersPage({
         ))}
       </div>
 
-      {/* Centre filter */}
-      {profile?.role && ['group_admin', 'group_cao'].includes(profile.role) && (
+      {/* Centre filter — only for group-level roles */}
+      {isGroupLevel && (
         <div className="mb-5 flex gap-2 flex-wrap">
           <Link href={`/purchase-orders${params.status ? `?status=${params.status}` : ''}`}
             className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
@@ -77,7 +73,7 @@ export default async function PurchaseOrdersPage({
         </div>
       )}
 
-      <POListClient pos={pos ?? []} userRole={profile?.role || 'store_staff'} />
+      <POListClient pos={pos ?? []} userRole={role} />
     </div>
   )
 }

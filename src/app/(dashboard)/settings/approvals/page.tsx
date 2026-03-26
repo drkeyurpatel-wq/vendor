@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatLakhs, formatDate } from '@/lib/utils'
@@ -85,11 +85,7 @@ const APPROVAL_STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function ApprovalsSettingsPage() {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: currentProfile } = await supabase
     .from('user_profiles')
     .select('role')

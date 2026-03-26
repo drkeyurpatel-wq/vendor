@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { cn, formatDate, formatLakhs, formatCurrency, PO_STATUS_COLORS, timeAgo } from '@/lib/utils'
 import { ArrowLeft, Edit, Printer, CheckCircle, Package, FileText, Truck, Download, Mail, MessageCircle, Clock, XCircle, Send } from 'lucide-react'
@@ -71,10 +71,7 @@ function ApprovalTimeline({ approvals, poStatus }: { approvals: any[]; poStatus:
 
 export default async function PODetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: profile } = await supabase.from('user_profiles').select('id, role').eq('id', user.id).single()
 
   const { data: po, error } = await supabase
@@ -150,7 +147,7 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
       {/* APPROVAL ACTIONS — wired in */}
       {profile && (
         <div className="mb-6">
-          <POApprovalActions poId={po.id} poStatus={po.status} totalAmount={po.total_amount} userRole={profile.role} userId={profile.id} />
+          <POApprovalActions poId={po.id} poStatus={po.status} totalAmount={po.total_amount} userRole={role} userId={profile.id} />
         </div>
       )}
 
@@ -161,7 +158,7 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
           <POStatusActions
             poId={po.id} poNumber={po.po_number} currentStatus={po.status}
             vendorEmail={po.vendor?.primary_contact_email} vendorPhone={po.vendor?.primary_contact_phone}
-            userRole={profile.role} centreId={po.centre_id}
+            userRole={role} centreId={po.centre_id}
           />
         </div>
       )}

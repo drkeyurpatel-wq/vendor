@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatDate, formatLakhs, PO_STATUS_COLORS, PAYMENT_STATUS_COLORS } from '@/lib/utils'
@@ -7,18 +7,8 @@ import { ShoppingCart, FileText, CreditCard, Package, AlertTriangle } from 'luci
 export const dynamic = 'force-dynamic'
 
 export default async function VendorPortalPage() {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role, centre_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'vendor') {
+  const { supabase, user, profile, role, centreId, isGroupLevel } = await requireAuth()
+  if (!profile || role !== 'vendor') {
     return (
       <div className="card p-12 text-center">
         <Package size={40} className="mx-auto mb-3 text-gray-300" />

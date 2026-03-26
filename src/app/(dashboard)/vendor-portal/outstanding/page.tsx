@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { cn, formatDate, formatLakhs, formatCurrency } from '@/lib/utils'
 import { AlertTriangle, Clock, IndianRupee } from 'lucide-react'
@@ -15,17 +15,8 @@ function getAgingBucket(daysOverdue: number): { label: string; class: string } {
 export const dynamic = 'force-dynamic'
 
 export default async function VendorOutstandingPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'vendor') {
+  const { supabase, user, profile, role, centreId, isGroupLevel } = await requireAuth()
+  if (!profile || role !== 'vendor') {
     return (
       <div className="card p-12 text-center">
         <AlertTriangle size={40} className="mx-auto mb-3 text-yellow-400" />

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { cn, formatDate } from '@/lib/utils'
 import Link from 'next/link'
@@ -43,16 +43,7 @@ export default async function VendorPerformancePage({
   searchParams: Promise<{ month?: string; q?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('*, centre:centres(*)')
-    .eq('id', user.id)
-    .single()
-
+  const { supabase, user, profile, role, centreId, isGroupLevel } = await requireAuth()
   // Determine the selected month filter (default: current month)
   const selectedMonth = params.month || format(startOfMonth(new Date()), 'yyyy-MM-dd')
   const previousMonth = format(subMonths(new Date(selectedMonth), 1), 'yyyy-MM-01')

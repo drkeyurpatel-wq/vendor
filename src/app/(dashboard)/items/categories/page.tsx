@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import ItemCategoriesManager from './ItemCategoriesManager'
 
 export default async function ItemCategoriesPage() {
-  const supabase = await createClient()
+  const { supabase, role, isGroupLevel } = await requireAuth()
 
   const { data: categories } = await supabase
     .from('item_categories')

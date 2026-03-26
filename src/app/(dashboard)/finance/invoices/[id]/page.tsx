@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatDate, formatCurrency, formatLakhs, getDueDateStatus, MATCH_STATUS_COLORS, PAYMENT_STATUS_COLORS } from '@/lib/utils'
@@ -9,11 +9,7 @@ import InvoiceActions from '@/components/ui/InvoiceActions'
 
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: profile } = await supabase.from('user_profiles').select('id, role').eq('id', user.id).single()
 
   // Fetch invoice with joins
@@ -183,7 +179,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             totalAmount={invoice.total_amount || 0} paidAmount={invoice.paid_amount || 0}
             vendorId={invoice.vendor_id} centreId={invoice.centre_id}
             poId={poId || undefined} grnId={invoice.grn_id || undefined}
-            userRole={profile.role}
+            userRole={role}
           />
         </div>
       )}

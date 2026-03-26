@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
@@ -12,10 +12,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function ConsignmentDashboard() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const [{ data: deposits }, { data: stock }, { data: usage }, { count: pendingCount }] = await Promise.all([
     supabase.from('consignment_deposits').select('*, vendor:vendors(legal_name, vendor_code), centre:centres(code)').order('created_at', { ascending: false }).limit(10),
     supabase.from('consignment_stock').select('*, item:items(item_code, generic_name), deposit:consignment_deposits(vendor_id, vendor:vendors(legal_name))').eq('status', 'available').order('created_at', { ascending: false }).limit(20),

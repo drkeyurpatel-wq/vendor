@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { formatLakhs, formatCurrency } from '@/lib/utils'
 import { ShoppingCart, TrendingUp, Users, Package, AlertTriangle, IndianRupee, FileCheck, Truck } from 'lucide-react'
@@ -7,7 +7,7 @@ import ReportsCharts from './ReportsCharts'
 export const dynamic = 'force-dynamic'
 
 export default async function ReportsPage() {
-  const supabase = await createClient()
+  const { supabase, role, isGroupLevel } = await requireAuth()
   const today = new Date().toISOString().split('T')[0]
 
   const [

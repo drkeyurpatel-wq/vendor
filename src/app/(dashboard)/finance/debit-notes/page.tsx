@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn, formatDate, formatLakhs } from '@/lib/utils'
 import { FileText, Plus } from 'lucide-react'
@@ -33,13 +33,7 @@ export default async function DebitNotesPage({
 }) {
   const params = await searchParams
   const currentPage = Math.max(1, parseInt(params.page || '1'))
-  const supabase = await createClient()
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role, centre_id')
-    .eq('id', (await supabase.auth.getUser()).data.user!.id)
-    .single()
+  const { supabase, role, centreId, isGroupLevel } = await requireAuth()
 
   // Main query
   let query = supabase
@@ -52,8 +46,8 @@ export default async function DebitNotesPage({
   if (params.q) query = query.or(`dn_number.ilike.%${params.q}%,vendor:vendors.legal_name.ilike.%${params.q}%`)
 
   // RLS handles centre scoping, but apply explicit filter if passed
-  if (profile?.centre_id && !['group_admin', 'group_cao'].includes(profile.role ?? '')) {
-    query = query.eq('centre_id', profile.centre_id)
+  if (centreId && !isGroupLevel) {
+    query = query.eq('centre_id', centreId)
   }
 
   const from = (currentPage - 1) * PAGE_SIZE
@@ -128,7 +122,7 @@ export default async function DebitNotesPage({
       </div>
 
       {/* Centre filter */}
-      {profile?.role && ['group_admin', 'group_cao'].includes(profile.role) && centres && (
+      {isGroupLevel && centres && (
         <div className="mb-5 flex gap-2 flex-wrap">
           {centres.map(c => (
             <Link key={c.id} href={`/finance/debit-notes?centre=${c.id}${params.status ? `&status=${params.status}` : ''}`}

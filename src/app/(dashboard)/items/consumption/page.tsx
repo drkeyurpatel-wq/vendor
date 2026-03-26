@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency } from '@/lib/utils'
@@ -12,10 +12,7 @@ export default async function ConsumptionPage({
   searchParams: Promise<{ centre?: string; months?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const monthsBack = parseInt(params.months || '3') || 3
   const { data: centres } = await supabase.from('centres').select('id, code, name').eq('is_active', true).order('code')
 

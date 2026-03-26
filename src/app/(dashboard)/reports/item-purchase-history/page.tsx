@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatDate, formatCurrency, formatLakhs } from '@/lib/utils'
@@ -12,10 +12,7 @@ export default async function ItemPurchaseHistory({
   searchParams: Promise<{ q?: string; months?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const monthsBack = parseInt(params.months || '6') || 6
   const now = new Date()
   const startDate = new Date(now.getFullYear(), now.getMonth() - monthsBack + 1, 1).toISOString().split('T')[0]

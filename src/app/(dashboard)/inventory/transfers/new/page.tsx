@@ -1,16 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Shield } from 'lucide-react'
 import TransferForm from './TransferForm'
 
 export default async function NewTransferPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: profile } = await supabase.from('user_profiles').select('id, role, centre_id').eq('id', user.id).single()
-  if (!profile || !['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(profile.role)) {
+  if (!profile || !['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(role)) {
     return (
       <div>
         <Link href="/inventory/transfers" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4">
@@ -32,7 +29,7 @@ export default async function NewTransferPage() {
         <ArrowLeft size={14} /> Back to Transfers
       </Link>
       <h1 className="text-2xl font-bold text-navy-600 mb-6">New Inter-Centre Transfer</h1>
-      <TransferForm centres={centres ?? []} userCentreId={profile.centre_id} />
+      <TransferForm centres={centres ?? []} userCentreId={centreId} />
     </div>
   )
 }
