@@ -103,7 +103,7 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
 
       // Check if PO is fully received
       const { data: allPoItems } = await supabase.from('purchase_order_items')
-        .select('id, item_id, ordered_qty, received_qty, rate, net_rate, unit, gst_percent, gst_amount, trade_discount_percent, specifications')
+        .select('id, item_id, ordered_qty, received_qty, rate, net_rate, unit, gst_percent, gst_amount, trade_discount_percent')
         .eq('po_id', poId)
       const allReceived = allPoItems?.every((i: any) => (i.received_qty || 0) >= i.ordered_qty)
       const someReceived = allPoItems?.some((i: any) => (i.received_qty || 0) > 0)
@@ -169,7 +169,7 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
                   sgst_amount: gstAmt / 2,
                   igst_amount: 0,
                   line_total: lineTotal + gstAmt,
-                  specifications: i.specifications,
+                  
                 }
               })
 
