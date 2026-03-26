@@ -33,7 +33,7 @@ export default function LoginPage() {
       {/* Logo */}
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-2xl shadow-black/20 mb-4">
-          <span className="text-xl sm:text-2xl font-extrabold text-[#1B3A6B] tracking-tight">H1</span>
+          <span className="text-xl sm:text-2xl font-extrabold text-navy-600 tracking-tight">H1</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Health1 VPMS</h1>
         <p className="text-blue-300/60 text-sm mt-1.5 font-medium">Vendor & Purchase Management System</p>
@@ -42,13 +42,13 @@ export default function LoginPage() {
       {/* Card */}
       <div className="bg-white/[0.95] backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/20 p-6 sm:p-8 border border-white/20">
         <h2 className="text-xl font-bold text-gray-900 mb-1">Welcome back</h2>
-        <p className="text-sm text-gray-400 mb-6 sm:mb-7">Sign in to your account to continue</p>
+        <p className="text-sm text-gray-500 mb-6 sm:mb-7">Sign in to your account to continue</p>
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label htmlFor="email" className="form-label">Email address</label>
             <div className="relative">
-              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               <input
                 id="email"
                 type="email"
@@ -64,7 +64,7 @@ export default function LoginPage() {
           <div>
             <label htmlFor="password" className="form-label">Password</label>
             <div className="relative">
-              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               <input
                 id="password"
                 type="password"
@@ -105,11 +105,11 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-gray-100">
-          <div className="flex items-center justify-center gap-2 text-gray-400 mb-2">
+          <div className="flex items-center justify-center gap-2 text-gray-500 mb-2">
             <ShieldCheck size={14} />
             <span className="text-[11px] font-semibold uppercase tracking-wider">Secure Access</span>
           </div>
-          <p className="text-[11px] text-gray-400 leading-relaxed text-center">
+          <p className="text-[11px] text-gray-500 leading-relaxed text-center">
             Health1 Super Speciality Hospitals Pvt. Ltd.
             <br />
             Internal System — Authorized Users Only

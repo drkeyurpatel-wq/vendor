@@ -110,7 +110,7 @@ export default async function ItemPurchaseHistory({
       <form method="GET" className="mb-6 flex gap-2 max-w-md">
         <input type="hidden" name="months" value={monthsBack} />
         <div className="relative flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input name="q" defaultValue={params.q} placeholder="Search item name, code..."
             className="form-input pl-9 text-sm w-full" />
         </div>
@@ -162,7 +162,7 @@ export default async function ItemPurchaseHistory({
             </table>
           </div>
         ) : (
-          <div className="empty-state"><Package size={40} className="mb-3 text-gray-300" /><p className="font-medium text-gray-500">No purchase data found</p></div>
+          <div className="empty-state"><Package size={40} className="mb-3 text-gray-500" /><p className="font-medium text-gray-500">No purchase data found</p></div>
         )}
       </div>
     </div>

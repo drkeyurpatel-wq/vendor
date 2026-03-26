@@ -29,9 +29,9 @@ export default async function SettingsUsersPage() {
       <div>
         <h1 className="page-title mb-4">User Management</h1>
         <div className="card p-12 text-center">
-          <Shield size={40} className="mx-auto mb-3 text-gray-300" />
+          <Shield size={40} className="mx-auto mb-3 text-gray-500" />
           <p className="font-medium text-gray-500">Access Restricted</p>
-          <p className="text-sm text-gray-400 mt-1">Only Group Admin can manage users</p>
+          <p className="text-sm text-gray-500 mt-1">Only Group Admin can manage users</p>
         </div>
       </div>
     )
@@ -68,7 +68,7 @@ export default async function SettingsUsersPage() {
         {Object.entries(ROLE_LABELS).map(([role, label]) => (
           <div key={role} className="stat-card text-center">
             <div className="text-xs text-gray-500">{label}</div>
-            <div className="text-xl font-bold text-[#1B3A6B] mt-1">
+            <div className="text-xl font-bold text-navy-600 mt-1">
               {roleGroups.get(role)?.length || 0}
             </div>
           </div>
@@ -104,7 +104,7 @@ export default async function SettingsUsersPage() {
                     {u.centre ? (
                       <span className="badge bg-blue-50 text-blue-700">{u.centre.code} — {u.centre.name}</span>
                     ) : (
-                      <span className="text-xs text-gray-400">{isGroupLevel(u.role) ? 'All Centres' : '—'}</span>
+                      <span className="text-xs text-gray-500">{isGroupLevel(u.role) ? 'All Centres' : '—'}</span>
                     )}
                   </td>
                   <td className="text-sm text-gray-600">{u.phone || '—'}</td>

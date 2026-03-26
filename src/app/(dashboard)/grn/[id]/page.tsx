@@ -89,7 +89,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="page-title text-2xl font-bold text-[#1B3A6B] font-mono">{grn.grn_number}</h1>
+              <h1 className="page-title text-2xl font-bold text-navy-600 font-mono">{grn.grn_number}</h1>
               <span className={cn('badge', GRN_STATUS_COLORS[grn.status] || 'bg-gray-100 text-gray-700')}>
                 {grn.status?.replace(/_/g, ' ')}
               </span>
@@ -101,11 +101,11 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
             </div>
             <p className="text-gray-500 mt-1">
               Against PO:{' '}
-              <Link href={`/purchase-orders/${grn.po?.id}`} className="text-[#0D7E8A] hover:underline font-mono">
+              <Link href={`/purchase-orders/${grn.po?.id}`} className="text-teal-500 hover:underline font-mono">
                 {grn.po?.po_number}
               </Link>
               {grn.po?.total_amount != null && (
-                <span className="text-gray-400 ml-1">({formatCurrency(grn.po.total_amount)})</span>
+                <span className="text-gray-500 ml-1">({formatCurrency(grn.po.total_amount)})</span>
               )}
               {' | '}Centre:{' '}
               <span className="font-medium text-gray-700">
@@ -158,7 +158,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Items Received</div>
-          <div className="text-xl font-bold text-[#1B3A6B] mt-1">{totalReceived}</div>
+          <div className="text-xl font-bold text-navy-600 mt-1">{totalReceived}</div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Accepted</div>
@@ -166,25 +166,25 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Rejected</div>
-          <div className={cn('text-xl font-bold mt-1', totalRejected > 0 ? 'text-red-600' : 'text-gray-400')}>
+          <div className={cn('text-xl font-bold mt-1', totalRejected > 0 ? 'text-red-600' : 'text-gray-500')}>
             {totalRejected}
           </div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Damaged</div>
-          <div className={cn('text-xl font-bold mt-1', totalDamaged > 0 ? 'text-red-600' : 'text-gray-400')}>
+          <div className={cn('text-xl font-bold mt-1', totalDamaged > 0 ? 'text-red-600' : 'text-gray-500')}>
             {totalDamaged}
           </div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Short</div>
-          <div className={cn('text-xl font-bold mt-1', totalShort > 0 ? 'text-orange-600' : 'text-gray-400')}>
+          <div className={cn('text-xl font-bold mt-1', totalShort > 0 ? 'text-orange-600' : 'text-gray-500')}>
             {totalShort}
           </div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Invoice Amount</div>
-          <div className="text-xl font-bold text-[#1B3A6B] mt-1">
+          <div className="text-xl font-bold text-navy-600 mt-1">
             {grn.vendor_invoice_amount ? formatLakhs(grn.vendor_invoice_amount) : '—'}
           </div>
         </div>
@@ -195,13 +195,13 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
         {/* Left: GRN Details */}
         <div className="card p-5">
           <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-4 flex items-center gap-2">
-            <ClipboardCheck size={14} className="text-[#0D7E8A]" />
+            <ClipboardCheck size={14} className="text-teal-500" />
             GRN Details
           </h3>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Vendor:</span>
-              <Link href={`/vendors/${grn.vendor?.id}`} className="text-[#0D7E8A] hover:underline font-medium">
+              <Link href={`/vendors/${grn.vendor?.id}`} className="text-teal-500 hover:underline font-medium">
                 {grn.vendor?.vendor_code} — {grn.vendor?.legal_name}
               </Link>
             </div>
@@ -288,7 +288,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Invoice Amount:</span>
-                <span className="font-bold text-[#1B3A6B]">
+                <span className="font-bold text-navy-600">
                   {grn.vendor_invoice_amount ? formatCurrency(grn.vendor_invoice_amount) : '—'}
                 </span>
               </div>
@@ -306,7 +306,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Amount:</span>
-                  <span className="font-bold text-[#1B3A6B]">{formatCurrency(linkedInvoice.total_amount)}</span>
+                  <span className="font-bold text-navy-600">{formatCurrency(linkedInvoice.total_amount)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Payment:</span>
@@ -368,7 +368,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
       {/* Items table */}
       <div className="card overflow-hidden mb-6">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-          <Package size={16} className="text-[#0D7E8A]" />
+          <Package size={16} className="text-teal-500" />
           <h2 className="font-semibold text-gray-900">Received Items ({items.length})</h2>
         </div>
         <div className="overflow-x-auto">
@@ -398,9 +398,9 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
                 <tr key={gi.id}>
                   <td className="min-w-[180px]">
                     <div className="font-medium text-gray-900 text-sm">{gi.item?.generic_name}</div>
-                    <div className="font-mono text-xs text-gray-400">{gi.item?.item_code}</div>
+                    <div className="font-mono text-xs text-gray-500">{gi.item?.item_code}</div>
                     {gi.item?.manufacturer && (
-                      <div className="text-xs text-gray-400">{gi.item.manufacturer}</div>
+                      <div className="text-xs text-gray-500">{gi.item.manufacturer}</div>
                     )}
                   </td>
                   <td className="font-mono text-xs text-gray-500">{gi.hsn_code || '—'}</td>
@@ -416,13 +416,13 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
                   <td className="text-right text-sm font-medium text-green-600">{gi.accepted_qty}</td>
                   <td className={cn(
                     'text-right text-sm font-medium',
-                    gi.rejected_qty > 0 ? 'text-red-600' : 'text-gray-400'
+                    gi.rejected_qty > 0 ? 'text-red-600' : 'text-gray-500'
                   )}>
                     {gi.rejected_qty}
                   </td>
                   <td className={cn(
                     'text-right text-sm font-medium',
-                    gi.damaged_qty > 0 ? 'text-red-600' : 'text-gray-400'
+                    gi.damaged_qty > 0 ? 'text-red-600' : 'text-gray-500'
                   )}>
                     {gi.damaged_qty}
                   </td>
@@ -433,13 +433,13 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
                   <td className="text-right text-xs text-gray-500 whitespace-nowrap">
                     {gi.cgst_amount != null ? formatCurrency(gi.cgst_amount) : '—'}
                     {gi.cgst_percent != null && (
-                      <div className="text-[10px] text-gray-400">{gi.cgst_percent}%</div>
+                      <div className="text-[10px] text-gray-500">{gi.cgst_percent}%</div>
                     )}
                   </td>
                   <td className="text-right text-xs text-gray-500 whitespace-nowrap">
                     {gi.sgst_amount != null ? formatCurrency(gi.sgst_amount) : '—'}
                     {gi.sgst_percent != null && (
-                      <div className="text-[10px] text-gray-400">{gi.sgst_percent}%</div>
+                      <div className="text-[10px] text-gray-500">{gi.sgst_percent}%</div>
                     )}
                   </td>
                   <td className="text-right text-sm font-bold whitespace-nowrap">
@@ -457,7 +457,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
               ))}
               {items.length === 0 && (
                 <tr>
-                  <td colSpan={16} className="text-center py-8 text-gray-400">
+                  <td colSpan={16} className="text-center py-8 text-gray-500">
                     No items found for this GRN.
                   </td>
                 </tr>
@@ -467,7 +467,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
         </div>
 
         {/* Tax summary footer */}
-        <div className="border-t border-gray-200 bg-[#EEF2F9] px-5 py-4">
+        <div className="border-t border-gray-200 bg-navy-50 px-5 py-4">
           <div className="flex justify-end">
             <div className="w-full max-w-xs space-y-2 text-sm">
               <div className="flex justify-between">
@@ -499,8 +499,8 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
                 </div>
               )}
               <div className="flex justify-between border-t border-gray-300 pt-2">
-                <span className="font-semibold text-[#1B3A6B]">Grand Total:</span>
-                <span className="font-bold text-[#1B3A6B] text-base">{formatCurrency(grandTotal)}</span>
+                <span className="font-semibold text-navy-600">Grand Total:</span>
+                <span className="font-bold text-navy-600 text-base">{formatCurrency(grandTotal)}</span>
               </div>
             </div>
           </div>
@@ -521,7 +521,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
                   <div className="flex-1">
                     <div className="font-medium text-gray-900 text-sm">
                       {gi.item?.generic_name}
-                      <span className="font-mono text-xs text-gray-400 ml-2">{gi.item?.item_code}</span>
+                      <span className="font-mono text-xs text-gray-500 ml-2">{gi.item?.item_code}</span>
                     </div>
                     {gi.batch_no && (
                       <div className="text-xs text-gray-500 mt-0.5">Batch: {gi.batch_no}</div>

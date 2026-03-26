@@ -64,7 +64,7 @@ export default function VendorListClient({ vendors, categories, activeStatus, us
         cell: ({ row }) => (
           <div>
             <div className="font-medium text-gray-900 text-sm">{row.original.legal_name}</div>
-            {row.original.trade_name && <div className="text-xs text-gray-400 mt-0.5">{row.original.trade_name}</div>}
+            {row.original.trade_name && <div className="text-xs text-gray-500 mt-0.5">{row.original.trade_name}</div>}
           </div>
         ),
       },
@@ -75,7 +75,7 @@ export default function VendorListClient({ vendors, categories, activeStatus, us
       {
         accessorKey: 'gstin', header: 'GSTIN',
         cell: ({ row }) => {
-          if (!row.original.gstin) return <span className="text-xs text-gray-400">Not provided</span>
+          if (!row.original.gstin) return <span className="text-xs text-gray-500">Not provided</span>
           return (
             <div className="flex items-center gap-1.5">
               <span className="font-mono text-xs text-gray-700">{row.original.gstin}</span>
@@ -93,7 +93,7 @@ export default function VendorListClient({ vendors, categories, activeStatus, us
         cell: ({ row }) => (
           <div>
             <div className="text-sm text-gray-700">{row.original.primary_contact_name ?? '—'}</div>
-            {row.original.primary_contact_phone && <div className="text-xs text-gray-400">{row.original.primary_contact_phone}</div>}
+            {row.original.primary_contact_phone && <div className="text-xs text-gray-500">{row.original.primary_contact_phone}</div>}
           </div>
         ),
       },
@@ -144,7 +144,7 @@ export default function VendorListClient({ vendors, categories, activeStatus, us
         searchPlaceholder="Search vendor name, code, GSTIN..."
         showSearch showExport showColumnToggle exportFilename="vendors" pageSize={25}
         onRowClick={vendor => router.push(`/vendors/${vendor.id}`)}
-        emptyIcon={<Users size={40} className="text-gray-300" />}
+        emptyIcon={<Users size={40} className="text-gray-500" />}
         emptyTitle={activeStatus ? 'No vendors match this filter' : 'No vendors yet'}
         emptyDescription={activeStatus ? 'Try a different status' : 'Add your first vendor'}
         emptyAction={!activeStatus ? <Link href="/vendors/new" className="btn-primary text-sm"><Plus size={15} /> Add Vendor</Link> : undefined}

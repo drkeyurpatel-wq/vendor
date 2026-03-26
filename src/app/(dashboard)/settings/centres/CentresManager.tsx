@@ -170,7 +170,7 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Total Centres</div>
-          <div className="text-2xl font-bold text-[#1B3A6B] mt-1">{totalCentres}</div>
+          <div className="text-2xl font-bold text-navy-600 mt-1">{totalCentres}</div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Active Centres</div>
@@ -178,11 +178,11 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Inactive Centres</div>
-          <div className="text-2xl font-bold text-gray-400 mt-1">{totalCentres - activeCentres}</div>
+          <div className="text-2xl font-bold text-gray-500 mt-1">{totalCentres - activeCentres}</div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">States Covered</div>
-          <div className="text-2xl font-bold text-[#0D7E8A] mt-1">
+          <div className="text-2xl font-bold text-teal-500 mt-1">
             {new Set(centres.map(c => c.state).filter(Boolean)).size}
           </div>
         </div>
@@ -192,11 +192,11 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-4 border-b bg-[#EEF2F9] rounded-t-xl">
-              <h2 className="text-lg font-bold text-[#1B3A6B]">
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-navy-50 rounded-t-xl">
+              <h2 className="text-lg font-bold text-navy-600">
                 {editingId ? 'Edit Centre' : 'Add New Centre'}
               </h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 p-1">
+              <button onClick={() => setShowForm(false)} className="text-gray-500 hover:text-gray-600 p-1">
                 <X size={20} />
               </button>
             </div>
@@ -292,7 +292,7 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
                     checked={form.is_active}
                     onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))}
                   />
-                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0D7E8A]"></div>
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500"></div>
                 </label>
                 <span className="text-sm text-gray-700">Active</span>
               </div>
@@ -317,23 +317,23 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
               {/* Header */}
               <div className={cn(
                 'px-5 py-4 flex items-center justify-between border-b',
-                centre.is_active ? 'bg-[#EEF2F9] border-blue-100' : 'bg-gray-50 border-gray-100'
+                centre.is_active ? 'bg-navy-50 border-blue-100' : 'bg-gray-50 border-gray-100'
               )}>
                 <div className="flex items-center gap-3">
                   <div className={cn(
                     'w-10 h-10 rounded-lg flex items-center justify-center',
-                    centre.is_active ? 'bg-[#1B3A6B]' : 'bg-gray-300'
+                    centre.is_active ? 'bg-navy-600' : 'bg-gray-300'
                   )}>
                     <Building2 size={18} className="text-white" />
                   </div>
-                  <span className="badge bg-[#1B3A6B] text-white font-mono text-xs">
+                  <span className="badge bg-navy-600 text-white font-mono text-xs">
                     {centre.code}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => openEdit(centre)}
-                    className="text-gray-400 hover:text-[#0D7E8A] transition-colors p-1.5 rounded-lg hover:bg-[#E6F5F6]"
+                    className="text-gray-500 hover:text-teal-500 transition-colors p-1.5 rounded-lg hover:bg-teal-50"
                     title="Edit centre"
                   >
                     <Pencil size={14} />
@@ -353,11 +353,11 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
 
               {/* Body */}
               <div className="px-5 py-4 space-y-3">
-                <h3 className="font-semibold text-[#1B3A6B] text-base">{centre.name}</h3>
+                <h3 className="font-semibold text-navy-600 text-base">{centre.name}</h3>
 
                 {centre.address && (
                   <div className="flex items-start gap-2 text-sm text-gray-600">
-                    <MapPin size={14} className="mt-0.5 shrink-0 text-gray-400" />
+                    <MapPin size={14} className="mt-0.5 shrink-0 text-gray-500" />
                     <span>
                       {centre.address}
                       {centre.city && <>, {centre.city}</>}
@@ -367,7 +367,7 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
                 )}
                 {!centre.address && centre.city && (
                   <div className="flex items-start gap-2 text-sm text-gray-600">
-                    <MapPin size={14} className="mt-0.5 shrink-0 text-gray-400" />
+                    <MapPin size={14} className="mt-0.5 shrink-0 text-gray-500" />
                     <span>
                       {centre.city}
                       {centre.state && <>, {centre.state}</>}
@@ -377,20 +377,20 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
 
                 {centre.phone && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Phone size={14} className="shrink-0 text-gray-400" />
+                    <Phone size={14} className="shrink-0 text-gray-500" />
                     <span>{centre.phone}</span>
                   </div>
                 )}
 
                 {centre.email && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Mail size={14} className="shrink-0 text-gray-400" />
+                    <Mail size={14} className="shrink-0 text-gray-500" />
                     <span className="truncate">{centre.email}</span>
                   </div>
                 )}
 
                 {!centre.address && !centre.city && !centre.phone && !centre.email && (
-                  <p className="text-sm text-gray-400 italic">No contact details — click edit to add</p>
+                  <p className="text-sm text-gray-500 italic">No contact details — click edit to add</p>
                 )}
               </div>
 
@@ -414,9 +414,9 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
       ) : (
         <div className="card p-12">
           <div className="empty-state">
-            <Building2 size={40} className="mb-3 text-gray-300" />
+            <Building2 size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No centres found</p>
-            <p className="text-sm text-gray-400 mt-1">Click &quot;Add Centre&quot; to create your first hospital centre</p>
+            <p className="text-sm text-gray-500 mt-1">Click &quot;Add Centre&quot; to create your first hospital centre</p>
           </div>
         </div>
       )}

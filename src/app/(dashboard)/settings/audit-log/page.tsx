@@ -139,33 +139,33 @@ export default async function AuditLogPage({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="stat-card">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#EEF2F9] flex items-center justify-center">
-              <Activity size={20} className="text-[#1B3A6B]" />
+            <div className="w-10 h-10 rounded-lg bg-navy-50 flex items-center justify-center">
+              <Activity size={20} className="text-navy-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-[#1B3A6B]">{todayCount || 0}</p>
+              <p className="text-2xl font-bold text-navy-600">{todayCount || 0}</p>
               <p className="text-xs text-gray-500">Events Today</p>
             </div>
           </div>
         </div>
         <div className="stat-card">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#E6F5F6] flex items-center justify-center">
-              <User size={20} className="text-[#0D7E8A]" />
+            <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
+              <User size={20} className="text-teal-500" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-[#1B3A6B]">{uniqueUsers}</p>
+              <p className="text-2xl font-bold text-navy-600">{uniqueUsers}</p>
               <p className="text-xs text-gray-500">Active Users Today</p>
             </div>
           </div>
         </div>
         <div className="stat-card">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#EEF2F9] flex items-center justify-center">
-              <Clock size={20} className="text-[#1B3A6B]" />
+            <div className="w-10 h-10 rounded-lg bg-navy-50 flex items-center justify-center">
+              <Clock size={20} className="text-navy-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-[#1B3A6B]">{totalCount || 0}</p>
+              <p className="text-2xl font-bold text-navy-600">{totalCount || 0}</p>
               <p className="text-xs text-gray-500">Total Records</p>
             </div>
           </div>
@@ -182,7 +182,7 @@ export default async function AuditLogPage({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
             {/* Search */}
             <div className="relative">
-              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               <input
                 name="search"
                 type="text"
@@ -223,7 +223,7 @@ export default async function AuditLogPage({
 
             {/* Date From */}
             <div className="relative">
-              <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               <input
                 name="date_from"
                 type="date"
@@ -249,7 +249,7 @@ export default async function AuditLogPage({
           </div>
           {(params.action || params.entity_type || params.user_id || params.search || params.date_from || params.date_to) && (
             <div className="mt-2">
-              <Link href="/settings/audit-log" className="text-xs text-[#0D7E8A] hover:underline">
+              <Link href="/settings/audit-log" className="text-xs text-teal-500 hover:underline">
                 Clear all filters
               </Link>
             </div>
@@ -276,7 +276,7 @@ export default async function AuditLogPage({
                 <tr>
                   <td colSpan={6}>
                     <div className="empty-state py-12">
-                      <Activity size={40} className="mx-auto mb-3 text-gray-300" />
+                      <Activity size={40} className="mx-auto mb-3 text-gray-500" />
                       <p className="text-gray-500">No audit log entries found</p>
                     </div>
                   </td>
@@ -297,12 +297,12 @@ export default async function AuditLogPage({
                       <div className="text-sm font-medium text-gray-800">
                         {log.user?.full_name || 'System'}
                       </div>
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-gray-500">
                         {log.user?.email || ''}
                       </div>
                     </td>
                     <td>
-                      <span className="badge bg-[#EEF2F9] text-[#1B3A6B] text-xs px-2 py-0.5 rounded-full">
+                      <span className="badge bg-navy-50 text-navy-600 text-xs px-2 py-0.5 rounded-full">
                         {log.action?.replace(/_/g, ' ') || '-'}
                       </span>
                     </td>
@@ -313,7 +313,7 @@ export default async function AuditLogPage({
                       {entityLink ? (
                         <Link
                           href={entityLink}
-                          className="text-[#0D7E8A] hover:underline font-mono text-xs"
+                          className="text-teal-500 hover:underline font-mono text-xs"
                         >
                           {log.entity_id?.substring(0, 8)}...
                         </Link>
@@ -334,7 +334,7 @@ export default async function AuditLogPage({
                           </pre>
                         </details>
                       ) : (
-                        <span className="text-xs text-gray-400">-</span>
+                        <span className="text-xs text-gray-500">-</span>
                       )}
                     </td>
                   </tr>
@@ -376,7 +376,7 @@ export default async function AuditLogPage({
                     href={buildUrl({ page: String(pageNum) })}
                     className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm ${
                       pageNum === page
-                        ? 'bg-[#1B3A6B] text-white font-semibold'
+                        ? 'bg-navy-600 text-white font-semibold'
                         : 'hover:bg-gray-200 text-gray-600'
                     }`}
                   >

@@ -133,7 +133,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-bold text-[#1B3A6B] font-mono">{invoice.invoice_ref}</h1>
+              <h1 className="text-2xl font-bold text-navy-600 font-mono">{invoice.invoice_ref}</h1>
               <span className={cn('badge', MATCH_STATUS_COLORS[invoice.match_status as keyof typeof MATCH_STATUS_COLORS])}>
                 {(invoice.match_status || 'pending').replace(/_/g, ' ')}
               </span>
@@ -144,10 +144,10 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <p className="text-sm text-gray-500 mt-1">
               {invoice.vendor && (
                 <>
-                  <Link href={`/vendors/${invoice.vendor.id}`} className="text-[#0D7E8A] hover:underline">
+                  <Link href={`/vendors/${invoice.vendor.id}`} className="text-teal-500 hover:underline">
                     {invoice.vendor.legal_name}
                   </Link>
-                  {' '}<span className="font-mono text-xs text-gray-400">({invoice.vendor.vendor_code})</span>
+                  {' '}<span className="font-mono text-xs text-gray-500">({invoice.vendor.vendor_code})</span>
                 </>
               )}
               {invoice.centre && (
@@ -211,7 +211,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             {po && (
               <div className="flex justify-between">
                 <span className="text-gray-500">Linked PO:</span>
-                <Link href={`/purchase-orders/${po.id}`} className="text-[#0D7E8A] hover:underline font-mono text-xs">
+                <Link href={`/purchase-orders/${po.id}`} className="text-teal-500 hover:underline font-mono text-xs">
                   {po.po_number}
                 </Link>
               </div>
@@ -219,7 +219,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             {invoice.grn && (
               <div className="flex justify-between">
                 <span className="text-gray-500">Linked GRN:</span>
-                <Link href={`/grn/${invoice.grn.id}`} className="text-[#0D7E8A] hover:underline font-mono text-xs">
+                <Link href={`/grn/${invoice.grn.id}`} className="text-teal-500 hover:underline font-mono text-xs">
                   {invoice.grn.grn_number}
                 </Link>
               </div>
@@ -235,7 +235,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Total Amount:</span>
-              <span className="font-mono font-semibold text-[#1B3A6B]">{formatCurrency(invoice.total_amount || 0)}</span>
+              <span className="font-mono font-semibold text-navy-600">{formatCurrency(invoice.total_amount || 0)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">GST Amount:</span>
@@ -299,7 +299,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-500">Legal Name:</span>
-                <Link href={`/vendors/${invoice.vendor.id}`} className="text-[#0D7E8A] hover:underline font-medium">
+                <Link href={`/vendors/${invoice.vendor.id}`} className="text-teal-500 hover:underline font-medium">
                   {invoice.vendor.legal_name}
                 </Link>
               </div>

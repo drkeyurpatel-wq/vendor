@@ -105,7 +105,7 @@ export default function PaymentListClient({ batches, userRole }: { batches: Batc
       { accessorKey: 'batch_number', header: 'Batch #', size: 160,
         cell: ({ row }) => <span className="font-mono text-xs font-semibold text-gray-900">{row.original.batch_number}</span> },
       { accessorKey: 'batch_date', header: 'Date', size: 110,
-        cell: ({ row }) => <div className="flex items-center gap-1.5"><Calendar size={13} className="text-gray-400" /><span className="text-sm text-gray-700">{formatDate(row.original.batch_date)}</span></div> },
+        cell: ({ row }) => <div className="flex items-center gap-1.5"><Calendar size={13} className="text-gray-500" /><span className="text-sm text-gray-700">{formatDate(row.original.batch_date)}</span></div> },
       { accessorKey: 'total_amount', header: 'Amount', size: 120,
         cell: ({ row }) => <span className="text-sm font-bold text-gray-900">{formatLakhs(row.original.total_amount)}</span> },
       { id: 'count', header: 'Invoices', size: 80, accessorFn: r => r.payment_count || 0,
@@ -132,7 +132,7 @@ export default function PaymentListClient({ batches, userRole }: { batches: Batc
       <DataTable columns={columns} data={batches}
         searchPlaceholder="Search batch number..." showSearch showExport exportFilename="payment-batches" pageSize={25}
         onRowClick={batch => router.push(`/finance/payments/${batch.id}`)}
-        emptyIcon={<Wallet size={40} className="text-gray-300" />}
+        emptyIcon={<Wallet size={40} className="text-gray-500" />}
         emptyTitle="No payment batches" emptyDescription="Saturday payment cycle batches"
         emptyAction={<Link href="/finance/payments/new" className="btn-primary text-sm"><Plus size={15} /> New Batch</Link>} />
     </>

@@ -14,7 +14,7 @@ export default async function NewTransferPage() {
           <ArrowLeft size={14} /> Back
         </Link>
         <div className="card p-12 text-center">
-          <Shield size={40} className="mx-auto mb-3 text-gray-300" />
+          <Shield size={40} className="mx-auto mb-3 text-gray-500" />
           <p className="text-gray-500">You don't have permission to create transfers.</p>
         </div>
       </div>

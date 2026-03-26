@@ -67,7 +67,7 @@ export function SectionHeader({ title, href, linkText, icon }: {
         {title}
       </h2>
       {href && (
-        <Link href={href} className="text-xs text-[#0D7E8A] hover:underline flex items-center gap-1">
+        <Link href={href} className="text-xs text-teal-500 hover:underline flex items-center gap-1">
           {linkText || 'View all'} <ArrowRight size={12} />
         </Link>
       )}
@@ -112,7 +112,7 @@ export function InvoiceRow({ inv }: { inv: any }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-900">{inv.vendor?.legal_name}</span>
-          {inv.centre && <span className="text-xs text-gray-400">{inv.centre.code}</span>}
+          {inv.centre && <span className="text-xs text-gray-500">{inv.centre.code}</span>}
         </div>
         <div className="text-xs text-gray-500 mt-0.5">
           Due {formatDate(inv.due_date)} · {inv.vendor_invoice_no}
@@ -144,7 +144,7 @@ export function LowStockTable({ items }: { items: any[] }) {
             <tr key={s.id}>
               <td>
                 <div className="font-medium text-gray-900">{s.item?.generic_name}</div>
-                <div className="text-xs text-gray-400">{s.item?.item_code}</div>
+                <div className="text-xs text-gray-500">{s.item?.item_code}</div>
               </td>
               <td><span className="badge bg-blue-50 text-blue-700">{s.centre?.code}</span></td>
               <td>
@@ -158,7 +158,7 @@ export function LowStockTable({ items }: { items: any[] }) {
               <td className="text-gray-600">{s.reorder_level} {s.item?.unit}</td>
               <td>
                 <Link href={`/purchase-orders/new?item=${s.item_id}`}
-                  className="text-xs text-[#0D7E8A] hover:underline font-medium">
+                  className="text-xs text-teal-500 hover:underline font-medium">
                   Raise PO
                 </Link>
               </td>

@@ -108,7 +108,7 @@ export default async function ReportsPage() {
         <Link href="/purchase-orders" className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 hover:shadow-card-hover transition-all border-l-4 border-l-navy-600">
           <div className="flex items-center gap-2 mb-1"><ShoppingCart size={16} className="text-navy-600" /><span className="text-xs text-gray-500 font-medium">Purchase Orders</span></div>
           <div className="text-2xl font-bold text-navy-600">{totalPOs}</div>
-          <div className="text-xs text-gray-400 mt-1">{pendingPOs} pending approval</div>
+          <div className="text-xs text-gray-500 mt-1">{pendingPOs} pending approval</div>
         </Link>
         <Link href="/purchase-orders" className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 hover:shadow-card-hover transition-all border-l-4 border-l-teal-600">
           <div className="flex items-center gap-2 mb-1"><TrendingUp size={16} className="text-teal-600" /><span className="text-xs text-gray-500 font-medium">Total PO Value</span></div>
@@ -116,7 +116,7 @@ export default async function ReportsPage() {
         </Link>
         <Link href="/vendors" className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 hover:shadow-card-hover transition-all border-l-4 border-l-blue-500">
           <div className="flex items-center gap-2 mb-1"><Users size={16} className="text-blue-500" /><span className="text-xs text-gray-500 font-medium">Active Vendors</span></div>
-          <div className="text-2xl font-bold text-blue-600">{activeVendors}<span className="text-sm text-gray-400 font-normal">/{totalVendors}</span></div>
+          <div className="text-2xl font-bold text-blue-600">{activeVendors}<span className="text-sm text-gray-500 font-normal">/{totalVendors}</span></div>
         </Link>
         <Link href="/finance/credit" className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 hover:shadow-card-hover transition-all border-l-4 border-l-red-500">
           <div className="flex items-center gap-2 mb-1"><AlertTriangle size={16} className="text-red-500" /><span className="text-xs text-gray-500 font-medium">Outstanding</span></div>
@@ -126,17 +126,17 @@ export default async function ReportsPage() {
         <Link href="/finance/invoices" className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 hover:shadow-card-hover transition-all border-l-4 border-l-green-500">
           <div className="flex items-center gap-2 mb-1"><IndianRupee size={16} className="text-green-500" /><span className="text-xs text-gray-500 font-medium">Total Invoiced</span></div>
           <div className="text-2xl font-bold text-green-600">{formatLakhs(totalInvoiced)}</div>
-          <div className="text-xs text-gray-400 mt-1">{formatLakhs(totalPaid)} paid</div>
+          <div className="text-xs text-gray-500 mt-1">{formatLakhs(totalPaid)} paid</div>
         </Link>
         <Link href="/finance/invoices?match_status=matched" className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 hover:shadow-card-hover transition-all border-l-4 border-l-purple-500">
           <div className="flex items-center gap-2 mb-1"><FileCheck size={16} className="text-purple-500" /><span className="text-xs text-gray-500 font-medium">3-Way Match</span></div>
-          <div className="text-2xl font-bold text-purple-600">{matchedInvoices}<span className="text-sm text-gray-400 font-normal"> matched</span></div>
+          <div className="text-2xl font-bold text-purple-600">{matchedInvoices}<span className="text-sm text-gray-500 font-normal"> matched</span></div>
           <div className="text-xs text-red-400 mt-1">{mismatchInvoices} mismatches</div>
         </Link>
         <Link href="/grn" className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 hover:shadow-card-hover transition-all border-l-4 border-l-orange-500">
           <div className="flex items-center gap-2 mb-1"><Truck size={16} className="text-orange-500" /><span className="text-xs text-gray-500 font-medium">GRNs</span></div>
           <div className="text-2xl font-bold text-orange-600">{totalGRNs}</div>
-          <div className="text-xs text-gray-400 mt-1">{verifiedGRNs} verified</div>
+          <div className="text-xs text-gray-500 mt-1">{verifiedGRNs} verified</div>
         </Link>
         <Link href="/items/stock" className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 hover:shadow-card-hover transition-all border-l-4 border-l-amber-500">
           <div className="flex items-center gap-2 mb-1"><Package size={16} className="text-amber-500" /><span className="text-xs text-gray-500 font-medium">Stock Alerts</span></div>

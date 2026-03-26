@@ -35,14 +35,14 @@ export function BulkCheckbox({
         e.stopPropagation()
         onChange()
       }}
-      className="flex items-center justify-center w-5 h-5 text-gray-400 hover:text-[#0D7E8A] transition-colors"
+      className="flex items-center justify-center w-5 h-5 text-gray-500 hover:text-teal-500 transition-colors"
     >
       {indeterminate ? (
-        <div className="w-4 h-4 rounded border-2 border-[#0D7E8A] bg-[#0D7E8A] flex items-center justify-center">
+        <div className="w-4 h-4 rounded border-2 border-teal-500 bg-teal-500 flex items-center justify-center">
           <div className="w-2 h-0.5 bg-white rounded" />
         </div>
       ) : checked ? (
-        <CheckSquare size={18} className="text-[#0D7E8A]" />
+        <CheckSquare size={18} className="text-teal-500" />
       ) : (
         <Square size={18} />
       )}
@@ -135,8 +135,8 @@ export default function BulkActions({
     <>
       {/* Floating action bar */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white shadow-2xl border border-gray-200 rounded-xl px-4 sm:px-5 py-3 flex items-center gap-3 sm:gap-4 flex-wrap justify-center max-w-[calc(100vw-2rem)] animate-in slide-in-from-bottom-4">
-        <div className="flex items-center gap-2 text-sm font-medium text-[#1B3A6B]">
-          <CheckSquare size={16} className="text-[#0D7E8A]" />
+        <div className="flex items-center gap-2 text-sm font-medium text-navy-600">
+          <CheckSquare size={16} className="text-teal-500" />
           <span>{selectedIds.length} item{selectedIds.length > 1 ? 's' : ''} selected</span>
         </div>
 
@@ -179,7 +179,7 @@ export default function BulkActions({
             onSelectionChange([])
             setProgress(null)
           }}
-          className="text-gray-400 hover:text-gray-600 ml-1"
+          className="text-gray-500 hover:text-gray-600 ml-1"
           title="Clear selection"
         >
           <X size={16} />
@@ -194,7 +194,7 @@ export default function BulkActions({
               <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                 <AlertTriangle size={20} className="text-red-600" />
               </div>
-              <h3 className="text-lg font-semibold text-[#1B3A6B]">Confirm Action</h3>
+              <h3 className="text-lg font-semibold text-navy-600">Confirm Action</h3>
             </div>
             <p className="text-sm text-gray-600 mb-6">
               {confirmAction.confirmMessage}

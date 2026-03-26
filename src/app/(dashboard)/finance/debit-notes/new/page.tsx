@@ -88,7 +88,7 @@ export default function NewDebitNotePage() {
     router.push('/finance/debit-notes')
   }
 
-  if (pageLoading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-[#1B3A6B]" /></div>
+  if (pageLoading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-navy-600" /></div>
 
   return (
     <div className="max-w-3xl">
@@ -166,7 +166,7 @@ export default function NewDebitNotePage() {
             {subtotal && (
               <div className="p-3 bg-gray-50 rounded-lg text-sm">
                 <span className="text-gray-500">Total:</span>{' '}
-                <span className="font-bold text-[#1B3A6B]">₹{(parseFloat(subtotal || '0') + parseFloat(gstAmount || '0')).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                <span className="font-bold text-navy-600">₹{(parseFloat(subtotal || '0') + parseFloat(gstAmount || '0')).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
               </div>
             )}
             <div>

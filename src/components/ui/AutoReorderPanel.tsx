@@ -121,12 +121,12 @@ export default function AutoReorderPanel() {
                     <div className="flex items-center gap-3">
                       <span className="badge bg-blue-50 text-blue-700">{d.centre_code}</span>
                       <span className="text-sm font-medium text-gray-900">{d.vendor_name}</span>
-                      <span className="font-mono text-xs text-gray-400">{d.vendor_code}</span>
+                      <span className="font-mono text-xs text-gray-500">{d.vendor_code}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-gray-500">{d.items.length} items</span>
                       <span className="text-sm font-semibold">{formatLakhs(d.estimated_total)}</span>
-                      <ChevronDown size={14} className={`text-gray-400 transition-transform ${expandedVendor === `${d.vendor_code}_${d.centre_code}` ? 'rotate-180' : ''}`} />
+                      <ChevronDown size={14} className={`text-gray-500 transition-transform ${expandedVendor === `${d.vendor_code}_${d.centre_code}` ? 'rotate-180' : ''}`} />
                     </div>
                   </button>
                   {expandedVendor === `${d.vendor_code}_${d.centre_code}` && (

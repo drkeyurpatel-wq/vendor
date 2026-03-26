@@ -304,7 +304,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
               activeTab === tab.id
-                ? 'border-[#0D7E8A] text-[#0D7E8A]'
+                ? 'border-teal-500 text-teal-500'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -312,7 +312,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
           </button>
         ))}
         <button type="button" onClick={() => setShowAllTabs(!showAllTabs)}
-          className="ml-auto px-3 py-2 text-xs text-gray-400 hover:text-[#0D7E8A] whitespace-nowrap border-b-2 border-transparent">
+          className="ml-auto px-3 py-2 text-xs text-gray-500 hover:text-teal-500 whitespace-nowrap border-b-2 border-transparent">
           {showAllTabs ? '← Essential only' : `+ ${TABS.filter(t => !t.essential).length} more tabs`}
         </button>
       </div>
@@ -323,7 +323,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
           <div className="space-y-6">
             {/* Core identification */}
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Item Identification
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -369,7 +369,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
             {/* Drug Details — shown only for drug/consumable */}
             {['drug', 'consumable'].includes(form.item_type) && (
               <div className="card p-6">
-                <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#E6F5F6] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+                <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-teal-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                   Drug / Item Details
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
@@ -378,7 +378,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
                     <div className="flex gap-2">
                       <label className="flex items-center gap-1.5 text-sm">
                         <input type="checkbox" checked={form.is_generic} onChange={e => update('is_generic', e.target.checked)}
-                          className="w-4 h-4 accent-[#0D7E8A]" /> Generic
+                          className="w-4 h-4 accent-teal-500" /> Generic
                       </label>
                     </div>
                   </div>
@@ -428,11 +428,11 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
                 <div className="flex gap-4 mt-4 pt-3 border-t flex-wrap">
                   <label className="flex items-center gap-2 text-sm cursor-pointer">
                     <input type="checkbox" checked={form.allow_medicine_admin} onChange={e => update('allow_medicine_admin', e.target.checked)}
-                      className="w-4 h-4 accent-[#0D7E8A]" /> Allow for Medicine Administration
+                      className="w-4 h-4 accent-teal-500" /> Allow for Medicine Administration
                   </label>
                   <label className="flex items-center gap-2 text-sm cursor-pointer">
                     <input type="checkbox" checked={form.allow_combination} onChange={e => update('allow_combination', e.target.checked)}
-                      className="w-4 h-4 accent-[#0D7E8A]" /> Allow Combination of Drugs
+                      className="w-4 h-4 accent-teal-500" /> Allow Combination of Drugs
                   </label>
                 </div>
               </div>
@@ -445,7 +445,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
                       <input type="checkbox" checked={form.scheduled_drug} onChange={e => update('scheduled_drug', e.target.checked)}
-                        className="w-4 h-4 accent-[#0D7E8A]" /> Scheduled Drug
+                        className="w-4 h-4 accent-teal-500" /> Scheduled Drug
                     </label>
                     {form.scheduled_drug && (
                       <select className="form-select mt-2" value={form.scheduled_drug_category} onChange={e => update('scheduled_drug_category', e.target.value)}>
@@ -486,9 +486,9 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
               {aliasNames.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {aliasNames.map((a, i) => (
-                    <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#EEF2F9] text-sm rounded-full">
+                    <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-navy-50 text-sm rounded-full">
                       {a}
-                      <button type="button" onClick={() => setAliasNames(prev => prev.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500">
+                      <button type="button" onClick={() => setAliasNames(prev => prev.filter((_, j) => j !== i))} className="text-gray-500 hover:text-red-500">
                         <X size={12} />
                       </button>
                     </span>
@@ -503,7 +503,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
         {activeTab === 'units' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Unit of Measurement
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -538,7 +538,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
           <div className="space-y-6">
             {/* Item Nature */}
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Item Nature
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
@@ -549,12 +549,12 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
                     {(['A', 'B', 'C'] as const).map(v => (
                       <label key={v} className="flex items-center gap-1.5 cursor-pointer">
                         <input type="radio" name="abc" value={v} checked={form.item_nature_abc === v}
-                          onChange={e => update('item_nature_abc', e.target.value)} className="accent-[#0D7E8A]" />
+                          onChange={e => update('item_nature_abc', e.target.value)} className="accent-teal-500" />
                         <span className="text-sm font-medium">{v}</span>
                       </label>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">A=High value, B=Medium, C=Low</p>
+                  <p className="text-xs text-gray-500 mt-1">A=High value, B=Medium, C=Low</p>
                 </div>
                 {/* VED */}
                 <div>
@@ -563,12 +563,12 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
                     {(['V', 'E', 'D'] as const).map(v => (
                       <label key={v} className="flex items-center gap-1.5 cursor-pointer">
                         <input type="radio" name="ved" value={v} checked={form.item_nature_ved === v}
-                          onChange={e => update('item_nature_ved', e.target.value)} className="accent-[#0D7E8A]" />
+                          onChange={e => update('item_nature_ved', e.target.value)} className="accent-teal-500" />
                         <span className="text-sm font-medium">{v}</span>
                       </label>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">V=Vital, E=Essential, D=Desirable</p>
+                  <p className="text-xs text-gray-500 mt-1">V=Vital, E=Essential, D=Desirable</p>
                 </div>
                 {/* FSN */}
                 <div>
@@ -577,19 +577,19 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
                     {(['F', 'S', 'N'] as const).map(v => (
                       <label key={v} className="flex items-center gap-1.5 cursor-pointer">
                         <input type="radio" name="fsn" value={v} checked={form.item_nature_fsn === v}
-                          onChange={e => update('item_nature_fsn', e.target.value)} className="accent-[#0D7E8A]" />
+                          onChange={e => update('item_nature_fsn', e.target.value)} className="accent-teal-500" />
                         <span className="text-sm font-medium">{v}</span>
                       </label>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">F=Fast-moving, S=Slow, N=Non-moving</p>
+                  <p className="text-xs text-gray-500 mt-1">F=Fast-moving, S=Slow, N=Non-moving</p>
                 </div>
               </div>
             </div>
 
             {/* All flags in grid */}
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Item Flags
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-3 mt-4">
@@ -621,7 +621,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
                 ] as [FormKey, string][]).map(([field, label]) => (
                   <label key={field} className="flex items-center gap-2 cursor-pointer text-sm">
                     <input type="checkbox" checked={form[field] as boolean} onChange={e => update(field, e.target.checked)}
-                      className="w-4 h-4 accent-[#0D7E8A] flex-shrink-0" />
+                      className="w-4 h-4 accent-teal-500 flex-shrink-0" />
                     {label}
                   </label>
                 ))}
@@ -634,7 +634,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
         {activeTab === 'pricing' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Pricing & Margin
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
@@ -656,7 +656,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
                 <div>
                   <label className="flex items-center gap-2 text-sm mt-6 cursor-pointer">
                     <input type="checkbox" checked={form.is_consignment || false} onChange={e => update('is_consignment', e.target.checked)}
-                      className="w-4 h-4 accent-[#0D7E8A]" /> Implant / Consignment (exempt from margin lock)
+                      className="w-4 h-4 accent-teal-500" /> Implant / Consignment (exempt from margin lock)
                   </label>
                 </div>
               </div>
@@ -732,7 +732,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
             </div>
 
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Tax Breakdown (Auto-calculated)
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
@@ -779,7 +779,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
         {activeTab === 'storage' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Storage & Location
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -799,7 +799,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
             </div>
 
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Reorder Parameters
               </h3>
               <p className="text-xs text-gray-500 mb-4">These are default values. Centre-specific overrides are set in Stock Levels.</p>
@@ -833,7 +833,7 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
         {activeTab === 'integration' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 System Integration Mapping
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -841,13 +841,13 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
                   <label className="form-label">eClinicalWorks Item Code</label>
                   <input className="form-input" value={form.ecw_item_code} onChange={e => update('ecw_item_code', e.target.value)}
                     placeholder="eCW item code for consumption sync" />
-                  <p className="text-xs text-gray-400 mt-1">Maps this item to eCW for consumption data import</p>
+                  <p className="text-xs text-gray-500 mt-1">Maps this item to eCW for consumption data import</p>
                 </div>
                 <div>
                   <label className="form-label">Tally Item Name</label>
                   <input className="form-input" value={form.tally_item_name} onChange={e => update('tally_item_name', e.target.value)}
                     placeholder="Exact name in Tally stock item" />
-                  <p className="text-xs text-gray-400 mt-1">Must match the exact Stock Item name in Tally for sync</p>
+                  <p className="text-xs text-gray-500 mt-1">Must match the exact Stock Item name in Tally for sync</p>
                 </div>
               </div>
             </div>

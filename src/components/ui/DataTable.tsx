@@ -84,9 +84,9 @@ function TableEmpty({
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6">
-      {icon && <div className="text-gray-300 mb-4">{icon}</div>}
+      {icon && <div className="text-gray-500 mb-4">{icon}</div>}
       <p className="text-sm font-medium text-gray-500">{title}</p>
-      {description && <p className="text-xs text-gray-400 mt-1.5 text-center max-w-sm">{description}</p>}
+      {description && <p className="text-xs text-gray-500 mt-1.5 text-center max-w-sm">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   )
@@ -238,7 +238,7 @@ export default function DataTable<TData>({
         <div className="px-3 md:px-4 py-3 border-b border-gray-100 flex items-center gap-2 md:gap-3 flex-wrap">
           {showSearch && (
             <div className="relative flex-1 min-w-[160px] md:min-w-[200px] max-w-sm">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               <input
                 type="text"
                 value={globalFilter ?? ''}
@@ -251,7 +251,7 @@ export default function DataTable<TData>({
               {globalFilter && (
                 <button
                   onClick={() => setGlobalFilter('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600 transition-colors"
                 >
                   <X size={14} />
                 </button>
@@ -420,7 +420,7 @@ export default function DataTable<TData>({
               {/* Page numbers */}
               {generatePageNumbers(currentPage, totalPageCount).map((p, i) => (
                 p === '...' ? (
-                  <span key={`dots-${i}`} className="w-8 h-8 flex items-center justify-center text-xs text-gray-400">...</span>
+                  <span key={`dots-${i}`} className="w-8 h-8 flex items-center justify-center text-xs text-gray-500">...</span>
                 ) : (
                   <button
                     key={p}

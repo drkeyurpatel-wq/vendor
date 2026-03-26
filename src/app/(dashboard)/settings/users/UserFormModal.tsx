@@ -142,7 +142,7 @@ export default function UserFormModal({ centres, editUser }: UserFormModalProps)
 
   return (
     <>
-      <button onClick={() => { resetForm(); setOpen(true) }} className={editUser ? 'text-xs text-[#0D7E8A] hover:underline font-medium' : 'btn-primary'}>
+      <button onClick={() => { resetForm(); setOpen(true) }} className={editUser ? 'text-xs text-teal-500 hover:underline font-medium' : 'btn-primary'}>
         {editUser ? 'Edit' : '+ Add User'}
       </button>
 
@@ -151,7 +151,7 @@ export default function UserFormModal({ centres, editUser }: UserFormModalProps)
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="font-semibold text-gray-900">{editUser ? 'Edit User' : 'Add New User'}</h2>
-              <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+              <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-600"><X size={18} /></button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -163,7 +163,7 @@ export default function UserFormModal({ centres, editUser }: UserFormModalProps)
               <div>
                 <label className="form-label">Email *</label>
                 <input className="form-input" type="email" value={email} onChange={e => setEmail(e.target.value)} disabled={!!editUser} />
-                {editUser && <p className="text-xs text-gray-400 mt-1">Email cannot be changed</p>}
+                {editUser && <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>}
               </div>
 
               <div>

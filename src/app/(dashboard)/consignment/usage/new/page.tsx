@@ -88,7 +88,7 @@ export default function RecordUsagePage() {
     router.push('/consignment/usage')
   }
 
-  if (pageLoading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-[#1B3A6B]" /></div>
+  if (pageLoading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-navy-600" /></div>
 
   return (
     <div className="max-w-4xl">
@@ -109,7 +109,7 @@ export default function RecordUsagePage() {
         <h2 className="font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-100">Step 1 — Select Consignment Item</h2>
         <div className="flex gap-2 mb-4">
           <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
             <input className="form-input pl-10" placeholder="Search by item name, code, serial number, batch..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <BarcodeScanButton onScan={(code) => {
@@ -139,16 +139,16 @@ export default function RecordUsagePage() {
                   <div>
                     <div className="text-sm font-semibold text-gray-900">{s.item?.generic_name}</div>
                     <div className="text-xs text-gray-500">{s.item?.item_code} | Batch: {s.batch_number || '—'} | SN: {s.serial_number || '—'} | Exp: {s.expiry_date ? formatDate(s.expiry_date) : '—'}</div>
-                    <div className="text-xs text-gray-400 mt-0.5">Vendor: {s.deposit?.vendor?.legal_name} | Deposit: {s.deposit?.deposit_number} | Centre: {s.deposit?.centre?.code}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">Vendor: {s.deposit?.vendor?.legal_name} | Deposit: {s.deposit?.deposit_number} | Centre: {s.deposit?.centre?.code}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-bold text-[#1B3A6B]">{avail} avail</div>
-                    <div className="text-xs text-gray-400">{formatCurrency(s.vendor_rate)}/unit</div>
+                    <div className="text-sm font-bold text-navy-600">{avail} avail</div>
+                    <div className="text-xs text-gray-500">{formatCurrency(s.vendor_rate)}/unit</div>
                   </div>
                 </div>
               </div>
             )
-          }) : <p className="text-sm text-gray-400 text-center py-4">No available consignment items{search ? ' matching your search' : ''}</p>}
+          }) : <p className="text-sm text-gray-500 text-center py-4">No available consignment items{search ? ' matching your search' : ''}</p>}
         </div>
       </div>
 
@@ -191,8 +191,8 @@ export default function RecordUsagePage() {
         {selectedStock && (
           <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
             <span className="text-gray-500">Amount:</span>{' '}
-            <span className="font-bold text-[#1B3A6B]">{formatCurrency((selectedStock.vendor_rate || 0) * (parseInt(qtyUsed) || 1))}</span>
-            <span className="text-gray-400 ml-2">({formatCurrency(selectedStock.vendor_rate)} × {qtyUsed})</span>
+            <span className="font-bold text-navy-600">{formatCurrency((selectedStock.vendor_rate || 0) * (parseInt(qtyUsed) || 1))}</span>
+            <span className="text-gray-500 ml-2">({formatCurrency(selectedStock.vendor_rate)} × {qtyUsed})</span>
           </div>
         )}
         <div className="mt-4"><label className="form-label">Notes</label>

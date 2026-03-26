@@ -11,9 +11,9 @@ export default async function VendorPortalPage() {
   if (!profile || role !== 'vendor') {
     return (
       <div className="card p-12 text-center">
-        <Package size={40} className="mx-auto mb-3 text-gray-300" />
+        <Package size={40} className="mx-auto mb-3 text-gray-500" />
         <p className="font-medium text-gray-500">Vendor Portal</p>
-        <p className="text-sm text-gray-400 mt-1">This page is only accessible to vendor users</p>
+        <p className="text-sm text-gray-500 mt-1">This page is only accessible to vendor users</p>
       </div>
     )
   }
@@ -30,7 +30,7 @@ export default async function VendorPortalPage() {
       <div className="card p-12 text-center">
         <AlertTriangle size={40} className="mx-auto mb-3 text-yellow-400" />
         <p className="font-medium text-gray-500">Vendor Profile Not Found</p>
-        <p className="text-sm text-gray-400 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
+        <p className="text-sm text-gray-500 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
       </div>
     )
   }
@@ -78,20 +78,20 @@ export default async function VendorPortalPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="stat-card border-l-4 border-[#1B3A6B]">
+        <div className="stat-card border-l-4 border-navy-600">
           <div className="flex items-center gap-2 mb-1">
-            <ShoppingCart size={18} className="text-[#1B3A6B]" />
+            <ShoppingCart size={18} className="text-navy-600" />
             <span className="text-sm text-gray-500">Purchase Orders</span>
           </div>
-          <div className="text-2xl font-bold text-[#1B3A6B]">{pos?.length ?? 0}</div>
-          <div className="text-xs text-gray-400 mt-1">{formatLakhs(totalPOValue)} total value</div>
+          <div className="text-2xl font-bold text-navy-600">{pos?.length ?? 0}</div>
+          <div className="text-xs text-gray-500 mt-1">{formatLakhs(totalPOValue)} total value</div>
         </div>
-        <div className="stat-card border-l-4 border-[#0D7E8A]">
+        <div className="stat-card border-l-4 border-teal-500">
           <div className="flex items-center gap-2 mb-1">
-            <FileText size={18} className="text-[#0D7E8A]" />
+            <FileText size={18} className="text-teal-500" />
             <span className="text-sm text-gray-500">Invoices</span>
           </div>
-          <div className="text-2xl font-bold text-[#0D7E8A]">{invoices?.length ?? 0}</div>
+          <div className="text-2xl font-bold text-teal-500">{invoices?.length ?? 0}</div>
         </div>
         <div className="stat-card border-l-4 border-green-500">
           <div className="flex items-center gap-2 mb-1">
@@ -156,7 +156,7 @@ export default async function VendorPortalPage() {
               </table>
             </div>
           ) : (
-            <div className="p-8 text-center text-gray-400 text-sm">No purchase orders yet</div>
+            <div className="p-8 text-center text-gray-500 text-sm">No purchase orders yet</div>
           )}
         </div>
 
@@ -181,7 +181,7 @@ export default async function VendorPortalPage() {
                     <tr key={inv.id}>
                       <td>
                         <div className="font-mono text-xs font-semibold">{inv.invoice_ref}</div>
-                        <div className="text-xs text-gray-400">{inv.vendor_invoice_no}</div>
+                        <div className="text-xs text-gray-500">{inv.vendor_invoice_no}</div>
                       </td>
                       <td className="text-sm font-semibold">{formatLakhs(inv.total_amount)}</td>
                       <td className="text-sm text-gray-600">{formatDate(inv.due_date)}</td>
@@ -196,7 +196,7 @@ export default async function VendorPortalPage() {
               </table>
             </div>
           ) : (
-            <div className="p-8 text-center text-gray-400 text-sm">No invoices yet</div>
+            <div className="p-8 text-center text-gray-500 text-sm">No invoices yet</div>
           )}
         </div>
       </div>

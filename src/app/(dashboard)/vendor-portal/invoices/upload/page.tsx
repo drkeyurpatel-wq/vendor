@@ -199,7 +199,7 @@ export default function VendorInvoiceUploadPage() {
   if (!isVendor) {
     return (
       <div className="card p-12 text-center">
-        <AlertTriangle size={40} className="mx-auto mb-3 text-gray-300" />
+        <AlertTriangle size={40} className="mx-auto mb-3 text-gray-500" />
         <p className="font-medium text-gray-500">This page is only accessible to vendor users</p>
       </div>
     )
@@ -210,7 +210,7 @@ export default function VendorInvoiceUploadPage() {
       <div className="card p-12 text-center">
         <AlertTriangle size={40} className="mx-auto mb-3 text-yellow-400" />
         <p className="font-medium text-gray-500">Vendor Profile Not Found</p>
-        <p className="text-sm text-gray-400 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
+        <p className="text-sm text-gray-500 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
       </div>
     )
   }
@@ -219,7 +219,7 @@ export default function VendorInvoiceUploadPage() {
     <div>
       <div className="page-header">
         <div className="flex items-center gap-3">
-          <Link href="/vendor-portal/invoices" className="text-gray-400 hover:text-[#1B3A6B] transition-colors">
+          <Link href="/vendor-portal/invoices" className="text-gray-500 hover:text-navy-600 transition-colors">
             <ArrowLeft size={20} />
           </Link>
           <div>
@@ -237,13 +237,13 @@ export default function VendorInvoiceUploadPage() {
               <div className={cn(
                 'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium',
                 idx < step ? 'bg-green-100 text-green-700' :
-                idx === step ? 'bg-[#1B3A6B] text-white' :
-                'bg-gray-100 text-gray-400'
+                idx === step ? 'bg-navy-600 text-white' :
+                'bg-gray-100 text-gray-500'
               )}>
                 {idx < step ? <CheckCircle size={14} /> : <span>{idx + 1}</span>}
                 <span className="hidden sm:inline">{s}</span>
               </div>
-              {idx < STEPS.length - 1 && <ChevronRight size={14} className="text-gray-300" />}
+              {idx < STEPS.length - 1 && <ChevronRight size={14} className="text-gray-500" />}
             </div>
           ))}
         </div>
@@ -263,25 +263,25 @@ export default function VendorInvoiceUploadPage() {
                   key={po.id}
                   onClick={() => { setSelectedPO(po); setStep(1) }}
                   className={cn(
-                    'w-full flex items-center justify-between p-4 border rounded-lg text-left transition-colors hover:border-[#0D7E8A] hover:bg-[#E6F5F6]',
-                    selectedPO?.id === po.id ? 'border-[#0D7E8A] bg-[#E6F5F6]' : 'border-gray-200'
+                    'w-full flex items-center justify-between p-4 border rounded-lg text-left transition-colors hover:border-teal-500 hover:bg-teal-50',
+                    selectedPO?.id === po.id ? 'border-teal-500 bg-teal-50' : 'border-gray-200'
                   )}
                 >
                   <div>
-                    <div className="font-mono text-sm font-semibold text-[#1B3A6B]">{po.po_number}</div>
+                    <div className="font-mono text-sm font-semibold text-navy-600">{po.po_number}</div>
                     <div className="text-xs text-gray-500 mt-0.5">
                       {po.centre?.code} &middot; {formatDate(po.po_date)}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="font-semibold text-sm">{formatCurrency(po.total_amount)}</div>
-                    <ChevronRight size={16} className="text-gray-400 ml-auto mt-1" />
+                    <ChevronRight size={16} className="text-gray-500 ml-auto mt-1" />
                   </div>
                 </button>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-400">
+            <div className="text-center py-8 text-gray-500">
               <FileText size={32} className="mx-auto mb-2" />
               <p className="text-sm">No eligible Purchase Orders found</p>
             </div>
@@ -300,9 +300,9 @@ export default function VendorInvoiceUploadPage() {
           <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center">
             {!file ? (
               <label className="cursor-pointer block">
-                <Upload size={40} className="mx-auto mb-3 text-gray-300" />
+                <Upload size={40} className="mx-auto mb-3 text-gray-500" />
                 <p className="font-medium text-gray-600">Click to select invoice PDF</p>
-                <p className="text-xs text-gray-400 mt-1">PDF, JPG, PNG up to 10MB</p>
+                <p className="text-xs text-gray-500 mt-1">PDF, JPG, PNG up to 10MB</p>
                 <input
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
@@ -312,9 +312,9 @@ export default function VendorInvoiceUploadPage() {
               </label>
             ) : (
               <div>
-                <FileText size={40} className="mx-auto mb-3 text-[#0D7E8A]" />
+                <FileText size={40} className="mx-auto mb-3 text-teal-500" />
                 <p className="font-medium text-gray-900">{file.name}</p>
-                <p className="text-xs text-gray-400 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                <p className="text-xs text-gray-500 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                 <div className="flex items-center justify-center gap-3 mt-4">
                   <button
                     onClick={() => { setFile(null); setUploadedPath(null) }}

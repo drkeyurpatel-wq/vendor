@@ -92,7 +92,7 @@ export default async function CentreWiseSpendReport({
               {fy.label}
             </Link>
           ))}
-          <span className="text-gray-300 self-center">|</span>
+          <span className="text-gray-500 self-center">|</span>
           {[3, 6, 12].map(m => (
             <Link key={m} href={`/reports/centre-wise-spend?months=${m}`}
               className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
@@ -112,7 +112,7 @@ export default async function CentreWiseSpendReport({
             <div key={code} className="bg-white rounded-xl border border-gray-200/80 shadow-card p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="badge bg-blue-50 text-blue-700 font-semibold">{code}</span>
-                <span className="text-xs text-gray-400">{pct.toFixed(1)}%</span>
+                <span className="text-xs text-gray-500">{pct.toFixed(1)}%</span>
               </div>
               <div className="text-lg font-bold text-navy-600">{formatLakhs(ct.spend)}</div>
               <div className="text-xs text-gray-500">{ct.count} POs</div>
@@ -156,7 +156,7 @@ export default async function CentreWiseSpendReport({
               })}
             </tbody>
             <tfoot>
-              <tr className="bg-[#EEF2F9]">
+              <tr className="bg-navy-50">
                 <td className="font-semibold text-navy-600">Grand Total</td>
                 {centreCodesInData.map(c => (
                   <td key={c} className="text-right font-bold font-mono">{formatLakhs(centreTotals[c].spend)}</td>

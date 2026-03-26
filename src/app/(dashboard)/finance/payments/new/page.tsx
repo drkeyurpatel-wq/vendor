@@ -167,7 +167,7 @@ export default function NewPaymentPage() {
     router.push(`/finance/payments/${batch.id}`)
   }
 
-  if (pageLoading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-[#1B3A6B]" /></div>
+  if (pageLoading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-navy-600" /></div>
 
   return (
     <div>
@@ -211,7 +211,7 @@ export default function NewPaymentPage() {
 
       {/* Summary Strip */}
       {selectedLines.length > 0 && (
-        <div className="card p-4 mb-6 bg-gradient-to-r from-[#1B3A6B] to-[#0D7E8A] text-white">
+        <div className="card p-4 mb-6 bg-gradient-to-r from-navy-600 to-teal-500 text-white">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
             <div><div className="text-[10px] uppercase tracking-wider opacity-70">Gross</div><div className="text-lg font-bold">{formatCurrency(totals.gross)}</div></div>
             <div><div className="text-[10px] uppercase tracking-wider opacity-70">TDS</div><div className="text-lg font-bold text-red-300">-{formatCurrency(totals.tds)}</div></div>
@@ -225,7 +225,7 @@ export default function NewPaymentPage() {
       {/* Invoice Selection Table */}
       <div className="card overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="font-semibold text-[#1B3A6B]">Unpaid Invoices ({lines.length})</h2>
+          <h2 className="font-semibold text-navy-600">Unpaid Invoices ({lines.length})</h2>
           <button onClick={toggleAll} className="text-xs text-teal-600 hover:underline font-medium">
             {lines.every(l => l.selected) ? 'Deselect All' : 'Select All'}
           </button>
@@ -255,17 +255,17 @@ export default function NewPaymentPage() {
                     <td><input type="checkbox" checked={line.selected} onChange={() => toggleLine(idx)} /></td>
                     <td>
                       <Link href={`/finance/invoices/${line.invoiceId}`} className="font-mono text-xs text-teal-600 hover:underline font-semibold">{line.invoiceRef}</Link>
-                      {line.vendorInvoiceNo && <div className="text-[10px] text-gray-400">{line.vendorInvoiceNo}</div>}
+                      {line.vendorInvoiceNo && <div className="text-[10px] text-gray-500">{line.vendorInvoiceNo}</div>}
                     </td>
                     <td>
                       <div className="text-sm font-medium text-gray-900">{line.vendorName}</div>
-                      {line.vendorPan && <div className="text-[10px] text-gray-400">PAN: {line.vendorPan}</div>}
+                      {line.vendorPan && <div className="text-[10px] text-gray-500">PAN: {line.vendorPan}</div>}
                     </td>
                     <td className="text-xs">
                       {line.vendorAccountNo ? (
                         <div>
                           <div className="font-mono text-gray-700">{line.vendorAccountNo}</div>
-                          <div className="text-gray-400">{line.vendorBankName} | {line.vendorIfsc}</div>
+                          <div className="text-gray-500">{line.vendorBankName} | {line.vendorIfsc}</div>
                         </div>
                       ) : (
                         <span className="text-orange-500 flex items-center gap-1"><AlertTriangle size={10} /> No bank</span>
@@ -280,7 +280,7 @@ export default function NewPaymentPage() {
                       {line.tdsApplicable ? (
                         <input type="number" step="0.1" min="0" max="20" className="form-input text-xs text-center w-16 mx-auto"
                           value={line.tdsPercent} onChange={e => updateTDS(idx, parseFloat(e.target.value) || 0)} />
-                      ) : <span className="text-xs text-gray-300">N/A</span>}
+                      ) : <span className="text-xs text-gray-500">N/A</span>}
                     </td>
                     <td className="text-sm text-right text-red-600">{line.tdsAmount > 0 ? `-${formatCurrency(line.tdsAmount)}` : '—'}</td>
                     <td>
@@ -293,21 +293,21 @@ export default function NewPaymentPage() {
                         value={line.advanceAdj || ''} onChange={e => updateDeduction(idx, 'advanceAdj', parseFloat(e.target.value) || 0)}
                         placeholder="0" />
                     </td>
-                    <td className="text-sm text-right font-bold text-[#1B3A6B]">{formatCurrency(line.netPayable)}</td>
+                    <td className="text-sm text-right font-bold text-navy-600">{formatCurrency(line.netPayable)}</td>
                   </tr>
                 )
               })}
             </tbody>
             {selectedLines.length > 0 && (
               <tfoot>
-                <tr className="bg-[#EEF2F9] font-semibold">
-                  <td colSpan={5} className="text-right text-sm text-[#1B3A6B]">{selectedLines.length} selected</td>
+                <tr className="bg-navy-50 font-semibold">
+                  <td colSpan={5} className="text-right text-sm text-navy-600">{selectedLines.length} selected</td>
                   <td className="text-right text-sm">{formatCurrency(totals.gross)}</td>
                   <td></td>
                   <td className="text-right text-sm text-red-600">{totals.tds > 0 ? `-${formatCurrency(totals.tds)}` : ''}</td>
                   <td className="text-right text-sm text-red-600">{totals.debitNote > 0 ? `-${formatCurrency(totals.debitNote)}` : ''}</td>
                   <td className="text-right text-sm text-red-600">{totals.advance > 0 ? `-${formatCurrency(totals.advance)}` : ''}</td>
-                  <td className="text-right text-sm font-bold text-[#1B3A6B]">{formatCurrency(totals.net)}</td>
+                  <td className="text-right text-sm font-bold text-navy-600">{formatCurrency(totals.net)}</td>
                 </tr>
               </tfoot>
             )}

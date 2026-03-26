@@ -39,7 +39,7 @@ export default function SearchInput({ placeholder = 'Search...', paramName = 'q'
 
   return (
     <div className="relative">
-      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
+      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none z-10" />
       <input
         type="text"
         className="form-input pl-11 pr-8 w-full md:w-72"
@@ -51,7 +51,7 @@ export default function SearchInput({ placeholder = 'Search...', paramName = 'q'
       {value && (
         <button
           onClick={handleClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600"
         >
           <X size={14} />
         </button>

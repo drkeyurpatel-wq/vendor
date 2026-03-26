@@ -248,7 +248,7 @@ export default function NewIndentPage() {
           {/* Search */}
           <div className="flex gap-2 mb-5">
             <div className="relative flex-1">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
@@ -281,15 +281,15 @@ export default function NewIndentPage() {
                           alreadyAdded ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'
                         )}
                       >
-                        <Package size={14} className="text-gray-400 flex-shrink-0" />
+                        <Package size={14} className="text-gray-500 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-gray-900">{item.generic_name}</div>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-gray-500">
                             {item.item_code} {item.brand_name ? `· ${item.brand_name}` : ''} · {item.unit} · {item.category?.name}
                           </div>
                         </div>
                         {alreadyAdded ? (
-                          <span className="text-2xs text-gray-400">Added</span>
+                          <span className="text-2xs text-gray-500">Added</span>
                         ) : (
                           <Plus size={14} className="text-teal-600 flex-shrink-0" />
                         )}
@@ -330,7 +330,7 @@ export default function NewIndentPage() {
                       <tr key={item.id} className={cn('border-b border-gray-100', idx % 2 === 1 && 'bg-gray-50/30')}>
                         <td className="px-4 py-3">
                           <div className="font-medium text-sm text-gray-900">{item.generic_name}</div>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-gray-500">
                             <span className="font-mono">{item.item_code}</span>
                             {item.brand_name && ` · ${item.brand_name}`} · {item.unit}
                           </div>
@@ -365,7 +365,7 @@ export default function NewIndentPage() {
                           <button
                             type="button"
                             onClick={() => removeItem(item.id)}
-                            className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                            className="text-gray-500 hover:text-red-500 transition-colors p-1"
                             title="Remove item"
                           >
                             <Trash2 size={14} />
@@ -390,9 +390,9 @@ export default function NewIndentPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <Package size={32} className="mx-auto text-gray-300 mb-3" />
+              <Package size={32} className="mx-auto text-gray-500 mb-3" />
               <p className="text-sm text-gray-500 font-medium">No items added yet</p>
-              <p className="text-xs text-gray-400 mt-1">Search and add items above to create your indent</p>
+              <p className="text-xs text-gray-500 mt-1">Search and add items above to create your indent</p>
             </div>
           )}
         </div>

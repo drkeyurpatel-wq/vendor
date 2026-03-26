@@ -60,7 +60,7 @@ export default async function DepositsListPage() {
                       <td className="font-mono text-xs text-gray-600">{d.challan_number}</td>
                       <td className="text-sm text-gray-600">{formatDate(d.challan_date)}</td>
                       <td className="text-sm font-semibold">{counts.total}</td>
-                      <td className="text-sm font-bold text-[#1B3A6B]">{counts.available}</td>
+                      <td className="text-sm font-bold text-navy-600">{counts.available}</td>
                       <td><span className={cn('badge', DEP_STATUS[d.status] || 'bg-gray-100 text-gray-600')}>{d.status?.replace(/_/g, ' ')}</span></td>
                     </tr>
                   )
@@ -70,9 +70,9 @@ export default async function DepositsListPage() {
           </div>
         ) : (
           <div className="empty-state py-12">
-            <Truck size={40} className="mb-3 text-gray-300" />
+            <Truck size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No deposits yet</p>
-            <p className="text-sm text-gray-400 mt-1"><Link href="/consignment/deposits/new" className="text-teal-600 hover:underline">Receive first challan</Link></p>
+            <p className="text-sm text-gray-500 mt-1"><Link href="/consignment/deposits/new" className="text-teal-600 hover:underline">Receive first challan</Link></p>
           </div>
         )}
       </div>

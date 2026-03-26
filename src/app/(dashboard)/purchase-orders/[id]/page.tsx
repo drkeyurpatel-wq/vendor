@@ -33,12 +33,12 @@ function ApprovalTimeline({ approvals, poStatus }: { approvals: any[]; poStatus:
                   isComplete ? 'bg-green-500 border-green-500 text-white' :
                   isCurrent ? 'bg-white border-teal-500 text-teal-600 shadow-md shadow-teal-500/20' :
                   isCancelled && i === 1 ? 'bg-red-500 border-red-500 text-white' :
-                  'bg-gray-100 border-gray-200 text-gray-400'
+                  'bg-gray-100 border-gray-200 text-gray-500'
                 )}>
                   {isComplete ? <CheckCircle size={16} /> : isCancelled && i === 1 ? <XCircle size={16} /> : step.icon}
                 </div>
                 <span className={cn('text-[10px] mt-1.5 font-medium text-center whitespace-nowrap',
-                  isComplete ? 'text-green-700' : isCurrent ? 'text-teal-700 font-semibold' : 'text-gray-400'
+                  isComplete ? 'text-green-700' : isCurrent ? 'text-teal-700 font-semibold' : 'text-gray-500'
                 )}>{isCancelled && i === 1 ? 'Cancelled' : step.label}</span>
               </div>
               {i < steps.length - 1 && <div className={cn('flex-1 h-0.5 mx-1 mt-[-18px]', isComplete ? 'bg-green-400' : 'bg-gray-200')} />}
@@ -58,9 +58,9 @@ function ApprovalTimeline({ approvals, poStatus }: { approvals: any[]; poStatus:
               <span className="text-gray-700">
                 <span className="font-medium">{a.approver?.full_name || a.approver_role?.replace(/_/g, ' ')}</span>{' '}
                 <span className={cn(a.status === 'approved' ? 'text-green-600' : a.status === 'rejected' ? 'text-red-600' : 'text-yellow-600')}>{a.status}</span>
-                {a.actioned_at && <span className="text-gray-400 ml-2">{timeAgo(a.actioned_at)}</span>}
+                {a.actioned_at && <span className="text-gray-500 ml-2">{timeAgo(a.actioned_at)}</span>}
               </span>
-              {a.comments && <span className="text-gray-400 text-xs italic ml-auto">&ldquo;{a.comments}&rdquo;</span>}
+              {a.comments && <span className="text-gray-500 text-xs italic ml-auto">&ldquo;{a.comments}&rdquo;</span>}
             </div>
           ))}
         </div>
@@ -124,7 +124,7 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
             </div>
             <p className="text-sm text-gray-500 mt-1">
               <Link href={`/vendors/${po.vendor?.id}`} className="text-teal-600 hover:underline">{po.vendor?.legal_name}</Link>
-              {' '}<span className="font-mono text-xs text-gray-400">({po.vendor?.vendor_code})</span>
+              {' '}<span className="font-mono text-xs text-gray-500">({po.vendor?.vendor_code})</span>
               {' | '}<span className="font-medium">{po.centre?.code} — {po.centre?.name}</span>
             </p>
           </div>
@@ -214,14 +214,14 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
             <tbody>
               {lineItems?.map((li: any) => (
                 <tr key={li.id}>
-                  <td><div className="font-medium text-gray-900 text-sm">{li.item?.generic_name}</div><div className="font-mono text-xs text-gray-400">{li.item?.item_code}</div>{li.trade_discount_percent > 0 && <div className="text-[10px] text-green-600">Disc: {li.trade_discount_percent}%</div>}</td>
+                  <td><div className="font-medium text-gray-900 text-sm">{li.item?.generic_name}</div><div className="font-mono text-xs text-gray-500">{li.item?.item_code}</div>{li.trade_discount_percent > 0 && <div className="text-[10px] text-green-600">Disc: {li.trade_discount_percent}%</div>}</td>
                   <td className="font-mono text-xs text-gray-500">{li.hsn_code || '—'}</td>
                   <td className="text-sm text-gray-600">{li.unit}</td>
                   <td className="text-sm font-medium">{li.ordered_qty}</td>
                   <td className="text-sm text-gray-500">{li.free_qty || '—'}</td>
-                  <td><span className={cn('text-sm font-medium', (li.received_qty || 0) >= li.ordered_qty ? 'text-green-600' : (li.received_qty || 0) > 0 ? 'text-yellow-600' : 'text-gray-400')}>{li.received_qty || 0}/{li.ordered_qty}</span></td>
-                  <td className="text-sm text-right"><span className="font-mono">{formatCurrency(li.rate)}</span><span className="text-[10px] text-gray-400">/{li.unit}</span></td>
-                  <td className="text-sm text-right"><span className="font-mono">{li.net_rate ? formatCurrency(li.net_rate) : '—'}</span>{li.net_rate ? <span className="text-[10px] text-gray-400">/{li.unit}</span> : null}</td>
+                  <td><span className={cn('text-sm font-medium', (li.received_qty || 0) >= li.ordered_qty ? 'text-green-600' : (li.received_qty || 0) > 0 ? 'text-yellow-600' : 'text-gray-500')}>{li.received_qty || 0}/{li.ordered_qty}</span></td>
+                  <td className="text-sm text-right"><span className="font-mono">{formatCurrency(li.rate)}</span><span className="text-[10px] text-gray-500">/{li.unit}</span></td>
+                  <td className="text-sm text-right"><span className="font-mono">{li.net_rate ? formatCurrency(li.net_rate) : '—'}</span>{li.net_rate ? <span className="text-[10px] text-gray-500">/{li.unit}</span> : null}</td>
                   {!isInterState ? (
                     <><td className="text-xs text-right text-gray-500">{li.cgst_percent || (li.gst_percent / 2)}%<br /><span className="font-mono">{formatCurrency(li.cgst_amount || 0)}</span></td>
                     <td className="text-xs text-right text-gray-500">{li.sgst_percent || (li.gst_percent / 2)}%<br /><span className="font-mono">{formatCurrency(li.sgst_amount || 0)}</span></td></>

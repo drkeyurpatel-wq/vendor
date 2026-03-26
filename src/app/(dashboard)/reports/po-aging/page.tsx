@@ -100,7 +100,7 @@ export default async function POAgingReport({
             </table>
           </div>
         ) : (
-          <div className="empty-state"><ShoppingCart size={40} className="mb-3 text-gray-300" /><p className="font-medium text-gray-500">No open POs</p></div>
+          <div className="empty-state"><ShoppingCart size={40} className="mb-3 text-gray-500" /><p className="font-medium text-gray-500">No open POs</p></div>
         )}
       </div>
     </div>

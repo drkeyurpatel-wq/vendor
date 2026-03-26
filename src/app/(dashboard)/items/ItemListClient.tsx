@@ -51,7 +51,7 @@ export default function ItemListClient({ items, categories, totalCount }: ItemLi
         <div>
           <div className="font-medium text-gray-900 text-sm">{row.original.generic_name}</div>
           {row.original.brand_name && (
-            <div className="text-xs text-gray-400 mt-0.5">{row.original.brand_name}</div>
+            <div className="text-xs text-gray-500 mt-0.5">{row.original.brand_name}</div>
           )}
         </div>
       ),
@@ -98,7 +98,7 @@ export default function ItemListClient({ items, categories, totalCount }: ItemLi
         if (row.original.is_cold_chain) flags.push({ icon: <Snowflake size={12} />, label: 'Cold', color: 'text-blue-600 bg-blue-50' })
         if (row.original.is_narcotic) flags.push({ icon: <Pill size={12} />, label: 'Narcotic', color: 'text-red-600 bg-red-50' })
         if (row.original.is_high_alert) flags.push({ icon: <AlertTriangle size={12} />, label: 'High Alert', color: 'text-amber-600 bg-amber-50' })
-        if (flags.length === 0) return <span className="text-xs text-gray-400">—</span>
+        if (flags.length === 0) return <span className="text-xs text-gray-500">—</span>
         return (
           <div className="flex gap-1 flex-wrap">
             {flags.map((f, i) => (
@@ -137,7 +137,7 @@ export default function ItemListClient({ items, categories, totalCount }: ItemLi
       exportFilename="items"
       pageSize={50}
       onRowClick={(item) => router.push(`/items/${item.id}`)}
-      emptyIcon={<Package size={40} className="text-gray-300" />}
+      emptyIcon={<Package size={40} className="text-gray-500" />}
       emptyTitle="No items in the system"
       emptyDescription="Add your first SKU to get started with inventory management"
       emptyAction={

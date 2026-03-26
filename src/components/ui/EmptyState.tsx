@@ -73,7 +73,7 @@ export default function EmptyState({
       {/* Decorative circle behind icon */}
       <div className="relative mb-4">
         <div className="absolute inset-0 -m-3 bg-gray-100/80 rounded-full" />
-        <div className="relative text-gray-300">
+        <div className="relative text-gray-500">
           {icon || v.icon}
         </div>
       </div>
@@ -86,7 +86,7 @@ export default function EmptyState({
       </h3>
 
       <p className={cn(
-        'text-gray-400 mt-1.5 max-w-sm',
+        'text-gray-500 mt-1.5 max-w-sm',
         compact ? 'text-xs' : 'text-sm'
       )}>
         {description || v.defaultDescription}

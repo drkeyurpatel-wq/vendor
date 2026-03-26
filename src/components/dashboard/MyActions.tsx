@@ -94,9 +94,9 @@ export default async function MyActions({ userId, role, centreId, userName }: Pr
               className={cn('rounded-xl border-l-4 p-3 hover:shadow-md transition-all group', action.color)}>
               <div className="flex items-start justify-between">
                 <Icon size={16} className="text-gray-500 mt-0.5" />
-                <span className={cn('text-lg font-bold', action.urgent ? 'text-red-600' : 'text-[#1B3A6B]')}>{action.count}</span>
+                <span className={cn('text-lg font-bold', action.urgent ? 'text-red-600' : 'text-navy-600')}>{action.count}</span>
               </div>
-              <p className="text-[11px] font-medium text-gray-700 mt-1.5 leading-tight group-hover:text-[#1B3A6B]">{action.label}</p>
+              <p className="text-[11px] font-medium text-gray-700 mt-1.5 leading-tight group-hover:text-navy-600">{action.label}</p>
             </Link>
           )
         })}

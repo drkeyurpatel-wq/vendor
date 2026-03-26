@@ -567,22 +567,22 @@ export default async function ApiDocsPage() {
       {/* Sidebar TOC */}
       <nav className="hidden lg:block w-56 flex-shrink-0 sticky top-6 self-start">
         <div className="card p-4">
-          <h3 className="text-sm font-bold text-[#1B3A6B] mb-3 uppercase tracking-wide">Categories</h3>
+          <h3 className="text-sm font-bold text-navy-600 mb-3 uppercase tracking-wide">Categories</h3>
           <ul className="space-y-1">
             {API_CATEGORIES.map((cat) => (
               <li key={cat.id}>
                 <a
                   href={`#${cat.id}`}
-                  className="block text-sm py-1.5 px-2 rounded text-gray-600 hover:text-[#0D7E8A] hover:bg-[#E6F5F6] transition-colors"
+                  className="block text-sm py-1.5 px-2 rounded text-gray-600 hover:text-teal-500 hover:bg-teal-50 transition-colors"
                 >
                   {cat.name}
-                  <span className="ml-1 text-xs text-gray-400">({cat.endpoints.length})</span>
+                  <span className="ml-1 text-xs text-gray-500">({cat.endpoints.length})</span>
                 </a>
               </li>
             ))}
           </ul>
           <div className="mt-4 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-500">
               {API_CATEGORIES.reduce((sum, c) => sum + c.endpoints.length, 0)} endpoints total
             </p>
           </div>
@@ -600,22 +600,22 @@ export default async function ApiDocsPage() {
 
         {/* Overview Card */}
         <div className="card p-5 mb-6" style={{ backgroundColor: '#EEF2F9' }}>
-          <h2 className="text-sm font-bold text-[#1B3A6B] mb-2">Base URL</h2>
-          <code className="text-sm text-[#0D7E8A] bg-white px-3 py-1.5 rounded border border-gray-200 font-mono">
+          <h2 className="text-sm font-bold text-navy-600 mb-2">Base URL</h2>
+          <code className="text-sm text-teal-500 bg-white px-3 py-1.5 rounded border border-gray-200 font-mono">
             https://vendor-rm26gxmw2-drkeyurpatel-6272s-projects.vercel.app
           </code>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
             <div>
               <p className="text-xs font-medium text-gray-500 uppercase">Authentication</p>
-              <p className="text-sm text-[#1B3A6B] font-medium">Supabase Auth (Cookie-based)</p>
+              <p className="text-sm text-navy-600 font-medium">Supabase Auth (Cookie-based)</p>
             </div>
             <div>
               <p className="text-xs font-medium text-gray-500 uppercase">Content Type</p>
-              <p className="text-sm text-[#1B3A6B] font-medium">application/json</p>
+              <p className="text-sm text-navy-600 font-medium">application/json</p>
             </div>
             <div>
               <p className="text-xs font-medium text-gray-500 uppercase">Rate Limiting</p>
-              <p className="text-sm text-[#1B3A6B] font-medium">10-20 req/min per endpoint</p>
+              <p className="text-sm text-navy-600 font-medium">10-20 req/min per endpoint</p>
             </div>
           </div>
         </div>
@@ -627,15 +627,15 @@ export default async function ApiDocsPage() {
               {method}
             </span>
           ))}
-          <span className="text-xs text-gray-400 self-center ml-2">Method color coding</span>
+          <span className="text-xs text-gray-500 self-center ml-2">Method color coding</span>
         </div>
 
         {/* Categories */}
         <div className="space-y-8">
           {API_CATEGORIES.map((category) => (
             <section key={category.id} id={category.id}>
-              <div className="border-l-4 border-[#0D7E8A] pl-4 mb-4">
-                <h2 className="text-lg font-bold text-[#1B3A6B]">{category.name}</h2>
+              <div className="border-l-4 border-teal-500 pl-4 mb-4">
+                <h2 className="text-lg font-bold text-navy-600">{category.name}</h2>
                 <p className="text-sm text-gray-500">{category.description}</p>
               </div>
 
@@ -649,7 +649,7 @@ export default async function ApiDocsPage() {
                         <span className={`inline-flex items-center px-2.5 py-1 rounded text-xs font-bold ${methodColor.bg} ${methodColor.text} min-w-[52px] justify-center`}>
                           {endpoint.method}
                         </span>
-                        <code className="text-sm font-mono font-medium text-[#1B3A6B]">{endpoint.path}</code>
+                        <code className="text-sm font-mono font-medium text-navy-600">{endpoint.path}</code>
                         {endpoint.rateLimit && (
                           <span className="ml-auto hidden sm:inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-500">
                             {endpoint.rateLimit}
@@ -683,21 +683,21 @@ export default async function ApiDocsPage() {
                               <table className="w-full text-sm">
                                 <thead>
                                   <tr className="border-b border-gray-200">
-                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-[#1B3A6B]">Parameter</th>
-                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-[#1B3A6B]">Type</th>
-                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-[#1B3A6B]">Required</th>
-                                    <th className="text-left py-1.5 text-xs font-bold text-[#1B3A6B]">Description</th>
+                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-navy-600">Parameter</th>
+                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-navy-600">Type</th>
+                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-navy-600">Required</th>
+                                    <th className="text-left py-1.5 text-xs font-bold text-navy-600">Description</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {endpoint.queryParams.map((param) => (
                                     <tr key={param.field} className="border-b border-gray-50">
-                                      <td className="py-1.5 pr-4 font-mono text-xs text-[#0D7E8A]">{param.field}</td>
+                                      <td className="py-1.5 pr-4 font-mono text-xs text-teal-500">{param.field}</td>
                                       <td className="py-1.5 pr-4 text-xs text-gray-500">{param.type}</td>
                                       <td className="py-1.5 pr-4">
                                         {param.required
                                           ? <span className="text-xs font-medium text-red-600">Yes</span>
-                                          : <span className="text-xs text-gray-400">No</span>
+                                          : <span className="text-xs text-gray-500">No</span>
                                         }
                                       </td>
                                       <td className="py-1.5 text-xs text-gray-600">{param.description}</td>
@@ -717,21 +717,21 @@ export default async function ApiDocsPage() {
                               <table className="w-full text-sm">
                                 <thead>
                                   <tr className="border-b border-gray-200">
-                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-[#1B3A6B]">Field</th>
-                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-[#1B3A6B]">Type</th>
-                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-[#1B3A6B]">Required</th>
-                                    <th className="text-left py-1.5 text-xs font-bold text-[#1B3A6B]">Description</th>
+                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-navy-600">Field</th>
+                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-navy-600">Type</th>
+                                    <th className="text-left py-1.5 pr-4 text-xs font-bold text-navy-600">Required</th>
+                                    <th className="text-left py-1.5 text-xs font-bold text-navy-600">Description</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {endpoint.requestBody.map((param) => (
                                     <tr key={param.field} className="border-b border-gray-50">
-                                      <td className="py-1.5 pr-4 font-mono text-xs text-[#0D7E8A]">{param.field}</td>
+                                      <td className="py-1.5 pr-4 font-mono text-xs text-teal-500">{param.field}</td>
                                       <td className="py-1.5 pr-4 text-xs text-gray-500">{param.type}</td>
                                       <td className="py-1.5 pr-4">
                                         {param.required
                                           ? <span className="text-xs font-medium text-red-600">Yes</span>
-                                          : <span className="text-xs text-gray-400">No</span>
+                                          : <span className="text-xs text-gray-500">No</span>
                                         }
                                       </td>
                                       <td className="py-1.5 text-xs text-gray-600">{param.description}</td>
@@ -756,11 +756,11 @@ export default async function ApiDocsPage() {
                         {/* Notes */}
                         {endpoint.notes && endpoint.notes.length > 0 && (
                           <div className="rounded-lg p-3" style={{ backgroundColor: '#E6F5F6' }}>
-                            <h4 className="text-xs font-bold text-[#0D7E8A] uppercase mb-1.5">Notes</h4>
+                            <h4 className="text-xs font-bold text-teal-500 uppercase mb-1.5">Notes</h4>
                             <ul className="space-y-1">
                               {endpoint.notes.map((note, i) => (
                                 <li key={i} className="text-xs text-gray-700 flex gap-2">
-                                  <span className="text-[#0D7E8A] flex-shrink-0">-</span>
+                                  <span className="text-teal-500 flex-shrink-0">-</span>
                                   <span>{note}</span>
                                 </li>
                               ))}
@@ -778,8 +778,8 @@ export default async function ApiDocsPage() {
 
         {/* Error Codes Reference */}
         <section className="mt-8" id="error-codes">
-          <div className="border-l-4 border-[#1B3A6B] pl-4 mb-4">
-            <h2 className="text-lg font-bold text-[#1B3A6B]">Common Error Codes</h2>
+          <div className="border-l-4 border-navy-600 pl-4 mb-4">
+            <h2 className="text-lg font-bold text-navy-600">Common Error Codes</h2>
             <p className="text-sm text-gray-500">Standard HTTP error responses used across all endpoints.</p>
           </div>
           <div className="card overflow-hidden">
@@ -804,7 +804,7 @@ export default async function ApiDocsPage() {
                   { code: '502', meaning: 'Bad Gateway', desc: '{ "pushed": false, "reason": "tally_connection_failed" }' },
                 ].map((row) => (
                   <tr key={row.code} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-2 px-4 font-mono text-sm font-bold text-[#1B3A6B]">{row.code}</td>
+                    <td className="py-2 px-4 font-mono text-sm font-bold text-navy-600">{row.code}</td>
                     <td className="py-2 px-4 text-sm text-gray-700">{row.meaning}</td>
                     <td className="py-2 px-4 font-mono text-xs text-gray-500">{row.desc}</td>
                   </tr>
@@ -814,7 +814,7 @@ export default async function ApiDocsPage() {
           </div>
         </section>
 
-        <div className="mt-6 text-center text-xs text-gray-400 pb-8">
+        <div className="mt-6 text-center text-xs text-gray-500 pb-8">
           H1 VPMS API Documentation - Last updated March 2026
         </div>
       </div>

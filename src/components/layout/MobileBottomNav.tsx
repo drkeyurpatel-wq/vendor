@@ -24,7 +24,7 @@ export default function MobileBottomNav() {
           return (
             <Link key={item.href} href={item.href}
               className={cn('flex flex-col items-center justify-center gap-0.5 w-full h-full transition-colors',
-                isActive ? 'text-[#1B3A6B]' : 'text-gray-400')}>
+                isActive ? 'text-navy-600' : 'text-gray-500')}>
               <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
               <span className={cn('text-[10px]', isActive ? 'font-semibold' : 'font-medium')}>{item.label}</span>
             </Link>

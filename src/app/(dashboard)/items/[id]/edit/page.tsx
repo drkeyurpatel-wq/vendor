@@ -125,7 +125,7 @@ export default function EditItemPage() {
     }
   }
 
-  if (pageLoading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-[#1B3A6B]" /></div>
+  if (pageLoading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-navy-600" /></div>
 
   return (
     <div className="max-w-4xl">
@@ -211,7 +211,7 @@ export default function EditItemPage() {
               { key: 'is_consignment', label: 'Consignment' },
             ].map(f => (
               <label key={f.key} className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" checked={!!form[f.key]} onChange={e => update(f.key, e.target.checked)} className="w-4 h-4 accent-[#0D7E8A]" />
+                <input type="checkbox" checked={!!form[f.key]} onChange={e => update(f.key, e.target.checked)} className="w-4 h-4 accent-teal-500" />
                 {f.label}
               </label>
             ))}

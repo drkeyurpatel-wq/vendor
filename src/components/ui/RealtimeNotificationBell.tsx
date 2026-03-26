@@ -66,7 +66,7 @@ function getActionColor(action: string): string {
   if (action.includes('low') || action.includes('warning')) {
     return 'bg-yellow-50 border-l-yellow-500'
   }
-  return 'bg-white border-l-[#0D7E8A]'
+  return 'bg-white border-l-teal-500'
 }
 
 export default function RealtimeNotificationBell({ userId }: RealtimeNotificationBellProps) {
@@ -194,12 +194,12 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-[#EEF2F9]">
-            <h3 className="text-sm font-semibold text-[#1B3A6B]">Notifications</h3>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-navy-50">
+            <h3 className="text-sm font-semibold text-navy-600">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="text-xs text-[#0D7E8A] hover:text-[#1B3A6B] font-medium flex items-center gap-1 transition-colors"
+                className="text-xs text-teal-500 hover:text-navy-600 font-medium flex items-center gap-1 transition-colors"
               >
                 <CheckCheck size={13} />
                 Mark all read
@@ -210,10 +210,10 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
           {/* Notification List */}
           <div className="max-h-96 overflow-y-auto">
             {loading && notifications.length === 0 && (
-              <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+              <div className="p-8 text-center text-gray-500 text-sm">Loading...</div>
             )}
             {!loading && notifications.length === 0 && (
-              <div className="p-8 text-center text-gray-400 text-sm">
+              <div className="p-8 text-center text-gray-500 text-sm">
                 No notifications in the last 7 days
               </div>
             )}
@@ -238,18 +238,18 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-gray-900 truncate">{label}</span>
                         {!notification.is_read && (
-                          <span className="w-2 h-2 bg-[#0D7E8A] rounded-full flex-shrink-0" />
+                          <span className="w-2 h-2 bg-teal-500 rounded-full flex-shrink-0" />
                         )}
                       </div>
                       {entityRef && (
                         <p className="text-xs text-gray-500 mt-0.5 truncate">{entityRef}</p>
                       )}
                       {notification.user?.full_name && (
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-gray-500 mt-0.5">
                           by {notification.user.full_name}
                         </p>
                       )}
-                      <p className="text-[11px] text-gray-400 mt-1">
+                      <p className="text-[11px] text-gray-500 mt-1">
                         {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                       </p>
                     </div>
@@ -261,7 +261,7 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
                             setIsOpen(false)
                             if (!notification.is_read) markAsRead(notification.id)
                           }}
-                          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#E6F5F6] text-[#0D7E8A] transition-colors"
+                          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-teal-50 text-teal-500 transition-colors"
                           title="View"
                           aria-label={`View ${label}`}
                         >
@@ -271,7 +271,7 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
                       {!notification.is_read && (
                         <button
                           onClick={() => markAsRead(notification.id)}
-                          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#E6F5F6] text-gray-400 hover:text-[#0D7E8A] transition-colors"
+                          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-teal-50 text-gray-500 hover:text-teal-500 transition-colors"
                           title="Mark as read"
                           aria-label={`Mark ${label} as read`}
                         >
@@ -290,7 +290,7 @@ export default function RealtimeNotificationBell({ userId }: RealtimeNotificatio
             <Link
               href="/settings/audit-log"
               onClick={() => setIsOpen(false)}
-              className="text-xs text-[#0D7E8A] hover:text-[#1B3A6B] font-medium transition-colors"
+              className="text-xs text-teal-500 hover:text-navy-600 font-medium transition-colors"
             >
               View all activity
             </Link>

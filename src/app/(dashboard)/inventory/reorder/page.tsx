@@ -183,16 +183,16 @@ export default function AutoReorderPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="badge bg-blue-50 text-blue-700">{group.centre_code}</span>
-                    <ArrowRight size={12} className="text-gray-300" />
+                    <ArrowRight size={12} className="text-gray-500" />
                     <span className="text-sm font-semibold text-gray-900">{group.vendor_name}</span>
-                    <span className="font-mono text-xs text-gray-400">{group.vendor_code}</span>
+                    <span className="font-mono text-xs text-gray-500">{group.vendor_code}</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-bold text-navy-600">{formatLakhs(group.total_amount)}</div>
                   <div className="text-xs text-gray-500">{group.items.length} items</div>
                 </div>
-                {expandedGroup === idx ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                {expandedGroup === idx ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
               </div>
 
               {expandedGroup === idx && (
@@ -277,13 +277,13 @@ export default function AutoReorderPage() {
         <div className="card p-12 text-center mt-4">
           <CheckCircle2 size={48} className="mx-auto mb-3 text-green-400" />
           <p className="text-lg font-semibold text-gray-700">All stock levels are healthy</p>
-          <p className="text-sm text-gray-400 mt-1">No items below reorder point across any centre</p>
+          <p className="text-sm text-gray-500 mt-1">No items below reorder point across any centre</p>
         </div>
       )}
 
       {!result && !scanning && (
         <div className="card p-12 text-center">
-          <Package size={48} className="mx-auto mb-3 text-gray-300" />
+          <Package size={48} className="mx-auto mb-3 text-gray-500" />
           <p className="text-gray-500">Click Scan to check stock levels</p>
         </div>
       )}

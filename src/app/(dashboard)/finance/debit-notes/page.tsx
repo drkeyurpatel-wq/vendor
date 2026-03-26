@@ -109,13 +109,13 @@ export default async function DebitNotesPage({
       <div className="flex gap-2 mb-5 overflow-x-auto pb-1 flex-wrap">
         <Link href="/finance/debit-notes"
           className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
-            !params.status ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]' : 'bg-white text-gray-600 border-gray-200')}>
+            !params.status ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-gray-600 border-gray-200')}>
           All
         </Link>
         {STATUSES.map(s => (
           <Link key={s} href={`/finance/debit-notes?status=${s}${params.centre ? `&centre=${params.centre}` : ''}`}
             className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border capitalize transition-colors',
-              params.status === s ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]' : 'bg-white text-gray-600 border-gray-200')}>
+              params.status === s ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-gray-600 border-gray-200')}>
             {s.replace(/_/g, ' ')}
           </Link>
         ))}
@@ -127,7 +127,7 @@ export default async function DebitNotesPage({
           {centres.map(c => (
             <Link key={c.id} href={`/finance/debit-notes?centre=${c.id}${params.status ? `&status=${params.status}` : ''}`}
               className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
-                params.centre === c.id ? 'bg-[#0D7E8A] text-white border-[#0D7E8A]' : 'bg-white text-gray-500 border-gray-200')}>
+                params.centre === c.id ? 'bg-teal-500 text-white border-teal-500' : 'bg-white text-gray-500 border-gray-200')}>
               {c.code}
             </Link>
           ))}
@@ -156,7 +156,7 @@ export default async function DebitNotesPage({
                 {debitNotes.map((dn: any) => (
                   <tr key={dn.id}>
                     <td>
-                      <Link href={`/finance/debit-notes/${dn.id}`} className="font-mono text-xs font-semibold hover:text-[#0D7E8A] transition-colors">
+                      <Link href={`/finance/debit-notes/${dn.id}`} className="font-mono text-xs font-semibold hover:text-teal-500 transition-colors">
                         {dn.dn_number}
                       </Link>
                     </td>
@@ -191,9 +191,9 @@ export default async function DebitNotesPage({
           </>
         ) : (
           <div className="empty-state">
-            <FileText size={40} className="mb-3 text-gray-300" />
+            <FileText size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No debit notes found</p>
-            <p className="text-sm text-gray-400 mt-1">Create a debit note to get started</p>
+            <p className="text-sm text-gray-500 mt-1">Create a debit note to get started</p>
           </div>
         )}
       </div>

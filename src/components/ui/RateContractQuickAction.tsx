@@ -37,7 +37,7 @@ export default function RateContractQuickAction({ contractId, contractNumber, cu
     setLoading(false); router.refresh()
   }
 
-  if (loading) return <Loader2 size={14} className="animate-spin text-gray-400" />
+  if (loading) return <Loader2 size={14} className="animate-spin text-gray-500" />
 
   if (currentStatus === 'draft') {
     return (

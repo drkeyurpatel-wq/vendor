@@ -62,7 +62,7 @@ export default function DelegationsPage() {
   const approverRoles = ['unit_purchase_manager', 'unit_cao', 'group_cao', 'group_admin']
   const approvers = users.filter(u => approverRoles.includes(u.role))
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-[#1B3A6B]" /></div>
+  if (loading) return <div className="flex justify-center py-20"><Loader2 size={24} className="animate-spin text-navy-600" /></div>
 
   return (
     <div>
@@ -142,11 +142,11 @@ export default function DelegationsPage() {
                     <tr key={d.id} className="hover:bg-gray-50">
                       <td>
                         <div className="text-sm font-medium text-gray-900">{d.delegator?.full_name || '—'}</div>
-                        <div className="text-xs text-gray-400">{d.delegator?.role?.replace(/_/g, ' ')}</div>
+                        <div className="text-xs text-gray-500">{d.delegator?.role?.replace(/_/g, ' ')}</div>
                       </td>
                       <td>
                         <div className="text-sm font-medium text-gray-900">{d.delegate?.full_name || '—'}</div>
-                        <div className="text-xs text-gray-400">{d.delegate?.role?.replace(/_/g, ' ')}</div>
+                        <div className="text-xs text-gray-500">{d.delegate?.role?.replace(/_/g, ' ')}</div>
                       </td>
                       <td className="text-sm text-gray-600">{d.start_date} → {d.end_date}</td>
                       <td className="text-sm text-gray-500 max-w-[200px] truncate">{d.reason || '—'}</td>
@@ -170,9 +170,9 @@ export default function DelegationsPage() {
           </div>
         ) : (
           <div className="empty-state py-12">
-            <UserCheck size={40} className="mb-3 text-gray-300" />
+            <UserCheck size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No delegations configured</p>
-            <p className="text-sm text-gray-400 mt-1">Create a delegation when an approver is unavailable</p>
+            <p className="text-sm text-gray-500 mt-1">Create a delegation when an approver is unavailable</p>
           </div>
         )}
       </div>

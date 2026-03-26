@@ -28,7 +28,7 @@ interface AnalyticsData {
 const TrendIcon = ({ trend }: { trend: string }) => {
   if (trend === 'rising') return <TrendingUp size={14} className="text-red-500" />
   if (trend === 'falling') return <TrendingDown size={14} className="text-green-500" />
-  return <Minus size={14} className="text-gray-400" />
+  return <Minus size={14} className="text-gray-500" />
 }
 
 const RiskBadge = ({ risk }: { risk: string }) => {
@@ -94,7 +94,7 @@ export default function AnalyticsPage() {
       <div className="page-header">
         <div>
           <div className="flex items-center gap-2">
-            <Brain size={24} className="text-[#0D7E8A]" />
+            <Brain size={24} className="text-teal-500" />
             <h1 className="page-title">AI Analytics & Insights</h1>
           </div>
           <p className="page-subtitle">Consumption projections, inventory optimization, and price intelligence</p>
@@ -114,7 +114,7 @@ export default function AnalyticsPage() {
       {loading && !data ? (
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <Loader2 size={32} className="animate-spin text-[#0D7E8A] mx-auto mb-3" />
+            <Loader2 size={32} className="animate-spin text-teal-500 mx-auto mb-3" />
             <p className="text-sm text-gray-500">Analyzing procurement data...</p>
           </div>
         </div>
@@ -122,12 +122,12 @@ export default function AnalyticsPage() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <div className="stat-card border-l-4 border-[#0D7E8A]">
+            <div className="stat-card border-l-4 border-teal-500">
               <div className="flex items-center gap-2 mb-1">
-                <Activity size={16} className="text-[#0D7E8A]" />
+                <Activity size={16} className="text-teal-500" />
                 <span className="text-xs text-gray-500">Items Analyzed</span>
               </div>
-              <div className="text-2xl font-bold text-[#0D7E8A]">{s?.total_items_analyzed ?? 0}</div>
+              <div className="text-2xl font-bold text-teal-500">{s?.total_items_analyzed ?? 0}</div>
             </div>
             <div className="stat-card border-l-4 border-red-500">
               <div className="flex items-center gap-2 mb-1">
@@ -150,12 +150,12 @@ export default function AnalyticsPage() {
               </div>
               <div className="text-2xl font-bold text-yellow-700">{s?.items_needing_reorder_adjustment ?? 0}</div>
             </div>
-            <div className="stat-card border-l-4 border-[#1B3A6B]">
+            <div className="stat-card border-l-4 border-navy-600">
               <div className="flex items-center gap-2 mb-1">
-                <Zap size={16} className="text-[#1B3A6B]" />
+                <Zap size={16} className="text-navy-600" />
                 <span className="text-xs text-gray-500">Projected 30d Spend</span>
               </div>
-              <div className="text-2xl font-bold text-[#1B3A6B]">{formatLakhs(s?.total_projected_spend_30d ?? 0)}</div>
+              <div className="text-2xl font-bold text-navy-600">{formatLakhs(s?.total_projected_spend_30d ?? 0)}</div>
             </div>
           </div>
 
@@ -173,7 +173,7 @@ export default function AnalyticsPage() {
                 className={cn(
                   'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
                   activeTab === tab.key
-                    ? 'border-[#0D7E8A] text-[#0D7E8A]'
+                    ? 'border-teal-500 text-teal-500'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 )}
               >
@@ -181,7 +181,7 @@ export default function AnalyticsPage() {
                 {tab.count > 0 && (
                   <span className={cn(
                     'text-xs px-1.5 py-0.5 rounded-full',
-                    activeTab === tab.key ? 'bg-[#E6F5F6] text-[#0D7E8A]' : 'bg-gray-100 text-gray-500'
+                    activeTab === tab.key ? 'bg-teal-50 text-teal-500' : 'bg-gray-100 text-gray-500'
                   )}>{tab.count}</span>
                 )}
               </button>
@@ -191,9 +191,9 @@ export default function AnalyticsPage() {
           {/* Tab Content */}
           {activeTab === 'projections' && (
             <div className="card overflow-hidden">
-              <div className="px-5 py-3 bg-[#EEF2F9] border-b border-gray-200 flex items-center gap-2">
-                <Brain size={16} className="text-[#1B3A6B]" />
-                <span className="text-sm font-semibold text-[#1B3A6B]">AI-powered consumption forecasting using Exponential Moving Average</span>
+              <div className="px-5 py-3 bg-navy-50 border-b border-gray-200 flex items-center gap-2">
+                <Brain size={16} className="text-navy-600" />
+                <span className="text-sm font-semibold text-navy-600">AI-powered consumption forecasting using Exponential Moving Average</span>
               </div>
               {data.consumption_projections.length > 0 ? (
                 <div className="overflow-x-auto">
@@ -216,7 +216,7 @@ export default function AnalyticsPage() {
                         <tr key={`${cp.item_id}-${cp.centre_id}`} className={cp.stockout_risk === 'critical' ? 'bg-red-50/50' : ''}>
                           <td>
                             <div className="font-medium text-gray-900 text-sm">{cp.generic_name}</div>
-                            <div className="font-mono text-xs text-gray-400">{cp.item_code}</div>
+                            <div className="font-mono text-xs text-gray-500">{cp.item_code}</div>
                           </td>
                           <td><span className="badge bg-blue-50 text-blue-700">{cp.centre_code}</span></td>
                           <td className="text-sm font-semibold">{cp.avg_daily_consumption}</td>
@@ -260,9 +260,9 @@ export default function AnalyticsPage() {
 
           {activeTab === 'inventory' && (
             <div className="card overflow-hidden">
-              <div className="px-5 py-3 bg-[#EEF2F9] border-b border-gray-200 flex items-center gap-2">
-                <Brain size={16} className="text-[#1B3A6B]" />
-                <span className="text-sm font-semibold text-[#1B3A6B]">Optimal inventory levels using Safety Stock + EOQ model (95% service level)</span>
+              <div className="px-5 py-3 bg-navy-50 border-b border-gray-200 flex items-center gap-2">
+                <Brain size={16} className="text-navy-600" />
+                <span className="text-sm font-semibold text-navy-600">Optimal inventory levels using Safety Stock + EOQ model (95% service level)</span>
               </div>
               {data.ideal_inventory.length > 0 ? (
                 <div className="overflow-x-auto">
@@ -284,7 +284,7 @@ export default function AnalyticsPage() {
                         <tr key={`${inv.item_id}-${inv.centre_id}`}>
                           <td>
                             <div className="font-medium text-gray-900 text-sm">{inv.generic_name}</div>
-                            <div className="font-mono text-xs text-gray-400">{inv.item_code}</div>
+                            <div className="font-mono text-xs text-gray-500">{inv.item_code}</div>
                           </td>
                           <td><span className="badge bg-blue-50 text-blue-700">{inv.centre_code}</span></td>
                           <td className="text-sm font-semibold">{inv.current_stock}</td>
@@ -326,9 +326,9 @@ export default function AnalyticsPage() {
 
           {activeTab === 'prices' && (
             <div className="card overflow-hidden">
-              <div className="px-5 py-3 bg-[#EEF2F9] border-b border-gray-200 flex items-center gap-2">
-                <Brain size={16} className="text-[#1B3A6B]" />
-                <span className="text-sm font-semibold text-[#1B3A6B]">Historic price tracking across all POs with trend analysis</span>
+              <div className="px-5 py-3 bg-navy-50 border-b border-gray-200 flex items-center gap-2">
+                <Brain size={16} className="text-navy-600" />
+                <span className="text-sm font-semibold text-navy-600">Historic price tracking across all POs with trend analysis</span>
               </div>
               {data.price_history.length > 0 ? (
                 <div className="divide-y divide-gray-100">
@@ -343,7 +343,7 @@ export default function AnalyticsPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-medium text-gray-900">{ph.generic_name}</span>
-                              <span className="font-mono text-xs text-gray-400">{ph.item_code}</span>
+                              <span className="font-mono text-xs text-gray-500">{ph.item_code}</span>
                             </div>
                             <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
                               <span>Avg: {formatCurrency(ph.avg_rate)}</span>
@@ -363,7 +363,7 @@ export default function AnalyticsPage() {
                                 {ph.rate_change_pct > 0 ? '+' : ''}{ph.rate_change_pct}%
                               </span>
                             </div>
-                            {isExpanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                            {isExpanded ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
                           </div>
                         </button>
                         {isExpanded && (
@@ -412,9 +412,9 @@ export default function AnalyticsPage() {
 
           {activeTab === 'anomalies' && (
             <div className="card overflow-hidden">
-              <div className="px-5 py-3 bg-[#EEF2F9] border-b border-gray-200 flex items-center gap-2">
-                <Brain size={16} className="text-[#1B3A6B]" />
-                <span className="text-sm font-semibold text-[#1B3A6B]">Statistical anomaly detection: rates deviating &gt;2 standard deviations from mean</span>
+              <div className="px-5 py-3 bg-navy-50 border-b border-gray-200 flex items-center gap-2">
+                <Brain size={16} className="text-navy-600" />
+                <span className="text-sm font-semibold text-navy-600">Statistical anomaly detection: rates deviating &gt;2 standard deviations from mean</span>
               </div>
               {data.price_anomalies.length > 0 ? (
                 <div className="overflow-x-auto">
@@ -436,7 +436,7 @@ export default function AnalyticsPage() {
                         <tr key={i} className={a.severity === 'high' ? 'bg-red-50/50' : ''}>
                           <td>
                             <div className="font-medium text-gray-900 text-sm">{a.generic_name}</div>
-                            <div className="font-mono text-xs text-gray-400">{a.item_code}</div>
+                            <div className="font-mono text-xs text-gray-500">{a.item_code}</div>
                           </td>
                           <td className="text-sm font-mono text-gray-600">{a.po_number}</td>
                           <td className="text-sm text-gray-600">{a.po_date}</td>

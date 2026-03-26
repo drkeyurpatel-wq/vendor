@@ -18,9 +18,9 @@ export default async function VendorPaymentsPage({
   if (!profile || role !== 'vendor') {
     return (
       <div className="card p-12 text-center">
-        <Package size={40} className="mx-auto mb-3 text-gray-300" />
+        <Package size={40} className="mx-auto mb-3 text-gray-500" />
         <p className="font-medium text-gray-500">Vendor Portal</p>
-        <p className="text-sm text-gray-400 mt-1">This page is only accessible to vendor users</p>
+        <p className="text-sm text-gray-500 mt-1">This page is only accessible to vendor users</p>
       </div>
     )
   }
@@ -36,7 +36,7 @@ export default async function VendorPaymentsPage({
       <div className="card p-12 text-center">
         <AlertTriangle size={40} className="mx-auto mb-3 text-yellow-400" />
         <p className="font-medium text-gray-500">Vendor Profile Not Found</p>
-        <p className="text-sm text-gray-400 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
+        <p className="text-sm text-gray-500 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
       </div>
     )
   }
@@ -92,24 +92,24 @@ export default async function VendorPaymentsPage({
           </div>
           <div className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</div>
         </div>
-        <div className="stat-card border-l-4 border-[#1B3A6B]">
+        <div className="stat-card border-l-4 border-navy-600">
           <div className="flex items-center gap-2 mb-1">
-            <CreditCard size={18} className="text-[#1B3A6B]" />
+            <CreditCard size={18} className="text-navy-600" />
             <span className="text-sm text-gray-500">Last Payment</span>
           </div>
-          <div className="text-lg font-bold text-[#1B3A6B]">
+          <div className="text-lg font-bold text-navy-600">
             {lastPaymentDate ? formatDate(lastPaymentDate) : 'No payments yet'}
           </div>
         </div>
-        <div className="stat-card border-l-4 border-[#0D7E8A]">
+        <div className="stat-card border-l-4 border-teal-500">
           <div className="flex items-center gap-2 mb-1">
-            <CreditCard size={18} className="text-[#0D7E8A]" />
+            <CreditCard size={18} className="text-teal-500" />
             <span className="text-sm text-gray-500">Next Payment Cycle</span>
           </div>
-          <div className="text-lg font-bold text-[#0D7E8A]">
+          <div className="text-lg font-bold text-teal-500">
             {formatDate(nextSaturday.toISOString())}
           </div>
-          <div className="text-xs text-gray-400 mt-0.5">Saturday payment cycle</div>
+          <div className="text-xs text-gray-500 mt-0.5">Saturday payment cycle</div>
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export default async function VendorPaymentsPage({
                         {pmt.batch?.payment_date ? formatDate(pmt.batch.payment_date) : formatDate(pmt.created_at)}
                       </td>
                       <td>
-                        <span className="font-mono text-xs font-semibold text-[#1B3A6B]">
+                        <span className="font-mono text-xs font-semibold text-navy-600">
                           {pmt.batch?.batch_number || '-'}
                         </span>
                       </td>
@@ -147,7 +147,7 @@ export default async function VendorPaymentsPage({
                           {pmt.invoice?.invoice_ref || '-'}
                         </span>
                         {pmt.invoice?.vendor_invoice_no && (
-                          <div className="text-xs text-gray-400">{pmt.invoice.vendor_invoice_no}</div>
+                          <div className="text-xs text-gray-500">{pmt.invoice.vendor_invoice_no}</div>
                         )}
                       </td>
                       <td className="text-sm text-right font-semibold text-green-600">
@@ -188,9 +188,9 @@ export default async function VendorPaymentsPage({
           </>
         ) : (
           <div className="empty-state">
-            <CreditCard size={40} className="mx-auto mb-3 text-gray-300" />
+            <CreditCard size={40} className="mx-auto mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No payment records found</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
               Payments are processed every Saturday. Records will appear here after payment.
             </p>
           </div>

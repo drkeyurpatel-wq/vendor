@@ -189,7 +189,7 @@ export default function VendorDocumentsPage() {
       {/* Upload Form */}
       <div className="card p-6 mb-6">
         <h2 className="font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-100 flex items-center gap-2">
-          <Upload size={16} className="text-[#0D7E8A]" />
+          <Upload size={16} className="text-teal-500" />
           Upload New Document
         </h2>
         <form onSubmit={handleUpload} className="space-y-4">
@@ -215,11 +215,11 @@ export default function VendorDocumentsPage() {
               <input
                 id="file-input"
                 type="file"
-                className="form-input w-full text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-[#1B3A6B] file:text-white hover:file:bg-[#15305a] file:cursor-pointer"
+                className="form-input w-full text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-navy-600 file:text-white hover:file:bg-navy-700 file:cursor-pointer"
                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                 onChange={e => setSelectedFile(e.target.files?.[0] ?? null)}
               />
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 PDF, JPG, PNG, DOC up to 10 MB
               </p>
             </div>
@@ -244,7 +244,7 @@ export default function VendorDocumentsPage() {
       {/* Documents List */}
       <div className="card overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-          <FileText size={16} className="text-[#0D7E8A]" />
+          <FileText size={16} className="text-teal-500" />
           <h2 className="font-semibold text-gray-900">
             Uploaded Documents ({documents.length})
           </h2>
@@ -252,8 +252,8 @@ export default function VendorDocumentsPage() {
 
         {loading ? (
           <div className="p-8 text-center">
-            <Loader2 size={24} className="animate-spin text-gray-400 mx-auto" />
-            <p className="text-sm text-gray-400 mt-2">Loading documents...</p>
+            <Loader2 size={24} className="animate-spin text-gray-500 mx-auto" />
+            <p className="text-sm text-gray-500 mt-2">Loading documents...</p>
           </div>
         ) : documents.length > 0 ? (
           <div className="overflow-x-auto">
@@ -298,7 +298,7 @@ export default function VendorDocumentsPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleDownload(doc)}
-                          className="text-[#0D7E8A] hover:text-[#0a6570] transition-colors"
+                          className="text-teal-500 hover:text-[#0a6570] transition-colors"
                           title="Download"
                         >
                           <Download size={16} />
@@ -318,8 +318,8 @@ export default function VendorDocumentsPage() {
             </table>
           </div>
         ) : (
-          <div className="p-8 text-center text-gray-400 text-sm">
-            <FileText size={32} className="mx-auto mb-2 text-gray-300" />
+          <div className="p-8 text-center text-gray-500 text-sm">
+            <FileText size={32} className="mx-auto mb-2 text-gray-500" />
             No documents uploaded yet. Use the form above to upload vendor documents.
           </div>
         )}

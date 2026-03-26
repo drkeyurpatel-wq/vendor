@@ -142,7 +142,7 @@ export default function NewConsignmentDepositPage() {
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
           <h2 className="font-semibold text-gray-900">Items Deposited</h2>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">Total: <strong className="text-[#1B3A6B]">{formatCurrency(totalValue)}</strong></span>
+            <span className="text-sm text-gray-500">Total: <strong className="text-navy-600">{formatCurrency(totalValue)}</strong></span>
             <BarcodeScanButton onScan={handleBarcodeScan} label="Scan Item" scanType="item" />
             <button onClick={addLine} className="btn-secondary text-sm"><Plus size={14} /> Add Item</button>
           </div>

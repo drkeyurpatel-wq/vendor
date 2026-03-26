@@ -184,7 +184,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
 
       <aside className={cn(
         'min-h-screen flex flex-col flex-shrink-0 z-50 transition-all duration-300',
-        'bg-gradient-to-b from-[#1B3A6B] via-[#1a3766] to-[#152E56]',
+        'bg-gradient-to-b from-navy-600 via-[#1a3766] to-[#152E56]',
         // Mobile: fixed, slide in/out
         'fixed lg:static',
         mobileOpen ? 'translate-x-0 shadow-2xl w-[260px]' : '-translate-x-full w-[260px]',
@@ -198,7 +198,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
         <div className={cn('border-b border-white/[0.08] transition-all duration-300', collapsed ? 'px-2 py-4' : 'px-5 py-5')}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-white to-blue-50 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-black/10">
-              <span className="text-base font-extrabold text-[#1B3A6B] tracking-tight">H1</span>
+              <span className="text-base font-extrabold text-navy-600 tracking-tight">H1</span>
             </div>
             {!collapsed && (
               <div className="flex-1 min-w-0">
@@ -224,8 +224,8 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
             </div>
           </div>
         ) : !collapsed ? (
-          <div className="mx-3 mt-4 mb-1 bg-[#0D7E8A]/20 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5 border border-[#0D7E8A]/20">
-            <div className="w-7 h-7 bg-[#0D7E8A]/20 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="mx-3 mt-4 mb-1 bg-teal-500/20 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5 border border-teal-500/20">
+            <div className="w-7 h-7 bg-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
               <TrendingDown size={13} className="text-teal-300" />
             </div>
             <div>
@@ -265,11 +265,11 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                       'flex items-center gap-3 rounded-xl text-[13px] transition-all duration-200',
                       collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5',
                       active
-                        ? 'bg-white text-[#1B3A6B] font-semibold shadow-lg shadow-black/10'
+                        ? 'bg-white text-navy-600 font-semibold shadow-lg shadow-black/10'
                         : 'text-blue-200/80 hover:bg-white/[0.08] hover:text-white'
                     )}
                   >
-                    <span className={cn('flex-shrink-0 transition-colors', active ? 'text-[#0D7E8A]' : '')}>{item.icon}</span>
+                    <span className={cn('flex-shrink-0 transition-colors', active ? 'text-teal-500' : '')}>{item.icon}</span>
                     {!collapsed && <span>{item.label}</span>}
                   </Link>
                 )
@@ -329,7 +329,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                               className={cn(
                                 'block px-3 py-1.5 rounded-lg text-[12.5px] transition-all duration-150',
                                 active
-                                  ? 'bg-[#0D7E8A] text-white font-medium shadow-md shadow-[#0D7E8A]/20'
+                                  ? 'bg-teal-500 text-white font-medium shadow-md shadow-teal-500/20'
                                   : 'text-blue-300/60 hover:bg-white/[0.06] hover:text-blue-100'
                               )}
                             >
@@ -372,7 +372,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
             collapsed ? 'justify-center py-2' : 'gap-3 px-2 py-2.5'
           )}>
             <div className={cn(
-              'bg-gradient-to-br from-[#0D7E8A] to-[#0A9BA8] rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-black/10',
+              'bg-gradient-to-br from-teal-500 to-[#0A9BA8] rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-black/10',
               collapsed ? 'w-8 h-8' : 'w-9 h-9'
             )}>
               <span className={cn('text-white font-bold tracking-wide', collapsed ? 'text-[9px]' : 'text-[11px]')}>

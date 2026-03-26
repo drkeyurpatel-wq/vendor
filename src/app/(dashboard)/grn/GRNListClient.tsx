@@ -56,7 +56,7 @@ export default function GRNListClient({ grns, userRole }: { grns: GRN[]; userRol
       },
       {
         id: 'po', header: 'PO #', accessorFn: r => r.po?.po_number ?? '', size: 160,
-        cell: ({ row }) => row.original.po?.po_number ? <span className="font-mono text-xs text-gray-600">{row.original.po.po_number}</span> : <span className="text-xs text-gray-400">—</span>,
+        cell: ({ row }) => row.original.po?.po_number ? <span className="font-mono text-xs text-gray-600">{row.original.po.po_number}</span> : <span className="text-xs text-gray-500">—</span>,
       },
       {
         id: 'centre', header: 'Centre', accessorFn: r => r.centre?.code ?? '', size: 70,
@@ -131,7 +131,7 @@ export default function GRNListClient({ grns, userRole }: { grns: GRN[]; userRol
         searchPlaceholder="Search GRN#, PO#, vendor..." showSearch showExport showColumnToggle
         exportFilename="grns" pageSize={25}
         onRowClick={g => router.push(`/grn/${g.id}`)}
-        emptyIcon={<Package size={40} className="text-gray-300" />}
+        emptyIcon={<Package size={40} className="text-gray-500" />}
         emptyTitle="No GRNs found" emptyDescription="GRNs are created when goods arrive against a PO" />
     </>
   )

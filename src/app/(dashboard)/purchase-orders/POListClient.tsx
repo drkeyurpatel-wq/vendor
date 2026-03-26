@@ -92,7 +92,7 @@ export default function POListClient({ pos, userRole }: { pos: PO[]; userRole: s
         header: 'Exp. Delivery',
         size: 110,
         cell: ({ row }) => {
-          if (!row.original.expected_delivery_date) return <span className="text-xs text-gray-400">—</span>
+          if (!row.original.expected_delivery_date) return <span className="text-xs text-gray-500">—</span>
           const isLate = new Date(row.original.expected_delivery_date) < new Date() && !['fully_received', 'cancelled', 'closed'].includes(row.original.status)
           return (
             <span className={cn('text-sm', isLate ? 'text-red-600 font-medium' : 'text-gray-600')}>
@@ -188,7 +188,7 @@ export default function POListClient({ pos, userRole }: { pos: PO[]; userRole: s
         exportFilename="purchase-orders"
         pageSize={25}
         onRowClick={(po) => router.push(`/purchase-orders/${po.id}`)}
-        emptyIcon={<ShoppingCart size={40} className="text-gray-300" />}
+        emptyIcon={<ShoppingCart size={40} className="text-gray-500" />}
         emptyTitle="No purchase orders found"
         emptyDescription="Create your first purchase order to get started"
         emptyAction={<Link href="/purchase-orders/new" className="btn-primary text-sm"><Plus size={15} /> Create First PO</Link>}

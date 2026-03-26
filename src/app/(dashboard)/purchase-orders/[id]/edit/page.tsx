@@ -207,7 +207,7 @@ export default function EditPOPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 size={24} className="animate-spin text-gray-400" />
+        <Loader2 size={24} className="animate-spin text-gray-500" />
       </div>
     )
   }

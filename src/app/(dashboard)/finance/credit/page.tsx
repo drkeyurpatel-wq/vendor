@@ -143,7 +143,7 @@ export default async function CreditPeriodPage() {
                     <tr key={inv.id} className="hover:bg-gray-50">
                       <td>
                         <div className="font-medium text-gray-900">{inv.vendor?.legal_name}</div>
-                        {inv.vendor?.bank_name && <div className="text-xs text-gray-400">{inv.vendor.bank_name}</div>}
+                        {inv.vendor?.bank_name && <div className="text-xs text-gray-500">{inv.vendor.bank_name}</div>}
                       </td>
                       <td><span className="badge bg-gray-100 text-gray-700">{inv.centre?.code}</span></td>
                       <td><Link href={`/finance/invoices/${inv.id}`} className="font-mono text-xs text-teal-600 hover:underline font-semibold">{inv.vendor_invoice_no}</Link></td>

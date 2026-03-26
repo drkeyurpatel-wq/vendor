@@ -93,7 +93,7 @@ export default function ConsignmentUsageListPage() {
 
       <div className="card overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-12"><Loader2 size={24} className="animate-spin text-[#1B3A6B]" /></div>
+          <div className="flex justify-center py-12"><Loader2 size={24} className="animate-spin text-navy-600" /></div>
         ) : usage.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="data-table">
@@ -105,15 +105,15 @@ export default function ConsignmentUsageListPage() {
                   const amount = (u.stock?.vendor_rate || 0) * (u.qty_used || 1)
                   return (
                     <tr key={u.id} className="hover:bg-gray-50">
-                      <td className="font-mono text-xs font-semibold text-[#1B3A6B]">{u.usage_number || u.id.substring(0, 8)}</td>
+                      <td className="font-mono text-xs font-semibold text-navy-600">{u.usage_number || u.id.substring(0, 8)}</td>
                       <td>
                         <div className="text-sm font-medium text-gray-900">{u.patient_name}</div>
-                        {u.patient_uhid && <div className="text-xs text-gray-400">{u.patient_uhid}</div>}
-                        {u.surgeon_name && <div className="text-xs text-gray-400">Dr. {u.surgeon_name}</div>}
+                        {u.patient_uhid && <div className="text-xs text-gray-500">{u.patient_uhid}</div>}
+                        {u.surgeon_name && <div className="text-xs text-gray-500">Dr. {u.surgeon_name}</div>}
                       </td>
                       <td>
                         <div className="text-sm">{u.stock?.item?.generic_name}</div>
-                        <div className="text-xs text-gray-400 font-mono">{u.stock?.item?.item_code} | SN: {u.stock?.serial_number || '—'}</div>
+                        <div className="text-xs text-gray-500 font-mono">{u.stock?.item?.item_code} | SN: {u.stock?.serial_number || '—'}</div>
                       </td>
                       <td className="text-sm text-gray-600">{u.deposit?.vendor?.legal_name}</td>
                       <td><span className="badge bg-blue-50 text-blue-700 text-xs">{u.centre?.code}</span></td>
@@ -144,9 +144,9 @@ export default function ConsignmentUsageListPage() {
           </div>
         ) : (
           <div className="empty-state py-12">
-            <FileText size={40} className="mb-3 text-gray-300" />
+            <FileText size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No usage records yet</p>
-            <p className="text-sm text-gray-400 mt-1">Record a consignment item usage to get started</p>
+            <p className="text-sm text-gray-500 mt-1">Record a consignment item usage to get started</p>
           </div>
         )}
       </div>

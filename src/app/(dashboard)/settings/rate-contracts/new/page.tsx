@@ -212,15 +212,15 @@ export default function NewRateContractPage() {
         {/* Contract Details */}
         <div className="card p-6 mb-6">
           <fieldset>
-            <legend className="text-lg font-semibold text-[#1B3A6B] mb-4">Contract Details</legend>
+            <legend className="text-lg font-semibold text-navy-600 mb-4">Contract Details</legend>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Vendor */}
               <div className="md:col-span-2 relative">
                 <label htmlFor="vendor-search" className="form-label">Vendor *</label>
                 {selectedVendor ? (
-                  <div className="flex items-center gap-2 p-2 border rounded-lg bg-[#EEF2F9]">
+                  <div className="flex items-center gap-2 p-2 border rounded-lg bg-navy-50">
                     <span className="text-sm font-medium">{selectedVendor.legal_name}</span>
-                    <span className="font-mono text-xs text-gray-400">({selectedVendor.vendor_code})</span>
+                    <span className="font-mono text-xs text-gray-500">({selectedVendor.vendor_code})</span>
                     <button
                       type="button"
                       onClick={() => { setSelectedVendor(null); setVendorId('') }}
@@ -252,10 +252,10 @@ export default function NewRateContractPage() {
                               setVendorSearch('')
                               setVendorResults([])
                             }}
-                            className="block w-full text-left px-4 py-2 hover:bg-[#EEF2F9] text-sm"
+                            className="block w-full text-left px-4 py-2 hover:bg-navy-50 text-sm"
                           >
                             <span className="font-medium">{v.legal_name}</span>
-                            <span className="text-xs text-gray-400 ml-2">({v.vendor_code})</span>
+                            <span className="text-xs text-gray-500 ml-2">({v.vendor_code})</span>
                           </button>
                         ))}
                       </div>
@@ -342,7 +342,7 @@ export default function NewRateContractPage() {
         {/* Items */}
         <div className="card p-6 mb-6">
           <fieldset>
-            <legend className="text-lg font-semibold text-[#1B3A6B] mb-4">
+            <legend className="text-lg font-semibold text-navy-600 mb-4">
               Contract Items ({items.length})
             </legend>
 
@@ -372,11 +372,11 @@ export default function NewRateContractPage() {
                       key={item.id}
                       type="button"
                       onClick={() => addItem(item)}
-                      className="block w-full text-left px-4 py-2 hover:bg-[#EEF2F9] text-sm"
+                      className="block w-full text-left px-4 py-2 hover:bg-navy-50 text-sm"
                     >
-                      <span className="font-mono text-xs text-gray-400 mr-2">{item.item_code}</span>
+                      <span className="font-mono text-xs text-gray-500 mr-2">{item.item_code}</span>
                       <span className="font-medium">{item.generic_name}</span>
-                      <span className="text-xs text-gray-400 ml-2">({item.unit})</span>
+                      <span className="text-xs text-gray-500 ml-2">({item.unit})</span>
                     </button>
                   ))}
                 </div>
@@ -402,7 +402,7 @@ export default function NewRateContractPage() {
                       <tr key={item.item_id}>
                         <td>
                           <div className="text-sm font-medium">{item.item_name}</div>
-                          <div className="font-mono text-xs text-gray-400">{item.item_code}</div>
+                          <div className="font-mono text-xs text-gray-500">{item.item_code}</div>
                         </td>
                         <td className="text-sm text-gray-600">{item.unit}</td>
                         <td>
@@ -460,7 +460,7 @@ export default function NewRateContractPage() {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-400">
+              <div className="text-center py-8 text-gray-500">
                 <Plus size={32} className="mx-auto mb-2" />
                 <p className="text-sm">Search and add items above</p>
               </div>

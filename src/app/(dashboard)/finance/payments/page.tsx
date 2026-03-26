@@ -57,7 +57,7 @@ export default async function PaymentsPage({
             <span className="text-sm font-semibold text-gray-700">Total Outstanding</span>
           </div>
           <div className="text-2xl font-bold text-red-600">{formatLakhs(totalOutstanding)}</div>
-          <div className="text-xs text-gray-400 mt-1">{unpaidCount} unpaid invoices</div>
+          <div className="text-xs text-gray-500 mt-1">{unpaidCount} unpaid invoices</div>
         </div>
         <div className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 border-l-4 border-l-amber-500">
           <div className="flex items-center gap-2 mb-1">
@@ -65,7 +65,7 @@ export default async function PaymentsPage({
             <span className="text-sm font-semibold text-gray-700">Next Payment Day</span>
           </div>
           <div className="text-2xl font-bold text-amber-600">{nextSatStr}</div>
-          <div className="text-xs text-gray-400 mt-1">Saturday payment cycle</div>
+          <div className="text-xs text-gray-500 mt-1">Saturday payment cycle</div>
         </div>
         <div className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5 border-l-4 border-l-green-500">
           <div className="flex items-center gap-2 mb-1">
@@ -75,7 +75,7 @@ export default async function PaymentsPage({
           <div className="text-2xl font-bold text-green-600">
             {batches?.filter((b: any) => new Date(b.batch_date).getMonth() === now.getMonth()).length ?? 0}
           </div>
-          <div className="text-xs text-gray-400 mt-1">
+          <div className="text-xs text-gray-500 mt-1">
             {formatLakhs(batches?.filter((b: any) => new Date(b.batch_date).getMonth() === now.getMonth() && b.status === 'completed').reduce((s: number, b: any) => s + (b.total_amount || 0), 0) ?? 0)} processed
           </div>
         </div>

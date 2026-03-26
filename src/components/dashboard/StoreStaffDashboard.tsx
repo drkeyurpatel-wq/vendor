@@ -90,8 +90,8 @@ export default async function StoreStaffDashboard({ profile }: { profile: any })
           label="Pending Deliveries"
           value={pendingDeliveryCount}
           sub="Approved POs awaiting receipt"
-          icon={<Truck size={22} className="text-[#0D7E8A]" />}
-          bg="bg-[#E6F5F6]"
+          icon={<Truck size={22} className="text-teal-500" />}
+          bg="bg-teal-50"
           href="/purchase-orders?status=approved"
           alert={pendingDeliveryCount > 0}
         />
@@ -118,7 +118,7 @@ export default async function StoreStaffDashboard({ profile }: { profile: any })
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Expected Deliveries */}
         <div className="card">
-          <SectionHeader title="Expected Deliveries" href="/purchase-orders?status=approved" icon={<Truck size={16} className="text-[#0D7E8A]" />} />
+          <SectionHeader title="Expected Deliveries" href="/purchase-orders?status=approved" icon={<Truck size={16} className="text-teal-500" />} />
           <div className="divide-y divide-gray-100">
             {pendingDeliveries && pendingDeliveries.length > 0 ? (
               pendingDeliveries.map((po: any) => (
@@ -140,7 +140,7 @@ export default async function StoreStaffDashboard({ profile }: { profile: any })
                         {new Date(po.expected_delivery_date) < new Date() ? 'OVERDUE' : formatDate(po.expected_delivery_date)}
                       </div>
                     ) : (
-                      <div className="text-xs text-gray-400">No ETA</div>
+                      <div className="text-xs text-gray-500">No ETA</div>
                     )}
                   </div>
                   <Link href={`/grn/new?po=${po.id}`}
@@ -151,7 +151,7 @@ export default async function StoreStaffDashboard({ profile }: { profile: any })
                 </div>
               ))
             ) : (
-              <EmptyRow icon={<Truck size={32} className="text-gray-300" />} message="No pending deliveries" />
+              <EmptyRow icon={<Truck size={32} className="text-gray-500" />} message="No pending deliveries" />
             )}
           </div>
         </div>
@@ -186,7 +186,7 @@ export default async function StoreStaffDashboard({ profile }: { profile: any })
                 </Link>
               ))
             ) : (
-              <EmptyRow icon={<PackageCheck size={32} className="text-gray-300" />} message="No recent GRNs" />
+              <EmptyRow icon={<PackageCheck size={32} className="text-gray-500" />} message="No recent GRNs" />
             )}
           </div>
         </div>
@@ -212,7 +212,7 @@ export default async function StoreStaffDashboard({ profile }: { profile: any })
                       <tr key={batch.id}>
                         <td>
                           <div className="font-medium text-gray-900">{batch.item?.generic_name}</div>
-                          <div className="text-xs text-gray-400">{batch.item?.item_code}</div>
+                          <div className="text-xs text-gray-500">{batch.item?.item_code}</div>
                         </td>
                         <td className="text-gray-600">{batch.batch_no}</td>
                         <td className="font-medium">{batch.qty_available} {batch.item?.unit}</td>
@@ -243,7 +243,7 @@ export default async function StoreStaffDashboard({ profile }: { profile: any })
                 <div key={s.id} className="flex items-center px-5 py-3">
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-900">{s.item?.generic_name}</div>
-                    <div className="text-xs text-gray-400">{s.item?.item_code}</div>
+                    <div className="text-xs text-gray-500">{s.item?.item_code}</div>
                   </div>
                   <div className="text-right ml-2">
                     <span className={cn('text-sm font-semibold',
@@ -251,7 +251,7 @@ export default async function StoreStaffDashboard({ profile }: { profile: any })
                     )}>
                       {s.current_stock}
                     </span>
-                    <span className="text-xs text-gray-400"> / {s.reorder_level} {s.item?.unit}</span>
+                    <span className="text-xs text-gray-500"> / {s.reorder_level} {s.item?.unit}</span>
                   </div>
                 </div>
               ))}

@@ -29,9 +29,9 @@ export default async function VendorInvoicesPage({
   if (!profile || role !== 'vendor') {
     return (
       <div className="card p-12 text-center">
-        <Package size={40} className="mx-auto mb-3 text-gray-300" />
+        <Package size={40} className="mx-auto mb-3 text-gray-500" />
         <p className="font-medium text-gray-500">Vendor Portal</p>
-        <p className="text-sm text-gray-400 mt-1">This page is only accessible to vendor users</p>
+        <p className="text-sm text-gray-500 mt-1">This page is only accessible to vendor users</p>
       </div>
     )
   }
@@ -47,7 +47,7 @@ export default async function VendorInvoicesPage({
       <div className="card p-12 text-center">
         <AlertTriangle size={40} className="mx-auto mb-3 text-yellow-400" />
         <p className="font-medium text-gray-500">Vendor Profile Not Found</p>
-        <p className="text-sm text-gray-400 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
+        <p className="text-sm text-gray-500 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
       </div>
     )
   }
@@ -118,8 +118,8 @@ export default async function VendorInvoicesPage({
             className={cn(
               'px-3 py-1 rounded-full text-xs font-medium transition-colors border',
               paymentFilter === s.value
-                ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]'
-                : 'bg-white text-gray-600 border-gray-200 hover:border-[#0D7E8A] hover:text-[#0D7E8A]'
+                ? 'bg-navy-600 text-white border-navy-600'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-teal-500 hover:text-teal-500'
             )}
           >
             {s.label}
@@ -155,7 +155,7 @@ export default async function VendorInvoicesPage({
                     return (
                       <tr key={inv.id} className="hover:bg-gray-50">
                         <td>
-                          <span className="font-mono text-xs font-semibold text-[#0D7E8A]">{inv.invoice_ref}</span>
+                          <span className="font-mono text-xs font-semibold text-teal-500">{inv.invoice_ref}</span>
                         </td>
                         <td className="text-sm text-gray-600">{inv.vendor_invoice_no}</td>
                         <td className="text-sm text-gray-600">{formatDate(inv.vendor_invoice_date)}</td>
@@ -163,14 +163,14 @@ export default async function VendorInvoicesPage({
                           {inv.po?.po_number ? (
                             <span className="font-mono text-xs text-gray-500">{inv.po.po_number}</span>
                           ) : (
-                            <span className="text-xs text-gray-400">-</span>
+                            <span className="text-xs text-gray-500">-</span>
                           )}
                         </td>
                         <td>
                           {inv.grn?.grn_number ? (
                             <span className="font-mono text-xs text-gray-500">{inv.grn.grn_number}</span>
                           ) : (
-                            <span className="text-xs text-gray-400">-</span>
+                            <span className="text-xs text-gray-500">-</span>
                           )}
                         </td>
                         <td className="text-sm text-right font-semibold">{formatCurrency(inv.total_amount)}</td>
@@ -208,9 +208,9 @@ export default async function VendorInvoicesPage({
           </>
         ) : (
           <div className="empty-state">
-            <FileText size={40} className="mx-auto mb-3 text-gray-300" />
+            <FileText size={40} className="mx-auto mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No invoices found</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
               {paymentFilter ? 'Try adjusting your filter' : 'Upload your first invoice to get started'}
             </p>
             <Link href="/vendor-portal/invoices/upload" className="btn-primary text-sm mt-4 inline-flex items-center gap-2">

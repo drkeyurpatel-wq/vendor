@@ -181,9 +181,9 @@ export default function DataImportHandler() {
         <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-teal-400 transition-colors cursor-pointer"
           onClick={() => fileRef.current?.click()}>
           <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFile} />
-          <FileSpreadsheet size={32} className="mx-auto text-gray-300 mb-3" />
+          <FileSpreadsheet size={32} className="mx-auto text-gray-500 mb-3" />
           <p className="text-sm text-gray-600 font-medium">Click to upload CSV file</p>
-          <p className="text-xs text-gray-400 mt-1">Max 5,000 rows per import</p>
+          <p className="text-xs text-gray-500 mt-1">Max 5,000 rows per import</p>
         </div>
 
         {/* Preview */}
@@ -205,7 +205,7 @@ export default function DataImportHandler() {
                   {parsed.rows.slice(0, 10).map((row, i) => (
                     <tr key={i}>{parsed.headers.map(h => <td key={h} className="text-gray-600">{row[h] || '—'}</td>)}</tr>
                   ))}
-                  {parsed.rows.length > 10 && <tr><td colSpan={parsed.headers.length} className="text-center text-gray-400">... {parsed.rows.length - 10} more rows</td></tr>}
+                  {parsed.rows.length > 10 && <tr><td colSpan={parsed.headers.length} className="text-center text-gray-500">... {parsed.rows.length - 10} more rows</td></tr>}
                 </tbody>
               </table>
             </div>

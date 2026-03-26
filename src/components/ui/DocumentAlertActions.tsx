@@ -63,7 +63,7 @@ export default function DocumentAlertActions({ alertId, vendorName, documentType
         {loading === 'snooze' ? <Loader2 size={14} className="animate-spin" /> : <Clock size={14} />}
       </button>
       <button onClick={dismiss} disabled={!!loading} title="Dismiss"
-        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
         {loading === 'dismiss' ? <Loader2 size={14} className="animate-spin" /> : <BellOff size={14} />}
       </button>
     </div>

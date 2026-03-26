@@ -109,8 +109,8 @@ export default async function GroupAdminDashboard({ profile }: { profile: any })
           label="Total Spend (MTD)"
           value={formatLakhs(totalSpendMTD)}
           sub={`Since ${formatDate(monthStart)}`}
-          icon={<IndianRupee size={22} className="text-[#1B3A6B]" />}
-          bg="bg-[#EEF2F9]"
+          icon={<IndianRupee size={22} className="text-navy-600" />}
+          bg="bg-navy-50"
           href="/reports"
         />
         <StatCard
@@ -126,8 +126,8 @@ export default async function GroupAdminDashboard({ profile }: { profile: any })
           label="Active POs"
           value={activePOs ?? 0}
           sub="Approved & in transit"
-          icon={<ShoppingCart size={22} className="text-[#0D7E8A]" />}
-          bg="bg-[#E6F5F6]"
+          icon={<ShoppingCart size={22} className="text-teal-500" />}
+          bg="bg-teal-50"
           href="/purchase-orders?status=approved"
         />
         <StatCard
@@ -152,8 +152,8 @@ export default async function GroupAdminDashboard({ profile }: { profile: any })
           label="Active Vendors"
           value={vendorCount ?? 0}
           sub="Registered suppliers"
-          icon={<Users size={22} className="text-[#1B3A6B]" />}
-          bg="bg-[#EEF2F9]"
+          icon={<Users size={22} className="text-navy-600" />}
+          bg="bg-navy-50"
           href="/vendors"
         />
       </div>
@@ -162,14 +162,14 @@ export default async function GroupAdminDashboard({ profile }: { profile: any })
       {centreStats.length > 0 && (
         <div className="mb-6">
           <h2 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <Building2 size={18} className="text-[#1B3A6B]" />
+            <Building2 size={18} className="text-navy-600" />
             Centre-wise Summary (MTD)
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {centreStats.map(centre => (
               <Link key={centre.id} href={`/purchase-orders?centre=${centre.id}`} className="bg-white rounded-xl border border-gray-200/80 shadow-card p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="badge bg-[#EEF2F9] text-[#1B3A6B] font-semibold">{centre.code}</span>
+                  <span className="badge bg-navy-50 text-navy-600 font-semibold">{centre.code}</span>
                   {centre.pending > 0 && (
                     <span className="badge bg-yellow-100 text-yellow-800 text-[9px]">{centre.pending} pending</span>
                   )}

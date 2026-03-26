@@ -63,9 +63,9 @@ export default function VendorSearch({ value, onChange, centreId, placeholder = 
         <div className="flex-1">
           <span className="font-mono text-xs text-gray-500">{value.vendor_code}</span>
           <span className="ml-2 font-medium text-gray-900">{value.legal_name}</span>
-          {value.category && <span className="ml-2 text-xs text-gray-400">{Array.isArray(value.category) ? value.category[0]?.name : value.category.name}</span>}
+          {value.category && <span className="ml-2 text-xs text-gray-500">{Array.isArray(value.category) ? value.category[0]?.name : value.category.name}</span>}
         </div>
-        <button type="button" onClick={() => onChange(null)} className="text-gray-400 hover:text-red-500">
+        <button type="button" onClick={() => onChange(null)} className="text-gray-500 hover:text-red-500">
           <X size={16} />
         </button>
       </div>
@@ -75,7 +75,7 @@ export default function VendorSearch({ value, onChange, centreId, placeholder = 
   return (
     <div ref={ref} className="relative">
       <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none z-10" />
         <input
           className="form-input pl-11"
           value={query}
@@ -97,14 +97,14 @@ export default function VendorSearch({ value, onChange, centreId, placeholder = 
                 <span className="font-mono text-xs text-gray-500">{v.vendor_code}</span>
                 <span className="font-medium text-gray-900">{v.legal_name}</span>
               </div>
-              {v.category && <div className="text-xs text-gray-400 mt-0.5">{Array.isArray(v.category) ? v.category[0]?.name : v.category.name}</div>}
+              {v.category && <div className="text-xs text-gray-500 mt-0.5">{Array.isArray(v.category) ? v.category[0]?.name : v.category.name}</div>}
             </button>
           ))}
         </div>
       )}
       {open && loading && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-4 flex items-center justify-center gap-2 text-gray-400 text-sm">
-          <Loader2 size={16} className="animate-spin text-[#0D7E8A]" />
+        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-4 flex items-center justify-center gap-2 text-gray-500 text-sm">
+          <Loader2 size={16} className="animate-spin text-teal-500" />
           Searching vendors...
         </div>
       )}

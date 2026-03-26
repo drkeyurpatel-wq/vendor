@@ -37,7 +37,7 @@ export default function ConfirmDialog({
   const variantClasses = {
     danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
     warning: 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500',
-    primary: 'bg-[#0D7E8A] hover:bg-[#0b6b75] focus:ring-[#0D7E8A]',
+    primary: 'bg-teal-500 hover:bg-teal-600 focus:ring-teal-500',
   }
 
   async function handleConfirm() {
@@ -51,7 +51,7 @@ export default function ConfirmDialog({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={loading ? undefined : onClose} />
       <div ref={ref} className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in">
-        <button onClick={onClose} disabled={loading} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+        <button onClick={onClose} disabled={loading} className="absolute top-4 right-4 text-gray-500 hover:text-gray-600">
           <X size={18} />
         </button>
         <div className="flex items-start gap-3 mb-4">
