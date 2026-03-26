@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { requireApiAuth } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuthWithProfile } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 
@@ -50,10 +50,7 @@ export async function GET(request: NextRequest) {
   const rl = await rateLimit(request, 10, 60000)
   if (!rl.success) return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+  const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
   const suggestions = await scanReorderNeeds(supabase)
   const groups = groupByVendorCentre(suggestions.filter(s => !s.has_open_po && s.vendor_id))
 
@@ -74,13 +71,10 @@ export async function POST(request: NextRequest) {
   const rl = await rateLimit(request, 5, 60000)
   if (!rl.success) return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+  const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
   // Check role
   const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(profile.role)) {
+  if (!profile || !['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(role)) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 

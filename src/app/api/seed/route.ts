@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { requireApiAuthWithProfile } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import { withApiErrorHandler } from '@/lib/api-error-handler'
 
@@ -116,14 +117,8 @@ export const POST = withApiErrorHandler(async () => {
   if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'group_admin') {
+  const { data: seedProfile } = await supabase.from('user_profiles').select('role').eq('id', user.id).single()
+  if (!seedProfile || seedProfile.role !== 'group_admin') {
     return NextResponse.json({ error: 'Only group_admin can seed data' }, { status: 403 })
   }
 

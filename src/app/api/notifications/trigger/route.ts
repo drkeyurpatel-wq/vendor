@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { requireApiAuthWithProfile } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 import { logActivity, getNotificationForAction, type AuditAction, type EntityType } from '@/lib/audit'
@@ -24,7 +25,7 @@ interface TriggerRequest {
  * Resolve which users should receive a notification based on the action.
  */
 async function resolveRecipients(
-  supabase: ReturnType<typeof createClient> extends Promise<infer T> ? T : never,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   action: AuditAction,
   centreId?: string
 ): Promise<string[]> {
@@ -74,12 +75,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+  const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
   let body: TriggerRequest
   try {
     body = await request.json()

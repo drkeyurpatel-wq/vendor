@@ -1,14 +1,13 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuth } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
+import { RATE_TOLERANCE } from '@/lib/business-rules'
 
 // ============================================================
 // H1 VPMS — Rate Contract Validation API
 // Called during PO creation to enforce contract pricing
 // Business rule: PO rate must match within ±0.5% of contract rate
 // ============================================================
-
-const RATE_TOLERANCE = 0.005 // 0.5%
 
 interface ValidationItem {
   item_id: string
@@ -33,12 +32,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+  const { supabase, user, userId } = await requireApiAuth()
   let body: { items: ValidationItem[]; centre_id?: string }
   try {
     body = await request.json()

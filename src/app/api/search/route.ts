@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuth } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { withApiErrorHandler } from '@/lib/api-error-handler'
 
@@ -27,12 +27,7 @@ export const GET = withApiErrorHandler(async (request: NextRequest) => {
   }
 
   // Auth check
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+  const { supabase, user, userId } = await requireApiAuth()
   // Get search query
   const q = request.nextUrl.searchParams.get('q')
   if (!q || q.trim().length < 2) {

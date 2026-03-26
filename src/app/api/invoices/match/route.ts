@@ -1,8 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
+import { requireApiAuth } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 import { invoiceMatchSchema } from '@/lib/validations'
 import { sendInAppNotification } from '@/lib/notify-server'
+import { RATE_TOLERANCE } from '@/lib/business-rules'
 
 /**
  * 3-Way Matching Engine
@@ -16,8 +18,6 @@ import { sendInAppNotification } from '@/lib/notify-server'
  * Rate tolerance: ±0.5% (for rate contract items)
  */
 
-const RATE_TOLERANCE = 0.005 // 0.5%
-
 interface MatchResult {
   item_id: string
   po_qty: number
@@ -29,19 +29,13 @@ interface MatchResult {
   rate_match: boolean
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 20, 60000)
   if (!rateLimitResult.success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+  const { supabase, user, userId } = await requireApiAuth()
   let body: unknown
   try {
     body = await request.json()
@@ -206,4 +200,4 @@ export async function POST(request: NextRequest) {
       mismatched: results.filter(r => !r.qty_match || !r.rate_match).length,
     },
   })
-}
+})

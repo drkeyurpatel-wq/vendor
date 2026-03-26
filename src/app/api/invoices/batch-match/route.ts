@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuth } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { withApiErrorHandler } from '@/lib/api-error-handler'
+import { RATE_TOLERANCE, QTY_TOLERANCE } from '@/lib/business-rules'
 
 // ============================================================
 // H1 VPMS — Batch 3-Way Match
@@ -9,17 +10,11 @@ import { withApiErrorHandler } from '@/lib/api-error-handler'
 // Called from: cron/daily, manual button, invoice creation
 // ============================================================
 
-const RATE_TOLERANCE = 0.005 // 0.5%
-const QTY_TOLERANCE = 0.02  // 2%
-
 export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 5, 60000)
   if (!rateLimitResult.success) return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+  const { supabase, user, userId } = await requireApiAuth()
   // Get all pending invoices with their PO and GRN
   const { data: invoices } = await supabase
     .from('invoices')

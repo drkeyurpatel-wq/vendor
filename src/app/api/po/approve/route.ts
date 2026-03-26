@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
+import { requireApiAuthWithProfile } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { canApprovePO, PO_APPROVAL_THRESHOLD } from '@/types/database'
 import type { UserRole } from '@/types/database'
@@ -11,29 +12,13 @@ import { sendInAppNotification, emailVendorPOApproved } from '@/lib/notify-serve
  * Each approval level must be approved in order.
  * Only the current pending level can be actioned.
  */
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 10, 60000)
   if (!rateLimitResult.success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role, centre_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) {
-    return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-  }
-
+  const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
   let body: unknown
   try {
     body = await request.json()
@@ -63,7 +48,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'PO is not pending approval' }, { status: 400 })
   }
 
-  if (!canApprovePO(profile.role as UserRole, po.total_amount)) {
+  if (!canApprovePO(role as UserRole, po.total_amount)) {
     return NextResponse.json({ error: 'Insufficient approval authority' }, { status: 403 })
   }
 
@@ -196,7 +181,7 @@ export async function POST(request: NextRequest) {
   }).catch(() => {})
 
   return NextResponse.json({ success: true, status: 'approved' })
-}
+})
 
 /**
  * Returns the ordered list of approval roles needed for a given amount.
