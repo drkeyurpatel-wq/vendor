@@ -3,137 +3,211 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { CheckCircle2, XCircle, Clock, RotateCcw, Copy } from 'lucide-react'
+import { CheckCircle2, XCircle, RefreshCcw, Calendar, Loader2, Copy, Edit } from 'lucide-react'
 import toast from 'react-hot-toast'
-import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import ConfirmDialog from './ConfirmDialog'
 
 interface Props {
   contractId: string
-  contractNumber: string
-  currentStatus: string
-  vendorId: string
+  contractNumber?: string
+  status: string
+  endDate?: string
+  vendorName?: string
   userRole: string
+  /** If true, render compact inline buttons. Otherwise, render full action bar. */
+  compact?: boolean
 }
 
-type DialogType = 'activate' | 'expire' | 'terminate' | null
-
-export default function RateContractActions({ contractId, contractNumber, currentStatus, vendorId, userRole }: Props) {
+export default function RateContractActions({ contractId, contractNumber, status, endDate, vendorName, userRole, compact }: Props) {
   const router = useRouter()
   const supabase = createClient()
-  const [dialog, setDialog] = useState<DialogType>(null)
+  const [loading, setLoading] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<string | null>(null)
   const [comment, setComment] = useState('')
+  const [extendDate, setExtendDate] = useState('')
 
   const canManage = ['group_admin', 'group_cao', 'unit_cao'].includes(userRole)
-  const isDraft = currentStatus === 'draft'
-  const isActive = currentStatus === 'active'
-  const isExpired = currentStatus === 'expired'
-  const isTerminated = currentStatus === 'terminated'
+  if (!canManage) return null
 
-  async function updateStatus(newStatus: string) {
-    const updates: Record<string, any> = {
-      status: newStatus,
-      updated_at: new Date().toISOString(),
-    }
-    if (newStatus === 'active') updates.approved_at = new Date().toISOString()
-    if (newStatus === 'terminated') updates.termination_reason = comment || null
-
-    const { error } = await supabase.from('rate_contracts').update(updates).eq('id', contractId)
-    if (error) { toast.error(error.message); return }
-
+  async function handleAction(action: string) {
+    setLoading(true)
     try {
-      await supabase.from('audit_logs').insert({
-        entity_type: 'rate_contract', entity_id: contractId,
-        action: `contract_${newStatus}`,
-        details: { contract_number: contractNumber, comment: comment || null },
-      })
-    } catch {}
+      let updates: Record<string, any> = { updated_at: new Date().toISOString() }
 
-    toast.success(`Contract ${contractNumber} → ${newStatus}`)
-    setDialog(null); setComment(''); router.refresh()
+      switch (action) {
+        case 'activate':
+          updates.status = 'active'
+          updates.activated_at = new Date().toISOString()
+          break
+        case 'terminate':
+          updates.status = 'terminated'
+          updates.terminated_at = new Date().toISOString()
+          if (comment) updates.termination_reason = comment
+          break
+        case 'extend':
+          if (!extendDate) { toast.error('Select new end date'); setLoading(false); return }
+          updates.end_date = extendDate
+          updates.extended = true
+          break
+        case 'renew':
+          // Create new contract as draft, copy from current
+          const { data: original } = await supabase.from('rate_contracts')
+            .select('*, items:rate_contract_items(*)')
+            .eq('id', contractId).single()
+          if (!original) { toast.error('Contract not found'); setLoading(false); return }
+
+          const newStart = original.end_date || new Date().toISOString().split('T')[0]
+          const startDate = new Date(newStart)
+          const newEnd = new Date(startDate)
+          if (original.contract_type === 'annual') newEnd.setFullYear(newEnd.getFullYear() + 1)
+          else if (original.contract_type === 'quarterly') newEnd.setMonth(newEnd.getMonth() + 3)
+          else newEnd.setMonth(newEnd.getMonth() + 1)
+
+          const { data: newContract, error: createErr } = await supabase.from('rate_contracts').insert({
+            vendor_id: original.vendor_id, centre_id: original.centre_id,
+            contract_type: original.contract_type, status: 'draft',
+            start_date: newStart, end_date: newEnd.toISOString().split('T')[0],
+            notes: `Renewed from ${contractNumber || contractId}`,
+          }).select('id').single()
+
+          if (createErr || !newContract) throw createErr || new Error('Failed')
+
+          // Copy items
+          if (original.items?.length) {
+            const newItems = original.items.map((item: any) => ({
+              contract_id: newContract.id, item_id: item.item_id,
+              rate: item.rate, l_rank: item.l_rank,
+              min_qty: item.min_qty, max_qty: item.max_qty,
+            }))
+            await supabase.from('rate_contract_items').insert(newItems)
+          }
+
+          toast.success('Renewal contract created as draft')
+          router.push(`/settings/rate-contracts/${newContract.id}`)
+          setLoading(false); setConfirmAction(null)
+          return
+      }
+
+      const { error } = await supabase.from('rate_contracts').update(updates).eq('id', contractId)
+      if (error) throw error
+
+      toast.success(`Contract → ${action}`)
+      setConfirmAction(null); setComment(''); setExtendDate(''); router.refresh()
+    } catch (err: any) { toast.error(err?.message || `Failed to ${action}`) }
+    finally { setLoading(false) }
   }
 
-  async function duplicateContract() {
-    const { data: original } = await supabase.from('rate_contracts')
-      .select('vendor_id, centre_id, valid_from, valid_to, payment_terms, notes')
-      .eq('id', contractId).single()
-    if (!original) { toast.error('Could not fetch contract'); return }
+  if (compact) {
+    return (
+      <div className="flex gap-1.5">
+        {status === 'draft' && (
+          <button onClick={() => setConfirmAction('activate')}
+            className="text-[10px] px-2 py-0.5 rounded bg-green-50 text-green-700 hover:bg-green-100 font-medium">
+            <CheckCircle2 size={10} className="inline mr-0.5" /> Activate
+          </button>
+        )}
+        {status === 'active' && (
+          <>
+            <button onClick={() => setConfirmAction('extend')}
+              className="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium">
+              <Calendar size={10} className="inline mr-0.5" /> Extend
+            </button>
+            <button onClick={() => setConfirmAction('terminate')}
+              className="text-[10px] px-2 py-0.5 rounded bg-red-50 text-red-700 hover:bg-red-100 font-medium">
+              <XCircle size={10} className="inline mr-0.5" /> Terminate
+            </button>
+          </>
+        )}
+        {['expired', 'terminated'].includes(status) && (
+          <button onClick={() => setConfirmAction('renew')}
+            className="text-[10px] px-2 py-0.5 rounded bg-teal-50 text-teal-700 hover:bg-teal-100 font-medium">
+            <RefreshCcw size={10} className="inline mr-0.5" /> Renew
+          </button>
+        )}
+        {/* Inline confirm modals shared below */}
+        {renderConfirm()}
+      </div>
+    )
+  }
 
-    const { data: items } = await supabase.from('rate_contract_items')
-      .select('item_id, rate, min_qty, max_qty, l_rank')
-      .eq('rate_contract_id', contractId)
+  // Full action bar (for detail page)
+  return (
+    <>
+      <div className="flex gap-2 flex-wrap">
+        {status === 'draft' && (
+          <>
+            <button onClick={() => setConfirmAction('activate')} disabled={loading} className="btn-primary text-xs flex items-center gap-1.5">
+              <CheckCircle2 size={13} /> Activate Contract
+            </button>
+            <a href={`/settings/rate-contracts/${contractId}`} className="btn-secondary text-xs flex items-center gap-1.5">
+              <Edit size={13} /> Edit
+            </a>
+          </>
+        )}
+        {status === 'active' && (
+          <>
+            <button onClick={() => setConfirmAction('extend')} disabled={loading} className="btn-primary text-xs flex items-center gap-1.5">
+              <Calendar size={13} /> Extend
+            </button>
+            <button onClick={() => setConfirmAction('terminate')} disabled={loading} className="btn-danger text-xs flex items-center gap-1.5">
+              <XCircle size={13} /> Terminate
+            </button>
+          </>
+        )}
+        {['expired', 'terminated'].includes(status) && (
+          <button onClick={() => setConfirmAction('renew')} disabled={loading} className="btn-primary text-xs flex items-center gap-1.5">
+            <RefreshCcw size={13} /> Renew Contract
+          </button>
+        )}
+      </div>
+      {renderConfirm()}
+    </>
+  )
 
-    const newNum = `${contractNumber}-RENEW`
-    const today = new Date().toISOString().split('T')[0]
-    const nextYear = new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0]
+  function renderConfirm() {
+    if (!confirmAction) return null
 
-    const { data: newContract, error } = await supabase.from('rate_contracts').insert({
-      ...original, contract_number: newNum, status: 'draft',
-      valid_from: today, valid_to: nextYear,
-      notes: `Renewed from ${contractNumber}`,
-    }).select('id').single()
-
-    if (error || !newContract) { toast.error(error?.message || 'Failed'); return }
-
-    if (items && items.length > 0) {
-      await supabase.from('rate_contract_items').insert(
-        items.map(i => ({ ...i, rate_contract_id: newContract.id }))
+    if (confirmAction === 'extend') {
+      return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50" onClick={() => !loading && setConfirmAction(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 space-y-3">
+            <h3 className="text-sm font-bold text-navy-600">Extend Contract</h3>
+            <p className="text-xs text-gray-500">Current end: {endDate || 'N/A'} · {vendorName}</p>
+            <div>
+              <label className="form-label">New End Date</label>
+              <input type="date" value={extendDate} onChange={e => setExtendDate(e.target.value)}
+                min={endDate || new Date().toISOString().split('T')[0]} className="form-input text-sm" />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setConfirmAction(null)} className="btn-secondary text-xs">Cancel</button>
+              <button onClick={() => handleAction('extend')} disabled={loading || !extendDate} className="btn-primary text-xs">
+                {loading ? <Loader2 size={12} className="animate-spin" /> : 'Extend'}
+              </button>
+            </div>
+          </div>
+        </div>
       )
     }
 
-    toast.success(`Renewed → ${newNum}`)
-    router.push(`/settings/rate-contracts/${newContract.id}`)
+    return (
+      <ConfirmDialog
+        open={true}
+        onClose={() => { setConfirmAction(null); setComment('') }}
+        title={`${confirmAction.charAt(0).toUpperCase() + confirmAction.slice(1)} Contract`}
+        description={
+          confirmAction === 'activate' ? `Activate this rate contract for ${vendorName || 'vendor'}. PO rates will be validated against contract rates.` :
+          confirmAction === 'terminate' ? `Terminate this rate contract. POs will no longer be validated against these rates.` :
+          `Create a renewal contract as draft, copying all items and rates from the current contract.`
+        }
+        confirmLabel={confirmAction.charAt(0).toUpperCase() + confirmAction.slice(1)}
+        confirmVariant={confirmAction === 'terminate' ? 'danger' : 'primary'}
+        showCommentBox={confirmAction === 'terminate'}
+        requireComment={confirmAction === 'terminate'}
+        comment={comment}
+        onCommentChange={setComment}
+        onConfirm={() => handleAction(confirmAction)}
+      />
+    )
   }
-
-  if (!canManage) return null
-
-  return (
-    <>
-      <div className="flex flex-wrap gap-2">
-        {isDraft && (
-          <button onClick={() => setDialog('activate')} className="btn-primary text-sm">
-            <CheckCircle2 size={14} /> Activate Contract
-          </button>
-        )}
-
-        {isActive && (
-          <button onClick={() => setDialog('expire')} className="text-sm px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700 font-medium">
-            <Clock size={14} className="inline mr-1" /> Expire Early
-          </button>
-        )}
-
-        {(isActive || isDraft) && (
-          <button onClick={() => setDialog('terminate')} className="text-sm px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 font-medium">
-            <XCircle size={14} className="inline mr-1" /> Terminate
-          </button>
-        )}
-
-        {(isExpired || isTerminated) && (
-          <button onClick={duplicateContract} className="btn-secondary text-sm">
-            <RotateCcw size={14} /> Renew (duplicate as draft)
-          </button>
-        )}
-
-        <button onClick={duplicateContract} className="btn-secondary text-sm">
-          <Copy size={14} /> Duplicate
-        </button>
-      </div>
-
-      <ConfirmDialog open={dialog === 'activate'} onClose={() => setDialog(null)}
-        title="Activate Rate Contract" description={`Activate ${contractNumber}. Rates will be enforced on new POs for this vendor.`}
-        confirmLabel="Activate" confirmVariant="primary"
-        onConfirm={() => updateStatus('active')} />
-
-      <ConfirmDialog open={dialog === 'expire'} onClose={() => setDialog(null)}
-        title="Expire Contract Early" description={`Mark ${contractNumber} as expired immediately. New POs won't enforce these rates.`}
-        confirmLabel="Expire" confirmVariant="warning"
-        showCommentBox comment={comment} onCommentChange={setComment}
-        onConfirm={() => updateStatus('expired')} />
-
-      <ConfirmDialog open={dialog === 'terminate'} onClose={() => setDialog(null)}
-        title="Terminate Contract" description={`Terminate ${contractNumber}. This is a stronger action than expiry — typically used for breach of terms.`}
-        confirmLabel="Terminate" confirmVariant="danger"
-        showCommentBox requireComment comment={comment} onCommentChange={setComment}
-        onConfirm={() => updateStatus('terminated')} />
-    </>
-  )
 }

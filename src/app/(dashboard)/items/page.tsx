@@ -45,8 +45,7 @@ export default async function ItemsPage({
 
       <ItemListClient
         items={items ?? []}
-        categories={categories ?? []}
-        totalCount={count ?? 0}
+        userRole={role}
       />
     </div>
   )

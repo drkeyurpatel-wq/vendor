@@ -4,6 +4,7 @@ import { cn, formatDate, formatLakhs } from '@/lib/utils'
 import { FileText, Plus } from 'lucide-react'
 import SearchInput from '@/components/ui/SearchInput'
 import Pagination from '@/components/ui/Pagination'
+import DebitNoteActions from '@/components/ui/DebitNoteActions'
 
 const PAGE_SIZE = 50
 
@@ -176,11 +177,21 @@ export default async function DebitNotesPage({
                         {dn.status?.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td>
-                      <Link href={`/finance/debit-notes/${dn.id}`}
-                        className="text-xs font-medium hover:underline" style={{ color: '#0D7E8A' }}>
-                        View
-                      </Link>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <Link href={`/finance/debit-notes/${dn.id}`}
+                          className="text-xs font-medium hover:underline" style={{ color: '#0D7E8A' }}>
+                          View
+                        </Link>
+                        <DebitNoteActions
+                          debitNoteId={dn.id}
+                          dnNumber={dn.debit_note_number}
+                          status={dn.status}
+                          amount={dn.amount}
+                          vendorName={dn.vendor?.legal_name}
+                          userRole={role}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))}

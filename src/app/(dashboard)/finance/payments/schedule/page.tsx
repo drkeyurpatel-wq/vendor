@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import { ArrowLeft, Calendar, AlertTriangle, Clock, CheckCircle2 } from 'lucide-react'
+import PaymentScheduleActions from '@/components/ui/PaymentScheduleActions'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,7 +63,7 @@ export default async function PaymentSchedulePage() {
         <div className="overflow-x-auto">
           <table className="data-table">
             <thead><tr>
-              <th>Invoice</th><th>Vendor</th><th>Centre</th><th>Due Date</th><th>Match</th><th className="text-right">Outstanding</th>
+              <th>Invoice</th><th>Vendor</th><th>Centre</th><th>Due Date</th><th>Match</th><th className="text-right">Outstanding</th><th>Actions</th>
             </tr></thead>
             <tbody>
               {bucket.items.map((inv: any) => (
@@ -79,6 +80,20 @@ export default async function PaymentSchedulePage() {
                   <td className={cn('text-xs font-medium', inv.isOverdue ? 'text-red-600' : 'text-gray-600')}>{inv.due_date ? formatDate(inv.due_date) : '—'}</td>
                   <td><span className={cn('badge text-[10px]', inv.match_status === 'matched' ? 'bg-green-100 text-green-700' : inv.match_status === 'mismatch' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600')}>{inv.match_status || 'pending'}</span></td>
                   <td className="text-sm text-right font-semibold">{formatCurrency(inv.outstanding)}</td>
+                  <td className="px-3 py-2">
+                    <PaymentScheduleActions
+                      payment={{
+                        id: inv.id,
+                        vendor_invoice_no: inv.vendor_invoice_no || inv.invoice_ref || '—',
+                        total_amount: inv.outstanding,
+                        due_date: inv.due_date,
+                        payment_status: inv.payment_status,
+                        vendor_name: inv.vendor?.legal_name,
+                        vendor_id: inv.vendor_id || inv.vendor?.id,
+                      }}
+                      userRole={role}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>

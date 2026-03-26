@@ -2,7 +2,7 @@ import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn, formatDate } from '@/lib/utils'
 import { FileText, Plus, Search, Filter } from 'lucide-react'
-import RateContractQuickAction from '@/components/ui/RateContractQuickAction'
+import RateContractActions from '@/components/ui/RateContractActions'
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
@@ -219,7 +219,15 @@ export default async function RateContractsPage({
                         {rc.centre?.code || 'All'}
                       </td>
                       <td>
-                        <RateContractQuickAction contractId={rc.id} contractNumber={rc.contract_number} currentStatus={rc.status} />
+                        <RateContractActions
+                          contractId={rc.id}
+                          contractNumber={rc.contract_number}
+                          status={rc.status}
+                          endDate={rc.end_date}
+                          vendorName={rc.vendor?.legal_name}
+                          userRole={role}
+                          compact
+                        />
                       </td>
                     </tr>
                   )

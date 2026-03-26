@@ -2,6 +2,7 @@ import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn, formatDate, formatCurrency } from '@/lib/utils'
 import { AlertTriangle, ShieldAlert } from 'lucide-react'
+import ExpiryAlertActions from '@/components/ui/ExpiryAlertActions'
 
 const ALERT_LEVEL_COLORS: Record<string, string> = {
   expired: 'bg-red-100 text-red-800',
@@ -220,6 +221,7 @@ export default async function ExpiryAlertsPage({
                   <th>MRP</th>
                   <th>Purchase Rate</th>
                   <th>Alert Level</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -280,6 +282,17 @@ export default async function ExpiryAlertsPage({
                           ? 'Expired'
                           : alert.alert_level?.replace('expiring_', '').replace('_', ' ')}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <ExpiryAlertActions
+                        alert={{
+                          id: alert.id, item_id: alert.item_id, centre_id: alert.centre_id,
+                          batch_number: alert.batch_number ?? '', quantity: alert.qty_available ?? 0,
+                          expiry_date: alert.expiry_date ?? '', alert_level: alert.alert_level,
+                          item_name: alert.item_name, centre_code: alert.centre_code,
+                        }}
+                        userRole={role}
+                      />
                     </td>
                   </tr>
                 ))}

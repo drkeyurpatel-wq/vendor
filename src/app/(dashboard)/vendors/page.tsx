@@ -96,8 +96,6 @@ export default async function VendorsPage({
 
       <VendorListClient
         vendors={vendors ?? []}
-        categories={categories ?? []}
-        activeStatus={params.status}
         userRole={role}
       />
     </div>

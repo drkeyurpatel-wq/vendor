@@ -4,6 +4,7 @@ import { cn, formatLakhs, formatDate, formatCurrency } from '@/lib/utils'
 import { PAYMENT_STATUS_COLORS } from '@/lib/utils'
 import { AlertTriangle, Clock, CheckCircle } from 'lucide-react'
 import CreditAgingCharts from './CreditAgingCharts'
+import CreditEscalationActions from '@/components/ui/CreditEscalationActions'
 
 export const dynamic = 'force-dynamic'
 
@@ -111,6 +112,22 @@ export default async function CreditPeriodPage() {
       {/* Aging Chart */}
       <div className="mb-6">
         <CreditAgingCharts agingData={agingBuckets} />
+      </div>
+
+      {/* Escalation Actions */}
+      <div className="mb-6">
+        <CreditEscalationActions
+          invoices={(overdueInvoices ?? []).map((inv: any) => ({
+            id: inv.id,
+            vendor_invoice_no: inv.vendor_invoice_no || inv.invoice_ref || '—',
+            total_amount: inv.total_amount - (inv.paid_amount ?? 0),
+            due_date: inv.due_date,
+            days_overdue: Math.floor((Date.now() - new Date(inv.due_date).getTime()) / (1000*60*60*24)),
+            vendor_id: inv.vendor_id,
+            vendor_name: inv.vendor?.legal_name,
+          }))}
+          userRole={role}
+        />
       </div>
 
       {/* Overdue Table */}

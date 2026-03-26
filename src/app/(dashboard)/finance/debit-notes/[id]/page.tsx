@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
 import { ArrowLeft, FileText, AlertTriangle } from 'lucide-react'
+import DebitNoteActions from '@/components/ui/DebitNoteActions'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,10 +66,16 @@ export default async function DebitNoteDetailPage({ params }: { params: Promise<
               {dn.centre && <> | Centre: <strong>{dn.centre.code}</strong></>}
             </p>
           </div>
+          <DebitNoteActions
+            debitNoteId={dn.id}
+            dnNumber={dn.debit_note_number}
+            status={dn.status}
+            amount={dn.total_amount}
+            vendorName={dn.vendor?.legal_name}
+            userRole={role}
+          />
         </div>
       </div>
-
-      {/* Details */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="card p-5">
           <h3 className="font-semibold text-navy-600 mb-3 pb-2 border-b border-gray-100">Debit Note Details</h3>
