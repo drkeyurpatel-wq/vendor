@@ -100,6 +100,7 @@ export default function NewPOPage() {
     if (!centreId) { toast.error('Please select a centre'); return }
     if (items.length === 0) { toast.error('Add at least one item'); return }
     if (items.some(i => i.rate <= 0)) { toast.error('All items must have a rate > 0'); return }
+    if (items.some(i => !i.ordered_qty || i.ordered_qty <= 0)) { toast.error('All items must have quantity > 0'); return }
 
     // Calculate PO total for checks
     const poTotal = items.reduce((s, i) => s + i.total_amount, 0)

@@ -117,14 +117,102 @@ export default function EditPOPage() {
     if (!centreId) { toast.error('Please select a centre'); return }
     if (items.length === 0) { toast.error('Add at least one item'); return }
     if (items.some(i => i.rate <= 0)) { toast.error('All items must have a rate > 0'); return }
+    if (items.some(i => !i.ordered_qty || i.ordered_qty <= 0)) { toast.error('All items must have quantity > 0'); return }
 
     setSaving(true)
+
+    // ── GUARD: Recheck PO is still draft ──
+    const { data: poRecheck } = await supabase
+      .from('purchase_orders').select('status').eq('id', id).single()
+    if (poRecheck?.status !== 'draft') {
+      toast.error(`PO status changed to "${poRecheck?.status}". Only draft POs can be edited.`)
+      setSaving(false)
+      return
+    }
 
     const subtotal = items.reduce((s, i) => s + i.ordered_qty * i.rate, 0)
     const gst_amount = items.reduce((s, i) => s + i.gst_amount, 0)
     const total_amount = items.reduce((s, i) => s + i.total_amount, 0)
 
-    // Update PO record
+    // ── Rate contract validation ──
+    try {
+      const { data: activeContracts } = await supabase
+        .from('rate_contracts')
+        .select('id, rate_contract_items(item_id, rate)')
+        .eq('vendor_id', vendor.id)
+        .eq('status', 'active')
+        .limit(5)
+
+      if (activeContracts && activeContracts.length > 0) {
+        const contractRateMap = new Map<string, number>()
+        for (const c of activeContracts) {
+          const rcItems = (c as any).rate_contract_items || []
+          for (const ri of rcItems) {
+            contractRateMap.set(ri.item_id, ri.rate)
+          }
+        }
+
+        const rateViolations = items.filter(i => {
+          const contractRate = contractRateMap.get(i.item_id)
+          if (!contractRate) return false
+          return Math.abs(i.rate - contractRate) / contractRate > 0.005
+        }).map(i => ({
+          generic_name: i.generic_name || i.item_code || i.item_id,
+          rate: i.rate,
+          contract_rate: contractRateMap.get(i.item_id),
+        }))
+
+        if (rateViolations.length > 0) {
+          const proceed = window.confirm(
+            `${rateViolations.length} item(s) deviate from contract rate (>±0.5%).\n` +
+            rateViolations.map(v => `${v.generic_name}: ₹${v.rate} vs contract ₹${v.contract_rate}`).join('\n') +
+            `\n\nThis PO will need higher-level approval. Continue?`
+          )
+          if (!proceed) { setSaving(false); return }
+        }
+      }
+    } catch { /* rate contract check non-blocking */ }
+
+    // ── Credit limit check ──
+    try {
+      const { data: vendorData } = await supabase
+        .from('vendors')
+        .select('credit_limit, minimum_order_value')
+        .eq('id', vendor.id)
+        .single()
+
+      if (vendorData?.minimum_order_value && total_amount < vendorData.minimum_order_value) {
+        const proceed = window.confirm(
+          `PO total ₹${total_amount.toLocaleString()} is below vendor minimum order ₹${vendorData.minimum_order_value.toLocaleString()}.\n\nContinue anyway?`
+        )
+        if (!proceed) { setSaving(false); return }
+      }
+
+      if (vendorData?.credit_limit && vendorData.credit_limit > 0) {
+        const { data: outstandingInv } = await supabase
+          .from('invoices')
+          .select('total_amount, paid_amount')
+          .eq('vendor_id', vendor.id)
+          .neq('payment_status', 'paid')
+        const outstanding = (outstandingInv ?? []).reduce((s, i: any) => s + (i.total_amount - (i.paid_amount || 0)), 0)
+        if (outstanding + total_amount > vendorData.credit_limit) {
+          const proceed = window.confirm(
+            `CREDIT LIMIT WARNING\n\nOutstanding: ₹${outstanding.toLocaleString()}\nThis PO: ₹${total_amount.toLocaleString()}\nTotal: ₹${(outstanding + total_amount).toLocaleString()}\nCredit Limit: ₹${vendorData.credit_limit.toLocaleString()}\n\nExceeds limit by ₹${(outstanding + total_amount - vendorData.credit_limit).toLocaleString()}. Continue?`
+          )
+          if (!proceed) { setSaving(false); return }
+        }
+      }
+    } catch { /* credit check non-blocking */ }
+
+    // ── Determine approval status based on new total ──
+    let status = 'pending_approval'
+    let approverRole = 'group_admin'
+    if (total_amount <= 10000) { status = 'approved' }
+    else if (total_amount <= 50000) { approverRole = 'unit_purchase_manager' }
+    else if (total_amount <= 200000) { approverRole = 'unit_cao' }
+    else if (total_amount <= 1000000) { approverRole = 'group_cao' }
+
+    // Update PO record with correct status
     const { error: updateError } = await supabase
       .from('purchase_orders')
       .update({
@@ -136,6 +224,10 @@ export default function EditPOPage() {
         subtotal,
         gst_amount,
         total_amount,
+        net_amount: total_amount,
+        status,
+        current_approval_level: status === 'approved' ? 0 : 1,
+        updated_at: new Date().toISOString(),
       })
       .eq('id', id)
 
@@ -163,10 +255,22 @@ export default function EditPOPage() {
       item_id: item.item_id,
       ordered_qty: item.ordered_qty,
       received_qty: 0,
+      pending_qty: item.ordered_qty,
+      cancelled_qty: 0,
+      free_qty: 0,
       unit: item.unit,
+      conversion_factor: 1,
       rate: item.rate,
+      net_rate: item.rate,
       gst_percent: item.gst_percent,
       gst_amount: item.gst_amount,
+      cgst_amount: item.gst_amount / 2,
+      sgst_amount: item.gst_amount / 2,
+      igst_amount: 0,
+      trade_discount_percent: 0,
+      trade_discount_amount: 0,
+      cash_discount_percent: 0,
+      special_discount_percent: 0,
       total_amount: item.total_amount,
     }))
 
@@ -180,7 +284,18 @@ export default function EditPOPage() {
       return
     }
 
-    toast.success('Purchase order updated successfully')
+    // Create approval record if pending
+    if (status === 'pending_approval') {
+      try {
+        // Delete old approvals for this PO
+        await supabase.from('po_approvals').delete().eq('po_id', id)
+        await supabase.from('po_approvals').insert({
+          po_id: id, approval_level: 1, approver_role: approverRole, status: 'pending',
+        })
+      } catch { /* non-critical */ }
+    }
+
+    toast.success(`PO updated → ${status === 'approved' ? 'auto-approved (≤₹10K)' : `pending ${approverRole.replace(/_/g, ' ')} approval`}`)
     router.push(`/purchase-orders/${id}`)
   }
 
