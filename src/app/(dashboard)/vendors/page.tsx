@@ -1,8 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { VENDOR_STATUS_COLORS } from '@/lib/utils'
-import { Plus, Users } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import VendorListClient from './VendorListClient'
 
 export const dynamic = 'force-dynamic'
@@ -13,11 +12,7 @@ export default async function VendorsPage({
   searchParams: Promise<{ status?: string; q?: string; category?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-
-  const { data: profile } = await supabase
-    .from('user_profiles').select('role')
-    .eq('id', (await supabase.auth.getUser()).data.user!.id).single()
+  const { supabase, role } = await requireAuth()
 
   let query = supabase
     .from('vendors')
@@ -99,12 +94,11 @@ export default async function VendorsPage({
         ))}
       </div>
 
-      {/* Client-side DataTable */}
       <VendorListClient
         vendors={vendors ?? []}
         categories={categories ?? []}
         activeStatus={params.status}
-        userRole={profile?.role || 'store_staff'}
+        userRole={role}
       />
     </div>
   )

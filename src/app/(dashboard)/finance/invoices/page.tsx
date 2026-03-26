@@ -1,9 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Plus } from 'lucide-react'
 import InvoiceListClient from './InvoiceListClient'
-import DateRangeFilter from '@/components/ui/DateRangeFilter'
 import BatchMatchButton from '@/components/ui/BatchMatchButton'
 
 export const dynamic = 'force-dynamic'
@@ -14,11 +13,7 @@ export default async function InvoicesPage({
   searchParams: Promise<{ match_status?: string; payment_status?: string; centre?: string; q?: string; from?: string; to?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-
-  const { data: profile } = await supabase
-    .from('user_profiles').select('role, centre_id')
-    .eq('id', (await supabase.auth.getUser()).data.user!.id).single()
+  const { supabase, role, isGroupLevel } = await requireAuth()
 
   let query = supabase
     .from('invoices')
@@ -38,7 +33,6 @@ export default async function InvoicesPage({
   const MATCH_STATUSES = ['pending', 'matched', 'partial_match', 'mismatch']
   const PAYMENT_STATUSES = ['unpaid', 'partial', 'paid', 'disputed', 'on_hold']
 
-  // Counts for filter badges
   const matchCounts: Record<string, number> = {}
   const paymentCounts: Record<string, number> = {}
   invoices?.forEach((inv: any) => {
@@ -95,8 +89,8 @@ export default async function InvoicesPage({
         ))}
       </div>
 
-      {/* Centre filter */}
-      {profile?.role && ['group_admin', 'group_cao'].includes(profile.role) && centres && (
+      {/* Centre filter — group-level only */}
+      {isGroupLevel && centres && (
         <div className="mb-5 flex gap-2 flex-wrap">
           {centres.map(c => (
             <Link key={c.id} href={`/finance/invoices?centre=${c.id}`}
@@ -108,7 +102,7 @@ export default async function InvoicesPage({
         </div>
       )}
 
-      <InvoiceListClient invoices={invoices ?? []} userRole={profile?.role || 'store_staff'} />
+      <InvoiceListClient invoices={invoices ?? []} userRole={role} />
     </div>
   )
 }
