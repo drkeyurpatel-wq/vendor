@@ -52,6 +52,7 @@ export type ExpiryAlertLevel = 'expired' | 'expiring_30_days' | 'expiring_90_day
 
 export interface Centre {
   id: string
+  tenant_id: string | null
   code: string
   name: string
   address: string | null
@@ -65,6 +66,7 @@ export interface Centre {
 
 export interface UserProfile {
   id: string
+  tenant_id: string | null
   full_name: string
   email: string
   phone: string | null
@@ -89,6 +91,7 @@ export interface VendorCategory {
 
 export interface Vendor {
   id: string
+  tenant_id: string | null
   vendor_code: string
   legal_name: string
   trade_name: string | null
@@ -211,6 +214,7 @@ export interface ItemCategory {
 
 export interface Item {
   id: string
+  tenant_id: string | null
   item_code: string
   generic_name: string
   brand_name: string | null
@@ -317,6 +321,9 @@ export interface Item {
   created_at: string
   updated_at: string
   deleted_at: string | null
+  // Barcode (added by migration)
+  barcode: string | null
+  alternate_barcode: string | null
   category?: ItemCategory
 }
 
@@ -347,6 +354,7 @@ export interface ItemCentreStock {
 
 export interface PurchaseOrder {
   id: string
+  tenant_id: string | null
   po_number: string
   centre_id: string
   vendor_id: string
@@ -397,6 +405,19 @@ export interface PurchaseOrder {
   created_at: string
   updated_at: string
   deleted_at: string | null
+  // Vendor portal fields (added by migration)
+  cancellation_reason: string | null
+  cancelled_at: string | null
+  closed_at: string | null
+  delivery_address: string | null
+  supply_type: SupplyType
+  vendor_acknowledged: boolean
+  vendor_acknowledged_at: string | null
+  vendor_confirmed_delivery_date: string | null
+  vendor_dispute: boolean
+  vendor_dispute_at: string | null
+  vendor_dispute_reason: string | null
+  vendor_notes: string | null
   // Relations
   vendor?: Vendor
   centre?: Centre
@@ -440,6 +461,7 @@ export interface PurchaseOrderItem {
   manufacturer: string | null
   delivery_date: string | null
   rate_contract_id: string | null
+  contract_rate: number | null
   notes: string | null
   item?: Item
 }
@@ -460,6 +482,7 @@ export interface POAmendment {
 
 export interface GRN {
   id: string
+  tenant_id: string | null
   grn_number: string
   centre_id: string
   po_id: string
@@ -497,8 +520,10 @@ export interface GRN {
   received_by: string | null
   verified_by: string | null
   verified_at: string | null
+  qc_completed_at: string | null
   created_at: string
   updated_at: string
+  deleted_at: string | null
   // Relations
   po?: PurchaseOrder
   vendor?: Vendor
@@ -549,6 +574,9 @@ export interface GRNItem {
   // QC
   qc_status: QCItemStatus
   qc_remarks: string | null
+  // Batch tracking (added by migration)
+  batch_number: string | null
+  manufacture_date: string | null
   item?: Item
 }
 
@@ -579,6 +607,7 @@ export interface GRNReturn {
 
 export interface Invoice {
   id: string
+  tenant_id: string | null
   invoice_ref: string
   vendor_invoice_no: string
   vendor_invoice_date: string
@@ -633,6 +662,11 @@ export interface Invoice {
   status: InvoiceStatus
   approved_by: string | null
   approved_at: string | null
+  // Dispute & settlement (added by migration)
+  dispute_reason: string | null
+  disputed_at: string | null
+  match_details: Record<string, unknown> | null
+  paid_at: string | null
   created_by: string | null
   created_at: string
   updated_at: string
@@ -932,6 +966,7 @@ export interface RateContract {
   end_date: string
   terms_and_conditions: string | null
   notes: string | null
+  termination_reason: string | null
   approved_by: string | null
   approved_at: string | null
   created_by: string | null
