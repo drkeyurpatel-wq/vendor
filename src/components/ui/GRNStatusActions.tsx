@@ -36,44 +36,64 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
   const qcPending = !qualityStatus || qualityStatus === 'pending'
 
   async function updateGRNStatus(newStatus: string) {
+    // ── GUARD: Prevent double stock update on re-verify ──
+    // If this GRN was previously verified (verified_at exists), stock was already counted.
+    // On re-verify after discrepancy, skip stock/PO updates — they were already applied.
+    let skipStockUpdate = false
+    if (newStatus === 'verified') {
+      const { data: grnCheck } = await supabase
+        .from('grns')
+        .select('verified_at, status')
+        .eq('id', grnId)
+        .single()
+
+      if (grnCheck?.verified_at) {
+        // Was verified before — stock already counted. Only flip status back.
+        skipStockUpdate = true
+      }
+    }
+
     const { error } = await supabase.from('grns').update({
       status: newStatus,
-      ...(newStatus === 'verified' ? { verified_at: new Date().toISOString(), verified_by: (await supabase.auth.getUser()).data.user?.id } : {}),
+      ...(newStatus === 'verified' && !skipStockUpdate ? { verified_at: new Date().toISOString(), verified_by: (await supabase.auth.getUser()).data.user?.id } : {}),
       notes: comment || null,
       updated_at: new Date().toISOString(),
     }).eq('id', grnId)
 
     if (error) { toast.error(error.message); return }
 
-    // If verified, update PO received quantities and stock
-    if (newStatus === 'verified' && lineItems.length > 0) {
+    // If verified AND first-time verify, update PO received quantities and stock
+    if (newStatus === 'verified' && !skipStockUpdate && lineItems.length > 0) {
       for (const li of lineItems) {
-        if (li.item_id && li.received_qty > 0) {
-          // Update PO line item received qty
+        // USE accepted_qty for stock, NOT received_qty
+        // received=100, rejected=10, damaged=5 → stock += 85 (accepted), NOT 100
+        const stockQty = li.accepted_qty ?? li.received_qty ?? 0
+        if (li.item_id && stockQty > 0) {
+          // Update PO line item received qty (use received_qty here — PO tracks total received)
           const { data: poItem } = await supabase.from('purchase_order_items')
             .select('id, received_qty, ordered_qty')
             .eq('po_id', poId).eq('item_id', li.item_id).single()
 
           if (poItem) {
-            const newRecv = (poItem.received_qty || 0) + li.received_qty
+            const newRecv = (poItem.received_qty || 0) + (li.received_qty || 0)
             await supabase.from('purchase_order_items').update({ received_qty: newRecv }).eq('id', poItem.id)
           }
 
-          // Update stock — ADDITIVE, not overwrite
+          // Update stock — use ACCEPTED qty only (excludes rejected + damaged)
           const { data: existing } = await supabase.from('item_centre_stock')
             .select('id, current_stock')
             .eq('item_id', li.item_id).eq('centre_id', centreId).single()
 
           if (existing) {
             await supabase.from('item_centre_stock').update({
-              current_stock: (existing.current_stock || 0) + li.received_qty,
+              current_stock: (existing.current_stock || 0) + stockQty,
               last_grn_date: new Date().toISOString().split('T')[0],
               last_grn_rate: li.rate || 0,
             }).eq('id', existing.id)
           } else {
             await supabase.from('item_centre_stock').insert({
               item_id: li.item_id, centre_id: centreId,
-              current_stock: li.received_qty,
+              current_stock: stockQty,
               last_grn_date: new Date().toISOString().split('T')[0],
               last_grn_rate: li.rate || 0,
             })

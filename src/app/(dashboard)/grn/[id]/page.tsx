@@ -179,7 +179,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
           grnId={grn.id} grnNumber={grn.grn_number} currentStatus={grn.status}
           qualityStatus={grn.quality_status} poId={grn.po_id} vendorId={grn.vendor_id}
           centreId={grn.centre_id} userRole={role}
-          lineItems={items.map((i: any) => ({ item_id: i.item_id, received_qty: i.received_qty || i.accepted_qty || 0, rate: i.rate }))}
+          lineItems={items.map((i: any) => ({ item_id: i.item_id, received_qty: i.received_qty || 0, accepted_qty: i.accepted_qty || 0, rate: i.rate }))}
         />
       </div>
 

@@ -42,7 +42,7 @@ export default function VendorSearch({ value, onChange, centreId, placeholder = 
       let q = supabase
         .from('vendors')
         .select('id, vendor_code, legal_name, trade_name, category:vendor_categories(name)')
-        .in('status', ['active', 'pending', 'approved'])
+        .eq('status', 'active')
         .is('deleted_at', null)
         .neq('onboarding_status', 'quick_draft')
         .or(`legal_name.ilike.%${query}%,vendor_code.ilike.%${query}%,trade_name.ilike.%${query}%`)
