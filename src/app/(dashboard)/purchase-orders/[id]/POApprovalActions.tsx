@@ -31,18 +31,18 @@ export default function POApprovalActions({ poId, poStatus, totalAmount, userRol
     try {
       if (action === 'approve') {
         await supabase.from('po_approvals')
-          .update({ status: 'approved', approved_by: userId, approved_at: new Date().toISOString(), comments: comments.trim() || null })
+          .update({ status: 'approved', approver_id: userId, actioned_at: new Date().toISOString(), comments: comments.trim() || null })
           .eq('po_id', poId)
           .eq('status', 'pending')
-        await supabase.from('purchase_orders').update({ status: 'approved' }).eq('id', poId)
+        await supabase.from('purchase_orders').update({ status: 'approved', approved_by: userId, approved_at: new Date().toISOString() }).eq('id', poId)
         toast.success('PO approved')
       } else if (action === 'reject') {
         if (!comments.trim()) { toast.error('Please add rejection comments'); setLoading(false); return }
         await supabase.from('po_approvals')
-          .update({ status: 'rejected', approved_by: userId, approved_at: new Date().toISOString(), comments: comments.trim() })
+          .update({ status: 'rejected', approver_id: userId, actioned_at: new Date().toISOString(), comments: comments.trim() })
           .eq('po_id', poId)
           .eq('status', 'pending')
-        await supabase.from('purchase_orders').update({ status: 'cancelled' }).eq('id', poId)
+        await supabase.from('purchase_orders').update({ status: 'cancelled', cancellation_reason: comments.trim() }).eq('id', poId)
         toast.success('PO rejected')
       } else if (action === 'send') {
         await supabase.from('purchase_orders').update({ status: 'sent_to_vendor' }).eq('id', poId)
