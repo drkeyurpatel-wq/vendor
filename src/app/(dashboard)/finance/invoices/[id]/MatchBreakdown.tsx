@@ -49,9 +49,13 @@ export default function MatchBreakdown({
   const [matchResults, setMatchResults] = useState<MatchResult[] | null>(null)
 
   const RATE_TOLERANCE = 0.005
+  const QTY_TOLERANCE = 0.02
 
   const computeLocalMatch = (item: MatchItem) => {
-    const qtyMatch = item.grn_accepted_qty === item.invoice_qty && item.grn_accepted_qty > 0
+    // TRUE 3-way: PO qty vs Invoice qty AND GRN accepted vs Invoice qty
+    const poQtyDev = Math.abs(item.po_qty - item.invoice_qty) / Math.max(item.po_qty, 1)
+    const grnQtyDev = Math.abs(item.grn_accepted_qty - item.invoice_qty) / Math.max(item.grn_accepted_qty, 1)
+    const qtyMatch = poQtyDev <= QTY_TOLERANCE && grnQtyDev <= QTY_TOLERANCE
     const rateDiff = item.po_rate > 0 ? Math.abs(item.po_rate - item.invoice_rate) / item.po_rate : 0
     const rateMatch = rateDiff <= RATE_TOLERANCE
     return { qtyMatch, rateMatch }

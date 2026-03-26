@@ -3,43 +3,25 @@ import { requireApiAuth } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 import { invoiceMatchSchema } from '@/lib/validations'
-import { sendInAppNotification } from '@/lib/notify-server'
-import { RATE_TOLERANCE } from '@/lib/business-rules'
+import { matchLineItem, computeMatchStatus, type MatchLineItem } from '@/lib/business-rules'
 
 /**
- * 3-Way Matching Engine
- * Compares: PO (ordered qty + rate) vs GRN (accepted qty) vs Invoice (qty + rate)
- *
- * Match rules:
- * - MATCHED: All three match exactly (or within tolerance)
- * - PARTIAL_MATCH: Some items match, some don't
- * - MISMATCH: Significant discrepancy — blocks payment
- *
- * Rate tolerance: ±0.5% (for rate contract items)
+ * 3-Way Match — Single Invoice
+ * Uses business-rules.ts matchLineItem (the tested, correct logic):
+ *   PO qty vs Invoice qty (within 2% tolerance)
+ *   GRN accepted qty vs Invoice qty (within 2% tolerance)
+ *   PO rate vs Invoice rate (within 0.5% tolerance)
+ * ALL THREE must pass for qty_match = true
  */
 
-interface MatchResult {
-  item_id: string
-  po_qty: number
-  po_rate: number
-  grn_qty: number
-  invoice_qty: number
-  invoice_rate: number
-  qty_match: boolean
-  rate_match: boolean
-}
-
 export const POST = withApiErrorHandler(async (request: NextRequest) => {
-  const rateLimitResult = await rateLimit(request, 20, 60000)
-  if (!rateLimitResult.success) {
-    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
-  }
+  const rl = await rateLimit(request, 20, 60000)
+  if (!rl.success) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
 
-  const { supabase, user, userId } = await requireApiAuth()
+  const { supabase, user } = await requireApiAuth()
+
   let body: unknown
-  try {
-    body = await request.json()
-  } catch {
+  try { body = await request.json() } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
@@ -50,199 +32,142 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
 
   const { invoice_id } = parsed.data
 
-  // Get invoice
-  const { data: invoice } = await supabase
+  // ── Fetch invoice ──
+  const { data: invoice, error: invErr } = await supabase
     .from('invoices')
-    .select('*, grn:grns(id, po_id)')
+    .select('id, po_id, grn_id, total_amount')
     .eq('id', invoice_id)
     .single()
 
-  if (!invoice) {
+  if (invErr || !invoice) {
     return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
   }
 
-  const poId = invoice.po_id || invoice.grn?.po_id
+  // ── Resolve PO ID ──
+  let poId = invoice.po_id
+  if (!poId && invoice.grn_id) {
+    const { data: grn } = await supabase.from('grns').select('po_id').eq('id', invoice.grn_id).single()
+    poId = grn?.po_id
+  }
+
   if (!poId) {
-    // No PO linked — flag as mismatch (No PO = No Payment rule)
-    await supabase.from('invoices')
-      .update({ match_status: 'mismatch' })
-      .eq('id', invoice_id)
+    await supabase.from('invoices').update({ match_status: 'mismatch', updated_at: new Date().toISOString() }).eq('id', invoice_id)
     return NextResponse.json({
       match_status: 'mismatch',
-      reason: 'No PO linked to this invoice — payment blocked',
-      results: [],
+      reason: 'No PO linked — payment blocked (No PO = No Payment rule)',
+      results: [], summary: { total_items: 0, matched: 0, mismatched: 0 },
     })
   }
 
-  // Get PO items
+  // ── Fetch PO line items ──
   const { data: poItems } = await supabase
     .from('purchase_order_items')
     .select('item_id, ordered_qty, rate')
     .eq('po_id', poId)
 
-  // Get GRN items (all GRNs for this PO)
-  const { data: grns } = await supabase
-    .from('grns')
-    .select('id')
-    .eq('po_id', poId)
-    .in('status', ['submitted', 'verified'])
-
-  // Also check for discrepancy GRNs — warn user if that's why matching fails
-  const { data: allGrnsForPO } = await supabase
-    .from('grns').select('id, status').eq('po_id', poId)
-  const discrepancyGRNs = allGrnsForPO?.filter(g => g.status === 'discrepancy') ?? []
-  const verifiedGRNs = grns ?? []
-
-  let grnItemsMap = new Map<string, number>()
-  if (verifiedGRNs.length > 0) {
-    const grnIds = verifiedGRNs.map(g => g.id)
-    const { data: grnItems } = await supabase
-      .from('grn_items')
-      .select('item_id, accepted_qty')
-      .in('grn_id', grnIds)
-
-    grnItems?.forEach((gi: any) => {
-      const current = grnItemsMap.get(gi.item_id) || 0
-      grnItemsMap.set(gi.item_id, current + gi.accepted_qty)
-    })
-  }
-
-  // If no verified/submitted GRNs but discrepancy GRNs exist, inform the user
-  if (verifiedGRNs.length === 0 && discrepancyGRNs.length > 0) {
-    await supabase.from('invoices')
-      .update({ match_status: 'mismatch', updated_at: new Date().toISOString() })
-      .eq('id', invoice_id)
+  if (!poItems || poItems.length === 0) {
+    await supabase.from('invoices').update({ match_status: 'mismatch', updated_at: new Date().toISOString() }).eq('id', invoice_id)
     return NextResponse.json({
       match_status: 'mismatch',
-      reason: `${discrepancyGRNs.length} GRN(s) found but all are in DISCREPANCY status. Verify the GRN first, then re-run the match.`,
-      results: [],
+      reason: 'PO has no line items',
+      results: [], summary: { total_items: 0, matched: 0, mismatched: 0 },
     })
   }
 
-  // Try to get invoice line items (if table exists — may not be created yet)
-  let invoiceItems: any[] | null = null
-  try {
-    const { data, error } = await supabase
-      .from('invoice_items')
-      .select('item_id, qty, rate')
-      .eq('invoice_id', invoice_id)
-    if (!error) invoiceItems = data
-  } catch {
-    // Table doesn't exist yet — fall back to PO vs GRN comparison
+  // ── Fetch ALL verified/submitted GRN items for this PO ──
+  const { data: poGRNs } = await supabase.from('grns').select('id, status').eq('po_id', poId)
+  const verifiedGRNs = (poGRNs ?? []).filter(g => g.status === 'verified' || g.status === 'submitted')
+  const discrepancyGRNs = (poGRNs ?? []).filter(g => g.status === 'discrepancy')
+
+  if (verifiedGRNs.length === 0) {
+    const reason = discrepancyGRNs.length > 0
+      ? `${discrepancyGRNs.length} GRN(s) in DISCREPANCY status. Verify the GRN first, then re-run match.`
+      : 'No verified GRNs found for this PO'
+    await supabase.from('invoices').update({ match_status: 'mismatch', updated_at: new Date().toISOString() }).eq('id', invoice_id)
+    return NextResponse.json({
+      match_status: 'mismatch', reason,
+      results: [], summary: { total_items: 0, matched: 0, mismatched: 0 },
+    })
   }
 
-  const invoiceItemsMap = new Map<string, { qty: number; rate: number }>()
-  invoiceItems?.forEach((ii: any) => {
-    invoiceItemsMap.set(ii.item_id, { qty: ii.qty, rate: ii.rate })
+  // Aggregate GRN accepted qty per item across all GRNs
+  const grnIds = verifiedGRNs.map(g => g.id)
+  const { data: grnItems } = await supabase.from('grn_items').select('item_id, accepted_qty').in('grn_id', grnIds)
+  const grnQtyMap = new Map<string, number>()
+  grnItems?.forEach((gi: any) => {
+    grnQtyMap.set(gi.item_id, (grnQtyMap.get(gi.item_id) || 0) + (gi.accepted_qty || 0))
   })
 
-  // Build match results
-  const results: MatchResult[] = []
-  let allMatch = true
-  let anyMatch = false
-
-  for (const poItem of (poItems || [])) {
-    const grnQty = grnItemsMap.get(poItem.item_id) || 0
-    const invoiceItem = invoiceItemsMap.get(poItem.item_id)
-
-    // Use actual invoice line item data if available, otherwise compare totals
-    const invoiceQty = invoiceItem?.qty ?? grnQty
-    const invoiceRate = invoiceItem?.rate ?? poItem.rate
-
-    // Qty match: GRN accepted qty should match what's invoiced
-    const qtyMatch = grnQty === invoiceQty && grnQty > 0
-    const rateDiff = poItem.rate > 0 ? Math.abs(poItem.rate - invoiceRate) / poItem.rate : 0
-    const rateMatch = rateDiff <= RATE_TOLERANCE
-
-    results.push({
-      item_id: poItem.item_id,
-      po_qty: poItem.ordered_qty,
-      po_rate: poItem.rate,
-      grn_qty: grnQty,
-      invoice_qty: invoiceQty,
-      invoice_rate: invoiceRate,
-      qty_match: qtyMatch,
-      rate_match: rateMatch,
-    })
-
-    if (qtyMatch && rateMatch) {
-      anyMatch = true
-    } else {
-      allMatch = false
+  // ── Fetch invoice line items (table may not exist) ──
+  let invoiceItemsMap = new Map<string, { qty: number; rate: number }>()
+  try {
+    const { data, error } = await supabase.from('invoice_items').select('item_id, qty, rate').eq('invoice_id', invoice_id)
+    if (!error && data) {
+      data.forEach((ii: any) => invoiceItemsMap.set(ii.item_id, { qty: ii.qty, rate: ii.rate }))
     }
+  } catch { /* table doesn't exist */ }
+
+  // ── Build match items using business-rules.ts ──
+  const matchItems: MatchLineItem[] = poItems.map((po: any) => {
+    const grnAccepted = grnQtyMap.get(po.item_id) || 0
+    const invItem = invoiceItemsMap.get(po.item_id)
+    return {
+      item_id: po.item_id,
+      po_qty: po.ordered_qty || 0,
+      po_rate: po.rate || 0,
+      grn_accepted_qty: grnAccepted,
+      // If no invoice line items table, use GRN qty and PO rate as invoice values
+      invoice_qty: invItem?.qty ?? grnAccepted,
+      invoice_rate: invItem?.rate ?? po.rate,
+    }
+  })
+
+  // ── Run the CORRECT 3-way match from business-rules.ts ──
+  const matchStatus = computeMatchStatus(matchItems)
+  const itemResults = matchItems.map(item => {
+    const result = matchLineItem(item)
+    return {
+      item_id: item.item_id,
+      po_qty: item.po_qty,
+      po_rate: item.po_rate,
+      grn_qty: item.grn_accepted_qty,
+      invoice_qty: item.invoice_qty,
+      invoice_rate: item.invoice_rate,
+      qty_match: result.status === 'matched' || result.status === 'rate_mismatch',
+      rate_match: result.status === 'matched' || result.status === 'qty_mismatch',
+    }
+  })
+
+  // ── Update invoice ──
+  const { error: updateErr } = await supabase.from('invoices').update({
+    match_status: matchStatus,
+    updated_at: new Date().toISOString(),
+  }).eq('id', invoice_id)
+
+  if (updateErr) {
+    return NextResponse.json({ error: `Failed to update invoice: ${updateErr.message}` }, { status: 500 })
   }
 
-  // Also compare total amounts as a cross-check
-  const poTotal = poItems?.reduce((s, p: any) => s + (p.ordered_qty * p.rate), 0) ?? 0
-  const grnTotal = Array.from(grnItemsMap.entries()).reduce((s, [itemId, qty]) => {
-    const poItem = poItems?.find((p: any) => p.item_id === itemId)
-    return s + qty * (poItem?.rate || 0)
-  }, 0)
-  const invoiceTotal = invoice.total_amount || 0
-  const totalDiff = poTotal > 0 ? Math.abs(grnTotal - invoiceTotal) / poTotal : 0
-
-  // Determine match status
-  let matchStatus: string
-  if (allMatch && results.length > 0 && totalDiff <= RATE_TOLERANCE) {
-    matchStatus = 'matched'
-  } else if (anyMatch || totalDiff <= 0.05) {
-    matchStatus = 'partial_match'
-  } else {
-    matchStatus = 'mismatch'
-  }
-
-  // Update invoice
-  const now = new Date().toISOString()
-  const { error: updateError } = await supabase.from('invoices')
-    .update({ match_status: matchStatus, updated_at: now })
-    .eq('id', invoice_id)
-
-  if (updateError) {
-    return NextResponse.json({
-      error: `Failed to update invoice: ${updateError.message}`,
-      match_status: matchStatus,
-      results,
-    }, { status: 500 })
-  }
-
-  // Log activity (non-blocking — never fail the match because of logging)
+  // ── Audit (non-blocking) ──
   try {
     await supabase.from('activity_log').insert({
-      user_id: user.id,
-      action: 'invoice_matched',
-      entity_type: 'invoice',
-      entity_id: invoice_id,
-      details: { match_status: matchStatus, item_count: results.length },
+      user_id: user.id, action: 'invoice_matched', entity_type: 'invoice', entity_id: invoice_id,
+      details: { match_status: matchStatus, item_count: itemResults.length },
     })
   } catch { /* non-critical */ }
 
-  // Notify (non-blocking)
-  sendInAppNotification(supabase, {
-    action: 'invoice_matched',
-    entity_type: 'invoice',
-    entity_id: invoice_id,
-    details: { match_status: matchStatus, invoice_ref: invoice_id },
-    actor_user_id: user.id,
-  }).then(() => {}, () => {})
-
+  // ── Warnings ──
   const warnings: string[] = []
-  if (discrepancyGRNs.length > 0) {
-    warnings.push(`${discrepancyGRNs.length} GRN(s) in discrepancy status — not included in match`)
-  }
-  if (!invoiceItems || invoiceItems.length === 0) {
-    warnings.push('No invoice line items found — matching against PO rates and GRN quantities')
-  }
-  if (verifiedGRNs.length === 0 && discrepancyGRNs.length === 0) {
-    warnings.push('No GRNs found for this PO — all quantities default to 0')
-  }
+  if (discrepancyGRNs.length > 0) warnings.push(`${discrepancyGRNs.length} GRN(s) in discrepancy — not included in match`)
+  if (invoiceItemsMap.size === 0) warnings.push('No invoice line items — using GRN quantities and PO rates as invoice values')
 
   return NextResponse.json({
     match_status: matchStatus,
-    results,
+    results: itemResults,
     summary: {
-      total_items: results.length,
-      matched: results.filter(r => r.qty_match && r.rate_match).length,
-      mismatched: results.filter(r => !r.qty_match || !r.rate_match).length,
+      total_items: itemResults.length,
+      matched: itemResults.filter(r => r.qty_match && r.rate_match).length,
+      mismatched: itemResults.filter(r => !r.qty_match || !r.rate_match).length,
     },
     ...(warnings.length > 0 && { warnings }),
   })
