@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { requireApiAuthWithProfile } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { withApiErrorHandler } from '@/lib/api-error-handler'
 
@@ -28,10 +29,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 20, 60000)
   if (!rateLimitResult.success) return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+  const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
   const body = await request.json()
   const { po_id, action, comments } = body // action: 'approve' | 'reject'
 
@@ -67,15 +65,15 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const currentLevelConfig = APPROVAL_LEVELS.find(l => l.level === currentLevel + 1)
   if (!currentLevelConfig) return NextResponse.json({ error: 'PO fully approved or invalid level' }, { status: 400 })
 
-  const canApprove = profile.role === currentLevelConfig.role ||
-    profile.role === 'group_admin' || // MD can approve anything
+  const canApprove = role === currentLevelConfig.role ||
+    role === 'group_admin' || // MD can approve anything
     (actingFor && delegation) // Delegate can act on behalf
 
   if (!canApprove) {
     return NextResponse.json({
-      error: `Requires ${currentLevelConfig.label} approval. Your role: ${profile.role}`,
+      error: `Requires ${currentLevelConfig.label} approval. Your role: ${role}`,
       required_role: currentLevelConfig.role,
-      your_role: profile.role,
+      your_role: role,
     }, { status: 403 })
   }
 
@@ -85,7 +83,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     // Record approval at this level
     await supabase.from('po_approvals').insert({
       po_id, approval_level: currentLevel + 1,
-      approver_id: user.id, approver_role: profile.role,
+      approver_id: user.id, approver_role: role,
       status: 'approved', comments: comments || null,
       actioned_at: new Date().toISOString(),
       sla_deadline: slaDeadline.toISOString(),
@@ -134,7 +132,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
 
     await supabase.from('po_approvals').insert({
       po_id, approval_level: currentLevel + 1,
-      approver_id: user.id, approver_role: profile.role,
+      approver_id: user.id, approver_role: role,
       status: 'rejected', comments,
       actioned_at: new Date().toISOString(),
       delegated_from: actingFor,

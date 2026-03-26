@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuth } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import {
   Document, Packer, Paragraph, Table, TableRow, TableCell,
@@ -96,12 +96,7 @@ export const GET = withApiErrorHandler(async (request: NextRequest) => {
     return NextResponse.json({ error: 'Missing PO id' }, { status: 400 })
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+  const { supabase, user, userId } = await requireApiAuth()
   const { data: po, error } = await supabase
     .from('purchase_orders')
     .select(`

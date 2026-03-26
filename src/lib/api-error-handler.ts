@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
+import { AuthError } from '@/lib/auth'
 
 // ─── Structured API error response ───────────────────────────
 
@@ -51,6 +52,14 @@ export function withApiErrorHandler(handler: ApiHandler): ApiHandler {
       // Log in dev
       if (process.env.NODE_ENV !== 'production') {
         console.error(`[API Error] ${request.method} ${request.nextUrl.pathname}:`, err.message)
+      }
+
+      // AuthError from requireApiAuth — clean 401, no Sentry noise
+      if (err instanceof AuthError) {
+        return NextResponse.json(
+          { error: err.message, code: 'AUTH_ERROR' } satisfies ApiErrorResponse,
+          { status: 401 }
+        )
       }
 
       // Supabase-specific errors

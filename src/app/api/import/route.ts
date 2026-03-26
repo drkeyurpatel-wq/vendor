@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuthWithProfile } from '@/lib/auth'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 import { rateLimit } from '@/lib/rate-limit'
 
@@ -48,7 +49,7 @@ async function parseFile(file: File): Promise<Record<string, string>[]> {
 // ─── VENDOR IMPORT ────────────────────────────────────────
 async function importVendors(
   rows: Record<string, string>[],
-  supabase: Awaited<ReturnType<typeof createClient>>
+  supabase: SupabaseClient
 ): Promise<ImportResult> {
   const result: ImportResult = { total: rows.length, success: 0, failed: 0, errors: [], created_codes: [] }
 
@@ -193,7 +194,7 @@ async function importVendors(
 // ─── ITEM IMPORT ──────────────────────────────────────────
 async function importItems(
   rows: Record<string, string>[],
-  supabase: Awaited<ReturnType<typeof createClient>>
+  supabase: SupabaseClient
 ): Promise<ImportResult> {
   const result: ImportResult = { total: rows.length, success: 0, failed: 0, errors: [], created_codes: [] }
 
@@ -327,7 +328,7 @@ async function importItems(
 // ─── VENDOR-ITEM MAPPING IMPORT ───────────────────────────
 async function importVendorItems(
   rows: Record<string, string>[],
-  supabase: Awaited<ReturnType<typeof createClient>>
+  supabase: SupabaseClient
 ): Promise<ImportResult> {
   const result: ImportResult = { total: rows.length, success: 0, failed: 0, errors: [] }
 
@@ -405,7 +406,7 @@ async function importVendorItems(
 // ─── OPENING STOCK IMPORT ─────────────────────────────────
 async function importOpeningStock(
   rows: Record<string, string>[],
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: SupabaseClient,
   userId: string
 ): Promise<ImportResult> {
   const result: ImportResult = { total: rows.length, success: 0, failed: 0, errors: [] }
@@ -495,7 +496,7 @@ async function importOpeningStock(
 // ─── VENDOR OUTSTANDING IMPORT ────────────────────────────
 async function importVendorOutstanding(
   rows: Record<string, string>[],
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: SupabaseClient,
   userId: string
 ): Promise<ImportResult> {
   const result: ImportResult = { total: rows.length, success: 0, failed: 0, errors: [] }
@@ -646,20 +647,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+  const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
   // Check role — only admin/CAO can bulk import
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || !['group_admin', 'group_cao'].includes(profile.role)) {
+  if (!isGroupLevel) {
     return NextResponse.json({ error: 'Only Group Admin or CAO can perform bulk imports' }, { status: 403 })
   }
 

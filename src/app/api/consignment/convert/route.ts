@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuth } from '@/lib/auth'
 import { format } from 'date-fns'
 import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 export const POST = withApiErrorHandler(async (request: NextRequest) => {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+  const { supabase, user, userId } = await requireApiAuth()
   const { usage_id } = await request.json()
   if (!usage_id) return NextResponse.json({ error: 'usage_id required' }, { status: 400 })
 

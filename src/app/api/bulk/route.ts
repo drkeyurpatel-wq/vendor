@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuthWithProfile } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { canApprovePO } from '@/types/database'
 
@@ -15,22 +15,7 @@ const BATCH_SIZE = 50
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('role, centre_id, full_name')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 403 })
-    }
-
+    const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
     const body: BulkRequest = await request.json()
     const { action, ids, updates } = body
 
@@ -49,7 +34,7 @@ export async function POST(request: NextRequest) {
       switch (action) {
         case 'approve_pos': {
           // Validate role can approve POs
-          if (!['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(profile.role)) {
+          if (!['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(role)) {
             return NextResponse.json({ error: 'Insufficient permissions to approve POs' }, { status: 403 })
           }
 
@@ -61,7 +46,7 @@ export async function POST(request: NextRequest) {
             .eq('status', 'pending_approval')
 
           for (const po of pos || []) {
-            if (!canApprovePO(profile.role, po.total_amount)) {
+            if (!canApprovePO(role, po.total_amount)) {
               errors.push(`${po.po_number}: Amount exceeds your approval limit`)
               failed++
               continue
@@ -116,7 +101,7 @@ export async function POST(request: NextRequest) {
         }
 
         case 'update_items': {
-          if (!['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(profile.role)) {
+          if (!['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(role)) {
             return NextResponse.json({ error: 'Insufficient permissions to update items' }, { status: 403 })
           }
 
@@ -154,7 +139,7 @@ export async function POST(request: NextRequest) {
         }
 
         case 'update_vendor_status': {
-          if (!['group_admin', 'group_cao'].includes(profile.role)) {
+          if (!['group_admin', 'group_cao'].includes(role)) {
             return NextResponse.json({ error: 'Insufficient permissions to update vendor status' }, { status: 403 })
           }
 
@@ -164,7 +149,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Only group_admin can blacklist
-          if (newStatus === 'blacklisted' && profile.role !== 'group_admin') {
+          if (newStatus === 'blacklisted' && role !== 'group_admin') {
             return NextResponse.json({ error: 'Only group admin can blacklist vendors' }, { status: 403 })
           }
 

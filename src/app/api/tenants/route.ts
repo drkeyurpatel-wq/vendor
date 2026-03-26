@@ -1,14 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuthWithProfile } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 import { tenantCreateSchema } from '@/lib/validations'
 
 // GET: Get current user's tenant info
 export async function GET() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+  const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
   const { data: tenantUser } = await supabase
     .from('tenant_users')
     .select('tenant_id, is_owner, tenant:tenants(*)')
@@ -29,10 +26,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+  const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
   let rawBody: unknown
   try {
     rawBody = await req.json()

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuthWithProfile } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -39,10 +39,7 @@ export const GET = withApiErrorHandler(async (request: NextRequest) => {
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'Missing indent id' }, { status: 400 })
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+  const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
   const { data: indent, error } = await supabase
     .from('purchase_indents')
     .select(`

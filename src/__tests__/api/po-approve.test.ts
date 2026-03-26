@@ -124,12 +124,12 @@ describe('POST /api/po/approve', () => {
   })
 
   // ── Missing profile ──
-  it('returns 404 if profile not found', async () => {
+  it('returns 401 if profile not found', async () => {
     const supabase = buildSupabase({ profile: null })
     mockCreateClient.mockResolvedValue(supabase)
 
     const res = await POST(makeRequest({ po_id: uuid(1), action: 'approve' }))
-    expect(res.status).toBe(404)
+    expect(res.status).toBe(401)
   })
 
   // ── Invalid request ──

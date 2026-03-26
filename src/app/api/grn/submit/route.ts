@@ -1,22 +1,17 @@
-import { createClient } from '@/lib/supabase/server'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
+import { requireApiAuth } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 import { grnSubmitSchema } from '@/lib/validations'
 import { sendInAppNotification } from '@/lib/notify-server'
 
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 10, 60000)
   if (!rateLimitResult.success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+  const { supabase, user, userId } = await requireApiAuth()
   let body: unknown
   try {
     body = await request.json()
@@ -67,4 +62,4 @@ export async function POST(request: NextRequest) {
   }).catch(() => {})
 
   return NextResponse.json({ success: true, status: newStatus })
-}
+})

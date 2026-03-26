@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuthWithProfile } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 
@@ -39,20 +39,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role, centre_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || !['group_admin', 'group_cao', 'unit_cao', 'store_staff'].includes(profile.role)) {
+  const { supabase, user, userId, role, centreId, isGroupLevel } = await requireApiAuthWithProfile()
+  if (!['group_admin', 'group_cao', 'unit_cao', 'store_staff'].includes(role)) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 

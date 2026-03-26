@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireApiAuth } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { withApiErrorHandler } from '@/lib/api-error-handler'
 
@@ -16,10 +16,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 5, 60000)
   if (!rateLimitResult.success) return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
+  const { supabase, user, userId } = await requireApiAuth()
   // Get all pending invoices with their PO and GRN
   const { data: invoices } = await supabase
     .from('invoices')
