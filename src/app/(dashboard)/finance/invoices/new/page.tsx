@@ -178,6 +178,32 @@ export default function NewInvoicePage() {
       return
     }
 
+    // CRITICAL: Prevent duplicate invoice for the same GRN
+    const { data: existingInvForGRN } = await supabase
+      .from('invoices')
+      .select('id, invoice_ref')
+      .eq('grn_id', selectedGRN.id)
+      .limit(1)
+
+    if (existingInvForGRN && existingInvForGRN.length > 0) {
+      toast.error(`This GRN already has invoice ${existingInvForGRN[0].invoice_ref}. One invoice per GRN.`)
+      setLoading(false)
+      return
+    }
+
+    // Recheck GRN status — must still be verified at submit time
+    const { data: grnCheck } = await supabase
+      .from('grns')
+      .select('status')
+      .eq('id', selectedGRN.id)
+      .single()
+
+    if (!grnCheck || grnCheck.status !== 'verified') {
+      toast.error(`GRN status changed to "${grnCheck?.status || 'unknown'}". Only verified GRNs can be invoiced.`)
+      setLoading(false)
+      return
+    }
+
     // Use atomic DB sequence for race-safe numbering
     const centreCode = (selectedGRN.centre as any)?.code || 'XXX'
     let invoiceRef: string

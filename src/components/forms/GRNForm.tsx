@@ -409,6 +409,24 @@ export default function GRNForm() {
 
     const centreId = selectedPO.centre_id || profile?.centre_id
 
+    // GUARD: Recheck PO status — may have changed since page loaded
+    const { data: poRecheck } = await supabase
+      .from('purchase_orders')
+      .select('status')
+      .eq('id', selectedPO.id)
+      .single()
+
+    if (poRecheck?.status === 'fully_received') {
+      toast.error('This PO is already fully received. Cannot create another GRN.')
+      setLoading(false)
+      return
+    }
+    if (poRecheck?.status === 'cancelled') {
+      toast.error('This PO has been cancelled. Cannot create GRN.')
+      setLoading(false)
+      return
+    }
+
     try {
       const { data: grn, error } = await supabase.from('grns').insert({
         grn_number: grnNumber,

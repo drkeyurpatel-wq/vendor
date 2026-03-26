@@ -55,7 +55,7 @@ function getGRNRowActions(grn: GRN, userRole: string): RowAction[] {
     },
     {
       key: 'create_invoice', label: 'Create invoice from GRN', icon: <FileText size={14} />,
-      href: `/finance/invoices/new?grn_id=${grn.id}`,
+      href: `/finance/invoices/new?grn=${grn.id}`,
       visible: grn.status === 'verified', divider: true,
     },
     {
