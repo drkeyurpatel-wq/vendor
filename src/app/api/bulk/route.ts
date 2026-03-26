@@ -1,6 +1,7 @@
 import { requireApiAuthWithProfile } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { canApprovePO } from '@/types/database'
+import { canChangeVendorStatus } from '@/lib/business-rules'
 
 export const dynamic = 'force-dynamic'
 
@@ -144,13 +145,13 @@ export async function POST(request: NextRequest) {
           }
 
           const newStatus = updates?.status
-          if (!newStatus || !['active', 'inactive', 'under_review'].includes(newStatus as string)) {
+          if (!newStatus || !['active', 'inactive', 'under_review', 'blacklisted'].includes(newStatus as string)) {
             return NextResponse.json({ error: 'Invalid vendor status' }, { status: 400 })
           }
 
-          // Only group_admin can blacklist
-          if (newStatus === 'blacklisted' && role !== 'group_admin') {
-            return NextResponse.json({ error: 'Only group admin can blacklist vendors' }, { status: 403 })
+          const statusCheck = canChangeVendorStatus(role, newStatus as string)
+          if (!statusCheck.allowed) {
+            return NextResponse.json({ error: statusCheck.message }, { status: 403 })
           }
 
           const { error, count } = await supabase
