@@ -112,6 +112,23 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
     <div>
       <Link href="/purchase-orders" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4"><ArrowLeft size={14} /> Back to Purchase Orders</Link>
 
+      {/* Backorder banner — this PO was created from a short delivery */}
+      {po.amended_from && (
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <Package size={16} className="text-blue-600" />
+            <div>
+              <span className="text-sm font-semibold text-blue-800">Backorder PO — created from short delivery</span>
+              <p className="text-xs text-blue-600 mt-0.5">This PO was auto-generated for items not received in a previous GRN</p>
+            </div>
+          </div>
+          <Link href={`/purchase-orders/${po.amended_from}`}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+            View parent PO
+          </Link>
+        </div>
+      )}
+
       {/* Header */}
       <div className="card p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
