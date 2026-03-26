@@ -15,7 +15,7 @@ interface Invoice {
   id: string
   invoice_ref?: string
   vendor_invoice_no: string
-  invoice_date: string
+  vendor_invoice_date: string
   due_date?: string
   total_amount: number
   match_status: string
@@ -92,7 +92,7 @@ export default function InvoiceListClient({ invoices, userRole }: { invoices: In
       { accessorKey: 'vendor_invoice_no', header: 'Invoice #', size: 140, cell: ({ row }) => <Link href={`/finance/invoices/${row.original.id}`} className="font-mono text-xs font-semibold text-teal-600 hover:underline">{row.original.vendor_invoice_no}</Link> },
       { id: 'vendor', header: 'Vendor', accessorFn: r => r.vendor?.legal_name ?? '', cell: ({ row }) => <span className="text-sm font-medium text-gray-900 truncate max-w-[180px] block">{row.original.vendor?.legal_name}</span> },
       { id: 'centre', header: 'Centre', accessorFn: r => r.centre?.code ?? '', size: 70, cell: ({ row }) => <span className="badge bg-blue-50 text-blue-700">{row.original.centre?.code}</span> },
-      { accessorKey: 'invoice_date', header: 'Date', size: 100, cell: ({ row }) => <span className="text-sm text-gray-600">{formatDate(row.original.invoice_date)}</span> },
+      { accessorKey: 'vendor_invoice_date', header: 'Date', size: 100, cell: ({ row }) => <span className="text-sm text-gray-600">{formatDate(row.original.vendor_invoice_date)}</span> },
       {
         accessorKey: 'due_date', header: 'Due', size: 100,
         cell: ({ row }) => {
