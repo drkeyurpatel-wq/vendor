@@ -62,11 +62,11 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     grn_number: grnNum, po_id: po.id, vendor_id: vendorId, centre_id: centreId,
     grn_date: usage.usage_date || format(now, 'yyyy-MM-dd'),
     status: 'verified', quality_status: 'approved',
-    subtotal: taxable, cgst_amount: cgst, sgst_amount: sgst,
+    cgst_amount: cgst, sgst_amount: sgst,
     total_amount: total, net_amount: total,
     dc_number: usage.deposit?.challan_number,
     notes: `Consignment. Patient: ${usage.patient_name}. Surgeon: ${usage.surgeon_name || 'N/A'}`,
-    created_by: user.id, verified_by: user.id,
+    verified_by: user.id, received_by: user.id,
   }).select().single()
 
   if (grnErr || !grn) return NextResponse.json({ error: 'GRN failed: ' + grnErr?.message, po_id: po.id }, { status: 500 })
@@ -77,7 +77,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     rejected_qty: 0, damaged_qty: 0, short_qty: 0,
     rate, gst_percent: gstPct, cgst_amount: cgst, sgst_amount: sgst,
     total_amount: total, batch_number: usage.stock?.batch_number,
-    expiry_date: usage.stock?.expiry_date, serial_number: usage.stock?.serial_number,
+    expiry_date: usage.stock?.expiry_date,
   })
 
   // 3. Invoice
@@ -91,7 +91,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     total_amount: total, gst_amount: cgst + sgst,
     payment_status: 'unpaid', match_status: 'matched',
     due_date: format(new Date(now.getTime() + 30 * 86400000), 'yyyy-MM-dd'),
-    notes: `Consignment. Patient: ${usage.patient_name}`,
+    match_notes: `Consignment. Patient: ${usage.patient_name}`,
     created_by: user.id,
   }).select().single()
 
@@ -102,6 +102,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
 
   await supabase.from('consignment_stock').update({
     qty_used: (usage.stock?.qty_used || 0) + qty,
+    qty_available: Math.max(0, (usage.stock?.qty_available || usage.stock?.qty_deposited || 1) - qty),
     status: (usage.stock?.qty_used || 0) + qty >= (usage.stock?.qty_deposited || 1) ? 'used' : 'available',
   }).eq('id', usage.stock_id)
 
