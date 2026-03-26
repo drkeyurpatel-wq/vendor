@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { CheckCircle2, XCircle, AlertTriangle, CreditCard, Scale, Ban } from 'lucide-react'
+import { CheckCircle2, XCircle, AlertTriangle, CreditCard, Scale, Ban, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
 import { fireNotification } from '@/lib/notifications'
@@ -23,7 +23,7 @@ interface Props {
   userRole: string
 }
 
-type DialogType = 'approve' | 'reject' | 'dispute' | 'schedule_payment' | 'mark_paid' | 'run_match' | null
+type DialogType = 'approve' | 'reject' | 'dispute' | 'schedule_payment' | 'mark_paid' | 'run_match' | 'delete' | null
 
 export default function InvoiceActions({
   invoiceId, invoiceRef, currentStatus, matchStatus, paymentStatus,
@@ -38,6 +38,7 @@ export default function InvoiceActions({
   const canManage = ['group_admin', 'group_cao', 'unit_cao', 'finance_staff'].includes(userRole)
   const canApprove = ['group_admin', 'group_cao', 'unit_cao'].includes(userRole)
   const canPay = ['group_admin', 'group_cao', 'finance_staff'].includes(userRole)
+  const isAdmin = userRole === 'group_admin'
   const isPending = currentStatus === 'pending'
   const isApproved = currentStatus === 'approved'
   const isUnpaid = paymentStatus === 'unpaid' || paymentStatus === 'partial'
@@ -109,6 +110,35 @@ export default function InvoiceActions({
     setDialog(null); setComment(''); router.refresh()
   }
 
+  async function deleteInvoice() {
+    if (!comment.trim()) { toast.error('Deletion reason is required'); return }
+
+    // Log before delete for audit trail
+    try {
+      await supabase.from('activity_log').insert({
+        entity_type: 'invoice', entity_id: invoiceId,
+        action: 'invoice_deleted',
+        details: {
+          invoice_ref: invoiceRef,
+          total_amount: totalAmount,
+          vendor_id: vendorId,
+          grn_id: grnId,
+          reason: comment,
+          deleted_by: (await supabase.auth.getUser()).data.user?.id,
+        },
+      })
+    } catch { /* non-critical */ }
+
+    // Hard delete — this invoice should never have existed
+    const { error } = await supabase.from('invoices').delete().eq('id', invoiceId)
+
+    if (error) { toast.error(error.message); return }
+
+    toast.success(`Invoice ${invoiceRef} permanently deleted`)
+    setDialog(null); setComment('')
+    router.push('/finance/invoices')
+  }
+
   if (!canManage) return null
 
   return (
@@ -147,6 +177,14 @@ export default function InvoiceActions({
             <CreditCard size={14} className="inline mr-1" /> Record Payment
           </button>
         )}
+
+        {/* Delete — group_admin only */}
+        {isAdmin && paymentStatus !== 'paid' && (
+          <button onClick={() => setDialog('delete')}
+            className="text-sm px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 font-medium">
+            <Trash2 size={14} className="inline mr-1" /> Delete Invoice
+          </button>
+        )}
       </div>
 
       <ConfirmDialog open={dialog === 'approve'} onClose={() => setDialog(null)}
@@ -168,6 +206,13 @@ export default function InvoiceActions({
         title="Run 3-Way Match" description={`Compare PO amount, GRN amount, and Invoice amount for ${invoiceRef}. Tolerance: ±1%.`}
         confirmLabel="Run Match" confirmVariant="primary"
         onConfirm={run3WayMatch} />
+
+      <ConfirmDialog open={dialog === 'delete'} onClose={() => { setDialog(null); setComment('') }}
+        title={`Delete Invoice ${invoiceRef}`}
+        description={`PERMANENT DELETE — this invoice (₹${totalAmount.toLocaleString()}) will be removed from the system. The linked GRN will become available for re-invoicing. This cannot be undone. Admin action only.`}
+        confirmLabel="Delete Permanently" confirmVariant="danger"
+        showCommentBox requireComment comment={comment} onCommentChange={setComment}
+        onConfirm={deleteInvoice} />
 
       {/* Payment Dialog — custom because it has an amount field */}
       {dialog === 'schedule_payment' && (

@@ -6,7 +6,7 @@ import { type ColumnDef } from '@tanstack/react-table'
 import DataTable from '@/components/ui/DataTable'
 import RowActions, { type RowAction } from '@/components/ui/RowActions'
 import { cn, formatLakhs, formatDate, MATCH_STATUS_COLORS, PAYMENT_STATUS_COLORS } from '@/lib/utils'
-import { FileText, Eye, CheckCircle2, AlertTriangle, CreditCard, XCircle, FileWarning, Clock } from 'lucide-react'
+import { FileText, Eye, CheckCircle2, AlertTriangle, CreditCard, XCircle, FileWarning, Clock, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import BulkActionBar from '@/components/ui/BulkActionBar'
 import toast from 'react-hot-toast'
@@ -73,6 +73,27 @@ function getInvoiceRowActions(inv: Invoice, userRole: string): RowAction[] {
       key: 'debit_note', label: 'Create debit note', icon: <FileWarning size={14} />,
       href: `/finance/debit-notes/new?invoice_id=${inv.id}`,
       visible: inv.match_status === 'mismatch' && canManage, divider: true,
+    },
+    {
+      key: 'delete', label: 'Delete invoice', icon: <Trash2 size={14} />, variant: 'danger',
+      confirm: true, requireComment: true,
+      confirmTitle: `Delete ${inv.vendor_invoice_no}`,
+      confirmDescription: `Permanently delete this invoice (${formatLakhs(inv.total_amount)}). The linked GRN will become available for re-invoicing. Admin only.`,
+      onExecute: async (id, comment) => {
+        const supabase = (await import('@/lib/supabase/client')).createClient()
+        try {
+          await supabase.from('activity_log').insert({
+            entity_type: 'invoice', entity_id: id, action: 'invoice_deleted',
+            details: { vendor_invoice_no: inv.vendor_invoice_no, amount: inv.total_amount, reason: comment },
+          })
+        } catch { /* non-critical */ }
+        const { error } = await supabase.from('invoices').delete().eq('id', id)
+        if (error) { toast.error(error.message); return false }
+        toast.success('Invoice deleted')
+        return true
+      },
+      visible: userRole === 'group_admin' && inv.payment_status !== 'paid',
+      divider: true,
     },
   ]
 }
