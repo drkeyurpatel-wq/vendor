@@ -49,7 +49,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
 
   await supabase.from('purchase_order_items').insert({
     po_id: po.id, item_id: item.id, ordered_qty: qty, rate,
-    discount_percent: 0, net_rate: rate, gst_percent: gstPct,
+    trade_discount_percent: 0, net_rate: rate, gst_percent: gstPct,
     cgst_amount: cgst, sgst_amount: sgst, total_amount: total,
     unit: item.unit || 'Nos', hsn_code: item.hsn_code,
   })

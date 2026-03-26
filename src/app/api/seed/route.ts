@@ -254,26 +254,26 @@ export const POST = withApiErrorHandler(async () => {
   const icMap = new Map((icData ?? []).map(c => [c.code, c.id]))
 
   const SAMPLE_ITEMS = [
-    { item_code: 'H1I-00001', generic_name: 'Paracetamol 500mg Tablet',     category_code: 'DRUG-TAB',  unit: 'Tab',    hsn_code: '30049099', gst_rate: 12 },
-    { item_code: 'H1I-00002', generic_name: 'Amoxicillin 500mg Capsule',    category_code: 'DRUG-TAB',  unit: 'Cap',    hsn_code: '30041011', gst_rate: 12 },
-    { item_code: 'H1I-00003', generic_name: 'Ceftriaxone 1g Injection',     category_code: 'DRUG-INJ',  unit: 'Vial',   hsn_code: '30049099', gst_rate: 12 },
-    { item_code: 'H1I-00004', generic_name: 'Normal Saline 500ml IV',       category_code: 'DRUG-IV',   unit: 'Bottle', hsn_code: '30049099', gst_rate: 12 },
-    { item_code: 'H1I-00005', generic_name: 'Omeprazole 20mg Capsule',      category_code: 'DRUG-TAB',  unit: 'Cap',    hsn_code: '30049099', gst_rate: 12 },
-    { item_code: 'H1I-00006', generic_name: 'Ringer Lactate 500ml',         category_code: 'DRUG-IV',   unit: 'Bottle', hsn_code: '30049099', gst_rate: 12 },
-    { item_code: 'H1I-00007', generic_name: 'Disposable Syringe 5ml',       category_code: 'CONS-NED',  unit: 'Pc',     hsn_code: '90183100', gst_rate: 12 },
-    { item_code: 'H1I-00008', generic_name: 'Surgical Gloves (Sterile) 7.5', category_code: 'CONS-GLV', unit: 'Pair',   hsn_code: '40151100', gst_rate: 18 },
-    { item_code: 'H1I-00009', generic_name: 'N95 Mask',                     category_code: 'CONS-MSK',  unit: 'Pc',     hsn_code: '63079090', gst_rate: 5  },
-    { item_code: 'H1I-00010', generic_name: 'Cotton Roll 500g',             category_code: 'CONS-CTN',  unit: 'Roll',   hsn_code: '30059090', gst_rate: 12 },
-    { item_code: 'H1I-00011', generic_name: 'Chromic Catgut Suture 2-0',    category_code: 'SURG-SUT',  unit: 'Pc',     hsn_code: '30061010', gst_rate: 12 },
-    { item_code: 'H1I-00012', generic_name: 'Foley Catheter 16Fr',          category_code: 'SURG-DRN',  unit: 'Pc',     hsn_code: '90183900', gst_rate: 12 },
-    { item_code: 'H1I-00013', generic_name: 'Betadine Solution 500ml',      category_code: 'DRUG-OIN',  unit: 'Bottle', hsn_code: '30049099', gst_rate: 12 },
-    { item_code: 'H1I-00014', generic_name: 'Crepe Bandage 6 inch',         category_code: 'CONS-BND',  unit: 'Roll',   hsn_code: '30059010', gst_rate: 12 },
-    { item_code: 'H1I-00015', generic_name: 'Pulse Oximeter Probe (Reuse)', category_code: 'EQUIP-MON', unit: 'Pc',     hsn_code: '90189099', gst_rate: 12 },
-    { item_code: 'H1I-00016', generic_name: 'Blood Glucose Test Strip',     category_code: 'DIAG-KIT',  unit: 'Strip',  hsn_code: '38220090', gst_rate: 12 },
-    { item_code: 'H1I-00017', generic_name: 'Ondansetron 4mg Injection',    category_code: 'DRUG-INJ',  unit: 'Amp',    hsn_code: '30049099', gst_rate: 12 },
-    { item_code: 'H1I-00018', generic_name: 'Examination Gloves (Box 100)', category_code: 'CONS-GLV',  unit: 'Box',    hsn_code: '40151900', gst_rate: 18 },
-    { item_code: 'H1I-00019', generic_name: 'Surgical Blade No. 22',        category_code: 'SURG-INS',  unit: 'Pc',     hsn_code: '82121090', gst_rate: 18 },
-    { item_code: 'H1I-00020', generic_name: 'Bed Sheet Hospital (White)',    category_code: 'LINEN',     unit: 'Pc',     hsn_code: '63023100', gst_rate: 5  },
+    { item_code: 'H1I-00001', generic_name: 'Paracetamol 500mg Tablet',     category_code: 'DRUG-TAB',  unit: 'Tab',    hsn_code: '30049099', gst_percent: 12 },
+    { item_code: 'H1I-00002', generic_name: 'Amoxicillin 500mg Capsule',    category_code: 'DRUG-TAB',  unit: 'Cap',    hsn_code: '30041011', gst_percent: 12 },
+    { item_code: 'H1I-00003', generic_name: 'Ceftriaxone 1g Injection',     category_code: 'DRUG-INJ',  unit: 'Vial',   hsn_code: '30049099', gst_percent: 12 },
+    { item_code: 'H1I-00004', generic_name: 'Normal Saline 500ml IV',       category_code: 'DRUG-IV',   unit: 'Bottle', hsn_code: '30049099', gst_percent: 12 },
+    { item_code: 'H1I-00005', generic_name: 'Omeprazole 20mg Capsule',      category_code: 'DRUG-TAB',  unit: 'Cap',    hsn_code: '30049099', gst_percent: 12 },
+    { item_code: 'H1I-00006', generic_name: 'Ringer Lactate 500ml',         category_code: 'DRUG-IV',   unit: 'Bottle', hsn_code: '30049099', gst_percent: 12 },
+    { item_code: 'H1I-00007', generic_name: 'Disposable Syringe 5ml',       category_code: 'CONS-NED',  unit: 'Pc',     hsn_code: '90183100', gst_percent: 12 },
+    { item_code: 'H1I-00008', generic_name: 'Surgical Gloves (Sterile) 7.5', category_code: 'CONS-GLV', unit: 'Pair',   hsn_code: '40151100', gst_percent: 18 },
+    { item_code: 'H1I-00009', generic_name: 'N95 Mask',                     category_code: 'CONS-MSK',  unit: 'Pc',     hsn_code: '63079090', gst_percent: 5  },
+    { item_code: 'H1I-00010', generic_name: 'Cotton Roll 500g',             category_code: 'CONS-CTN',  unit: 'Roll',   hsn_code: '30059090', gst_percent: 12 },
+    { item_code: 'H1I-00011', generic_name: 'Chromic Catgut Suture 2-0',    category_code: 'SURG-SUT',  unit: 'Pc',     hsn_code: '30061010', gst_percent: 12 },
+    { item_code: 'H1I-00012', generic_name: 'Foley Catheter 16Fr',          category_code: 'SURG-DRN',  unit: 'Pc',     hsn_code: '90183900', gst_percent: 12 },
+    { item_code: 'H1I-00013', generic_name: 'Betadine Solution 500ml',      category_code: 'DRUG-OIN',  unit: 'Bottle', hsn_code: '30049099', gst_percent: 12 },
+    { item_code: 'H1I-00014', generic_name: 'Crepe Bandage 6 inch',         category_code: 'CONS-BND',  unit: 'Roll',   hsn_code: '30059010', gst_percent: 12 },
+    { item_code: 'H1I-00015', generic_name: 'Pulse Oximeter Probe (Reuse)', category_code: 'EQUIP-MON', unit: 'Pc',     hsn_code: '90189099', gst_percent: 12 },
+    { item_code: 'H1I-00016', generic_name: 'Blood Glucose Test Strip',     category_code: 'DIAG-KIT',  unit: 'Strip',  hsn_code: '38220090', gst_percent: 12 },
+    { item_code: 'H1I-00017', generic_name: 'Ondansetron 4mg Injection',    category_code: 'DRUG-INJ',  unit: 'Amp',    hsn_code: '30049099', gst_percent: 12 },
+    { item_code: 'H1I-00018', generic_name: 'Examination Gloves (Box 100)', category_code: 'CONS-GLV',  unit: 'Box',    hsn_code: '40151900', gst_percent: 18 },
+    { item_code: 'H1I-00019', generic_name: 'Surgical Blade No. 22',        category_code: 'SURG-INS',  unit: 'Pc',     hsn_code: '82121090', gst_percent: 18 },
+    { item_code: 'H1I-00020', generic_name: 'Bed Sheet Hospital (White)',    category_code: 'LINEN',     unit: 'Pc',     hsn_code: '63023100', gst_percent: 5  },
   ]
 
   const newItems = SAMPLE_ITEMS.filter(i => !existingItemCodes.has(i.item_code))
@@ -303,7 +303,7 @@ export const POST = withApiErrorHandler(async () => {
     // Get first centre and first vendor for demo PO
     const { data: centreRows } = await supabase.from('centres').select('id, code').eq('is_active', true).order('code').limit(1)
     const { data: vendorRows } = await supabase.from('vendors').select('id, vendor_code').eq('status', 'active').is('deleted_at', null).order('vendor_code').limit(1)
-    const { data: itemRows } = await supabase.from('items').select('id, item_code, generic_name, gst_rate').is('deleted_at', null).order('item_code').limit(3)
+    const { data: itemRows } = await supabase.from('items').select('id, item_code, generic_name, gst_percent').is('deleted_at', null).order('item_code').limit(3)
 
     if (centreRows?.[0] && vendorRows?.[0] && itemRows && itemRows.length > 0) {
       const centre = centreRows[0]
@@ -317,11 +317,11 @@ export const POST = withApiErrorHandler(async () => {
         item_id: item.id,
         quantity: (idx + 1) * 100,
         unit_rate: [2.5, 8.0, 120.0][idx] ?? 10.0,
-        gst_rate: item.gst_rate ?? 12,
+        gst_percent: item.gst_percent ?? 12,
       }))
 
       const subtotal = lineItems.reduce((s, l) => s + l.quantity * l.unit_rate, 0)
-      const gstAmount = lineItems.reduce((s, l) => s + l.quantity * l.unit_rate * (l.gst_rate / 100), 0)
+      const gstAmount = lineItems.reduce((s, l) => s + l.quantity * l.unit_rate * (l.gst_percent / 100), 0)
       const totalAmount = subtotal + gstAmount
 
       const { data: po, error: poError } = await supabase
@@ -351,9 +351,9 @@ export const POST = withApiErrorHandler(async () => {
           item_id: l.item_id,
           quantity: l.quantity,
           unit_rate: l.unit_rate,
-          gst_rate: l.gst_rate,
-          gst_amount: l.quantity * l.unit_rate * (l.gst_rate / 100),
-          total_amount: l.quantity * l.unit_rate * (1 + l.gst_rate / 100),
+          gst_percent: l.gst_percent,
+          gst_amount: l.quantity * l.unit_rate * (l.gst_percent / 100),
+          total_amount: l.quantity * l.unit_rate * (1 + l.gst_percent / 100),
           line_number: idx + 1,
         }))
 

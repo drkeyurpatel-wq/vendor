@@ -457,7 +457,7 @@ export async function POST(req: NextRequest) {
 
         // Update entity with tally voucher number
         if (entityTable === 'purchase_orders') {
-          await supabase.from('invoices').update({ tally_voucher_no: tallyVoucherNo, tally_sync_date: new Date().toISOString() }).eq('po_id', entity_id)
+          // tally_voucher_no and tally_sync_date don't exist on invoices table
         } else if (entityTable === 'debit_notes' || entityTable === 'credit_notes') {
           await supabase.from(entityTable).update({ tally_voucher_no: tallyVoucherNo }).eq('id', entity_id)
         }

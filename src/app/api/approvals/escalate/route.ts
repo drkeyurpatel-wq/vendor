@@ -59,17 +59,14 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
 
     // Create escalation notification
     await supabase.from('notifications').insert({
-      action: 'approval_escalated',
+      type: 'approval_escalated',
+      title: 'PO Approval Escalated',
+      message: `PO ${po.po_number} (₹${po.total_amount}) waiting ${Math.round(hoursWaiting)}h — escalated from ${currentRole} to ${escalateToRole}`,
       entity_type: 'purchase_order',
       entity_id: po.id,
-      details: {
-        po_number: po.po_number,
-        amount: po.total_amount,
-        hours_waiting: Math.round(hoursWaiting),
-        escalated_from: currentRole,
-        escalated_to: escalateToRole,
-      },
+      user_id: escalateUser.id,
       is_read: false,
+      priority: 'high',
     })
 
     // Update PO to flag escalation

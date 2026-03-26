@@ -97,15 +97,15 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     // If batch specified, deduct from batch_stock too
     if (line.batch_number) {
       const { data: batchStock } = await supabase.from('batch_stock')
-        .select('id, current_stock')
+        .select('id, qty_available')
         .eq('item_id', vpmsItem.id)
         .eq('centre_id', centre.id)
         .eq('batch_number', line.batch_number)
         .single()
 
-      if (batchStock && batchStock.current_stock >= qtyToDeduct) {
+      if (batchStock && batchStock.qty_available >= qtyToDeduct) {
         await supabase.from('batch_stock').update({
-          current_stock: batchStock.current_stock - qtyToDeduct,
+          qty_available: batchStock.qty_available - qtyToDeduct,
         }).eq('id', batchStock.id)
       }
     }

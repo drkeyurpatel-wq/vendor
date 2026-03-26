@@ -70,8 +70,9 @@ export default function VendorPOActions({ poId, poNumber, poStatus, vendorId }: 
         details: { po_number: poNumber, reason: comment },
       })
       await supabase.from('notifications').insert({
-        action: 'vendor_dispute', entity_type: 'purchase_order', entity_id: poId,
-        details: { po_number: poNumber, reason: comment },
+        type: 'vendor_dispute', entity_type: 'purchase_order', entity_id: poId,
+        title: 'Vendor Dispute', message: JSON.stringify({ po_number: poNumber, reason: comment }),
+        is_read: false, priority: 'high',
       })
     } catch {}
 

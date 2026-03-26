@@ -113,16 +113,13 @@ export async function GET(request: NextRequest) {
     if (dueSoon && dueSoon.length > 0) {
       // Create notifications for upcoming payments
       const notifications = dueSoon.map((inv: any) => ({
-        action: 'payment_due_reminder',
+        type: 'payment_due_reminder',
+        title: 'Payment Due Soon',
+        message: `Invoice ${inv.invoice_ref} — ₹${inv.total_amount?.toLocaleString()} due ${inv.due_date} (${inv.vendor?.legal_name || 'Unknown'})`,
         entity_type: 'invoice',
         entity_id: inv.id,
-        details: {
-          invoice_ref: inv.invoice_ref,
-          amount: inv.total_amount,
-          due_date: inv.due_date,
-          vendor: inv.vendor?.legal_name,
-        },
         is_read: false,
+        priority: 'normal',
       }))
       await supabase.from('notifications').insert(notifications)
       results.payment_reminders = { sent: dueSoon.length, total_amount: dueSoon.reduce((s: number, i: any) => s + (i.total_amount || 0), 0) }

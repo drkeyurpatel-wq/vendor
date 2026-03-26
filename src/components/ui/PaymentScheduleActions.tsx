@@ -98,7 +98,7 @@ export default function PaymentScheduleActions({ payment, userRole }: { payment:
       // Update batch total
       const { data: items } = await supabase.from('payment_batch_items').select('amount').eq('batch_id', batch!.id)
       const total = items?.reduce((s, i) => s + (i.amount || 0), 0) || 0
-      await supabase.from('payment_batches').update({ total_amount: total, updated_at: new Date().toISOString() }).eq('id', batch!.id)
+      await supabase.from('payment_batches').update({ total_amount: total }).eq('id', batch!.id)
 
       toast.success(`Added to ${batch!.batch_number} (Saturday ${satDate})`)
       router.refresh()
