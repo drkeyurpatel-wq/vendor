@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { format } from 'date-fns'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -122,4 +123,4 @@ export async function POST(request: NextRequest) {
     amount: total,
     message: `${poNum} → ${grnNum} → ${invRef} | ₹${total.toLocaleString('en-IN')}`,
   })
-}
+})

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 // ─── Master Data: Centres ───────────────────────────────────
 const CENTRES = [
@@ -99,7 +100,7 @@ const ITEM_CATEGORIES: { code: string; name: string; children?: { code: string; 
   { code: 'OTHER', name: 'Miscellaneous' },
 ]
 
-export async function POST() {
+export const POST = withApiErrorHandler(async () => {
   // Block seed endpoint in production
   if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_SEED) {
     return NextResponse.json(
@@ -373,4 +374,4 @@ export async function POST() {
   }
 
   return NextResponse.json({ success: true, results })
-}
+})

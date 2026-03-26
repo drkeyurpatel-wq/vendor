@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as XLSX from 'xlsx'
 import { rateLimit } from '@/lib/rate-limit'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 // CSV/Excel template definitions for each import type
 const TEMPLATES: Record<string, { name: string; headers: string[]; sampleRows: string[][]; instructions: string[] }> = {
@@ -168,7 +169,7 @@ const TEMPLATES: Record<string, { name: string; headers: string[]; sampleRows: s
   }
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 30, 60000)
   if (!rateLimitResult.success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
@@ -243,4 +244,4 @@ export async function GET(request: NextRequest) {
       'Content-Disposition': `attachment; filename="${template.name}.xlsx"`,
     }
   })
-}
+})

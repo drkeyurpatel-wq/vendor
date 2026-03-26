@@ -8,6 +8,7 @@ import {
 import { format } from 'date-fns'
 import { rateLimit } from '@/lib/rate-limit'
 import { HEALTH1_LOGO_BASE64 } from '@/lib/logo-base64'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 // ============================================================
 // H1 VPMS — GRN DOCX Generator
@@ -43,7 +44,7 @@ function cellText(text: string, bold = false, size = 18, color = '000000'): Para
   })
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 20, 60000)
   if (!rateLimitResult.success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
@@ -336,4 +337,4 @@ export async function GET(request: NextRequest) {
       'Content-Length': String(buffer.length),
     },
   })
-}
+})

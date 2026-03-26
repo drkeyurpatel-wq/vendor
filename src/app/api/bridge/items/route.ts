@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { validateBridge, bridgeSuccess, bridgeError } from '@/lib/bridge-auth'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 /**
  * FLOW D: Shared Item/Drug Master Sync
@@ -33,7 +34,7 @@ import { validateBridge, bridgeSuccess, bridgeError } from '@/lib/bridge-auth'
  */
 
 // GET: HMIS pulls VPMS items
-export async function GET(request: NextRequest) {
+export const GET = withApiErrorHandler(async (request: NextRequest) => {
   const authErr = validateBridge(request)
   if (authErr) return authErr
 
@@ -78,10 +79,10 @@ export async function GET(request: NextRequest) {
     since: since || 'full',
     items: response,
   })
-}
+})
 
 // POST: HMIS pushes items to VPMS
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const authErr = validateBridge(request)
   if (authErr) return authErr
 
@@ -142,4 +143,4 @@ export async function POST(request: NextRequest) {
     total: items.length, created, updated, failed,
     errors: errors.length > 0 ? errors : undefined,
   })
-}
+})
