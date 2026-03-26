@@ -61,7 +61,6 @@ export default async function VendorPerformancePage({
       service_score,
       overall_score,
       notes,
-      created_at,
       vendor:vendors(id, vendor_code, legal_name, status)
     `)
     .eq('month', selectedMonth)

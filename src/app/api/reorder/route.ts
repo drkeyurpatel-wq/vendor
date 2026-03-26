@@ -57,7 +57,7 @@ async function scanReorderNeeds(supabase: any): Promise<ReorderItem[]> {
   const itemIds = Array.from(new Set(belowReorder.map((r: any) => r.item_id)))
   const { data: vendorItems } = await supabase
     .from('vendor_items')
-    .select('item_id, vendor_id, rate, vendor:vendors(vendor_code, legal_name, status)')
+    .select('item_id, vendor_id, last_quoted_rate, vendor:vendors(vendor_code, legal_name, status)')
     .in('item_id', itemIds)
     .eq('l_rank', 1)
 
@@ -98,7 +98,7 @@ async function scanReorderNeeds(supabase: any): Promise<ReorderItem[]> {
         l1_vendor_id: vi?.vendor_id || null,
         l1_vendor_code: vi?.vendor?.vendor_code || null,
         l1_vendor_name: vi?.vendor?.legal_name || null,
-        l1_rate: vi?.rate || null,
+        l1_rate: vi?.last_quoted_rate || null,
       }
     })
 }

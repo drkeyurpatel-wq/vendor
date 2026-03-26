@@ -26,7 +26,7 @@ interface VendorDocument {
   file_name: string
   file_path: string
   is_verified: boolean
-  uploaded_at: string
+  created_at: string
 }
 
 export default function VendorDocumentsPage() {
@@ -45,9 +45,9 @@ export default function VendorDocumentsPage() {
     setLoading(true)
     const { data, error } = await supabase
       .from('vendor_documents')
-      .select('id, vendor_id, document_type, file_name, file_path, is_verified, uploaded_at')
+      .select('id, vendor_id, document_type, file_name, file_path, is_verified, created_at')
       .eq('vendor_id', vendorId)
-      .order('uploaded_at', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (error) {
       toast.error('Failed to load documents')
@@ -279,7 +279,7 @@ export default function VendorDocumentsPage() {
                       <span className="text-sm text-gray-900">{doc.file_name}</span>
                     </td>
                     <td className="text-sm text-gray-600">
-                      {formatDate(doc.uploaded_at)}
+                      {formatDate(doc.created_at)}
                     </td>
                     <td>
                       {doc.is_verified ? (

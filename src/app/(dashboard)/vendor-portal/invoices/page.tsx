@@ -72,7 +72,7 @@ export default async function VendorInvoicesPage({
     .from('invoices')
     .select(`
       id, invoice_ref, vendor_invoice_no, vendor_invoice_date, total_amount, paid_amount, due_date,
-      payment_status, match_status, net_payable,
+      payment_status, match_status,
       po:purchase_orders(po_number),
       grn:grns(grn_number),
       centre:centres(code)

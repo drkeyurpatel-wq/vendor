@@ -53,19 +53,19 @@ export default async function VendorPaymentsPage({
   const { data: payments } = await supabase
     .from('payment_batch_items')
     .select(`
-      id, amount, payment_mode, utr_number, reference_number, status, created_at,
+      id, amount, payment_mode, utr_number, reference_number, status, payment_date,
       invoice:invoices!inner(id, invoice_ref, vendor_id, vendor_invoice_no),
       batch:payment_batches(batch_number, payment_date, status)
     `)
     .eq('invoice.vendor_id', vendor.id)
-    .order('created_at', { ascending: false })
+    .order('payment_date', { ascending: false })
     .range((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE - 1)
 
   // Summary stats
   const totalPaid = payments?.reduce((s, p: any) => s + (p.amount || 0), 0) ?? 0
   const lastPayment = payments?.[0]
   const batch = Array.isArray(lastPayment?.batch) ? lastPayment?.batch[0] : lastPayment?.batch
-  const lastPaymentDate = batch?.payment_date || lastPayment?.created_at
+  const lastPaymentDate = batch?.payment_date || lastPayment?.payment_date
 
   // Next expected Saturday
   const now = new Date()

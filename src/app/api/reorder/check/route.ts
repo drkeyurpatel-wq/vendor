@@ -200,7 +200,7 @@ async function scanReorderNeeds(supabase: any): Promise<ReorderSuggestion[]> {
   const itemIds = Array.from(new Set(belowReorder.map((s: any) => s.item_id)))
   const { data: vendorMappings } = await supabase
     .from('vendor_items')
-    .select('item_id, vendor_id, last_purchase_rate, contracted_rate, l_rank, vendor:vendors(vendor_code, legal_name, status)')
+    .select('item_id, vendor_id, last_quoted_rate, l_rank, vendor:vendors(vendor_code, legal_name, status)')
     .in('item_id', itemIds)
     .eq('l_rank', 1)
 
@@ -224,7 +224,7 @@ async function scanReorderNeeds(supabase: any): Promise<ReorderSuggestion[]> {
 
   return belowReorder.map((stock: any) => {
     const vm = vendorMap.get(stock.item_id)
-    const rate = vm?.contracted_rate || vm?.last_purchase_rate || stock.last_grn_rate || 0
+    const rate = vm?.last_quoted_rate || stock.last_grn_rate || 0
     const orderQty = Math.max(1, Math.round((stock.max_level || stock.reorder_level * 3) - stock.current_stock))
 
     return {

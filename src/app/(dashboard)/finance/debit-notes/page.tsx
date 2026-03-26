@@ -61,9 +61,9 @@ export default async function DebitNotesPage({
 
   const { data: totalAmountData } = await supabase
     .from('debit_notes')
-    .select('amount')
+    .select('total_amount')
 
-  const totalAmount = totalAmountData?.reduce((sum: number, dn: any) => sum + (dn.amount || 0), 0) ?? 0
+  const totalAmount = totalAmountData?.reduce((sum: number, dn: any) => sum + (dn.total_amount || 0), 0) ?? 0
 
   const { count: pendingCount } = await supabase
     .from('debit_notes')
@@ -171,7 +171,7 @@ export default async function DebitNotesPage({
                         {dn.reason?.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="text-sm font-semibold">{formatLakhs(dn.amount)}</td>
+                    <td className="text-sm font-semibold">{formatLakhs(dn.total_amount)}</td>
                     <td>
                       <span className={cn('badge', DN_STATUS_COLORS[dn.status] || DN_STATUS_COLORS.draft)}>
                         {dn.status?.replace(/_/g, ' ')}
@@ -187,7 +187,7 @@ export default async function DebitNotesPage({
                           debitNoteId={dn.id}
                           dnNumber={dn.debit_note_number}
                           status={dn.status}
-                          amount={dn.amount}
+                          amount={dn.total_amount}
                           vendorName={dn.vendor?.legal_name}
                           userRole={role}
                         />

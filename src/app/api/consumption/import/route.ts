@@ -180,18 +180,18 @@ export async function POST(req: NextRequest) {
     const today = new Date().toISOString().split('T')[0]
     const { data: contractItems } = await supabase
       .from('rate_contract_items')
-      .select('item_id, rate, vendor_rank, rate_contract:rate_contracts!inner(vendor_id, status, valid_from, valid_to)')
+      .select('item_id, rate, l_rank, rate_contract:rate_contracts!inner(vendor_id, status, valid_from, valid_to)')
       .in('item_id', allItemIds)
       .eq('rate_contract.status', 'active')
       .lte('rate_contract.valid_from', today)
       .gte('rate_contract.valid_to', today)
-      .order('vendor_rank', { ascending: true })
+      .order('l_rank', { ascending: true })
 
     // Build map: item_id → { vendor_id, rate, rank }  (L1 = rank 1 preferred)
     const l1VendorMap = new Map<string, { vendor_id: string; rate: number; rank: number }>()
     contractItems?.forEach((ci: any) => {
       const existing = l1VendorMap.get(ci.item_id)
-      const rank = ci.vendor_rank || 99
+      const rank = ci.l_rank || 99
       if (!existing || rank < existing.rank) {
         l1VendorMap.set(ci.item_id, {
           vendor_id: ci.rate_contract?.vendor_id,
