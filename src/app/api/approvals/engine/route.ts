@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimit } from '@/lib/rate-limit'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 // ============================================================
 // H1 VPMS — Multi-Level PO Approval Engine
@@ -23,7 +24,7 @@ function getRequiredLevel(amount: number): number {
   return APPROVAL_LEVELS.length
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 20, 60000)
   if (!rateLimitResult.success) return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
 
@@ -153,10 +154,10 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
-}
+})
 
 // GET: Check approval status and next required approver
-export async function GET(request: NextRequest) {
+export const GET = withApiErrorHandler(async (request: NextRequest) => {
   const poId = request.nextUrl.searchParams.get('po_id')
   if (!poId) return NextResponse.json({ error: 'po_id required' }, { status: 400 })
 
@@ -186,4 +187,4 @@ export async function GET(request: NextRequest) {
       completed: approvals?.find(a => a.approval_level === l.level),
     })),
   })
-}
+})

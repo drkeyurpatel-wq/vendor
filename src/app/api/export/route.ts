@@ -1,13 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 /**
  * CSV Export API
  * Exports data from various tables as CSV files
  * Usage: /api/export?type=purchase_orders&status=approved
  */
-export async function GET(req: NextRequest) {
+export const GET = withApiErrorHandler(async (req: NextRequest) => {
   const rateLimitResult = await rateLimit(req, 10, 60000)
   if (!rateLimitResult.success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
@@ -134,4 +135,4 @@ export async function GET(req: NextRequest) {
       'Transfer-Encoding': 'chunked',
     },
   })
-}
+})

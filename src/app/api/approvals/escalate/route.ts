@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 // ============================================================
 // H1 VPMS — Approval SLA Escalation
@@ -15,7 +16,7 @@ const ESCALATION_ROLES: Record<string, string> = {
   group_admin: 'group_admin', // MD is final
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const supabase = await createClient()
   const now = new Date()
 
@@ -81,4 +82,4 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ escalated, checked: pendingPOs.length })
-}
+})

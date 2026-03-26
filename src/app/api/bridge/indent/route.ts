@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { validateBridge, bridgeSuccess, bridgeError } from '@/lib/bridge-auth'
 import { format } from 'date-fns'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 /**
  * FLOW B: Pharmacy/Ward Indent → VPMS Purchase Indent
@@ -22,7 +23,7 @@ import { format } from 'date-fns'
  *   ]
  * }
  */
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const authErr = validateBridge(request)
   if (authErr) return authErr
 
@@ -95,4 +96,4 @@ export async function POST(request: NextRequest) {
     items_not_found: notFound,
     message: `Indent ${indentNum} created with ${indentItems.length} items${notFound.length ? `. Not found: ${notFound.join(', ')}` : ''}`,
   })
-}
+})

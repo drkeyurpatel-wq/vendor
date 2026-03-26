@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimit } from '@/lib/rate-limit'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 interface SearchResult {
   id: string
@@ -9,7 +10,7 @@ interface SearchResult {
   subtitle: string | null
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withApiErrorHandler(async (request: NextRequest) => {
   // Rate limit: 30 requests per minute
   const rateLimitResult = await rateLimit(request, 30, 60000)
   if (!rateLimitResult.success) {
@@ -143,4 +144,4 @@ export async function GET(request: NextRequest) {
       },
     }
   )
-}
+})

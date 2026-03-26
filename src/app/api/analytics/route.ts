@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 /**
  * AI Analytics API
@@ -106,7 +107,7 @@ function stdDev(values: number[]): number {
   return Math.sqrt(variance)
 }
 
-export async function GET(req: NextRequest) {
+export const GET = withApiErrorHandler(async (req: NextRequest) => {
   const rateLimitResult = await rateLimit(req, 30, 60000)
   if (!rateLimitResult.success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
@@ -428,7 +429,7 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json(response)
-}
+})
 
 // ── Advanced Anomaly Detection ──
 async function detectAnomalies(supabase: any, centreId: string | null) {

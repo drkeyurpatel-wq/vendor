@@ -5,6 +5,7 @@ import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
 import { rateLimit } from '@/lib/rate-limit'
 import { renderPDFHeader } from '@/lib/pdf-header'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 // ============================================================
 // H1 VPMS — GRN PDF Generator
@@ -32,7 +33,7 @@ function formatDate(date: string | null): string {
   return format(new Date(date), 'dd MMM yyyy')
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 20, 60000)
   if (!rateLimitResult.success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
@@ -340,4 +341,4 @@ export async function GET(request: NextRequest) {
       'Content-Length': String(pdfBuffer.length),
     },
   })
-}
+})

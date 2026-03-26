@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 // ============================================================
 // H1 VPMS — Vendor Scorecard Auto-Computation
@@ -8,7 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 // Auto-flags vendors below threshold
 // ============================================================
 
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const supabase = await createClient()
 
   const now = new Date()
@@ -138,4 +139,4 @@ export async function POST(request: NextRequest) {
     auto_blacklisted: blacklisted,
     scores: results,
   })
-}
+})

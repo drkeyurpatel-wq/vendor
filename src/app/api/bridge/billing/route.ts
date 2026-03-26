@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { validateBridge, bridgeSuccess, bridgeError } from '@/lib/bridge-auth'
 import { format } from 'date-fns'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 /**
  * FLOW A: Patient Billing → Consignment Conversion
@@ -25,7 +26,7 @@ import { format } from 'date-fns'
  *   bill_number: "SHI-BILL-2026-4521"  // HMIS bill reference
  * }
  */
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const authErr = validateBridge(request)
   if (authErr) return authErr
 
@@ -125,4 +126,4 @@ export async function POST(request: NextRequest) {
     amount: convertData.amount,
     message: `Consignment billed: ${patient_name} → ${convertData.message}`,
   })
-}
+})

@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
-export async function POST(req: NextRequest) {
+export const POST = withApiErrorHandler(async (req: NextRequest) => {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -136,4 +137,4 @@ export async function POST(req: NextRequest) {
       ? `Ready to create PO with L1 vendor`
       : `No common L1 vendor found — select vendor manually. ${Object.keys(itemVendorMap).length} items have vendor mappings.`,
   })
-}
+})

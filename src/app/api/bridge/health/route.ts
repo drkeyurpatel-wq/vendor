@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { validateBridge, bridgeSuccess, bridgeError } from '@/lib/bridge-auth'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 /**
  * Bridge Health Check
  * GET — returns VPMS status, table counts, last sync times
  * HMIS should call this periodically to verify bridge is alive.
  */
-export async function GET(request: NextRequest) {
+export const GET = withApiErrorHandler(async (request: NextRequest) => {
   const authErr = validateBridge(request)
   if (authErr) return authErr
 
@@ -55,4 +56,4 @@ export async function GET(request: NextRequest) {
       items_sync: '/api/bridge/items',
     },
   })
-}
+})

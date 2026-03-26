@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { rateLimit } from '@/lib/rate-limit'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 // ============================================================
 // H1 VPMS — Batch 3-Way Match
@@ -11,7 +12,7 @@ import { rateLimit } from '@/lib/rate-limit'
 const RATE_TOLERANCE = 0.005 // 0.5%
 const QTY_TOLERANCE = 0.02  // 2%
 
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 5, 60000)
   if (!rateLimitResult.success) return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
 
@@ -112,4 +113,4 @@ export async function POST(request: NextRequest) {
     matched, partial_match: partial, mismatch: mismatched, skipped,
     message: `${matched} matched, ${partial} partial, ${mismatched} mismatch, ${skipped} skipped`,
   })
-}
+})

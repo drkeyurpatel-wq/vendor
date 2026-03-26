@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { validateBridge, bridgeSuccess, bridgeError } from '@/lib/bridge-auth'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 /**
  * FLOW C: OT/Procedure Consumption → VPMS Stock Deduction
@@ -24,7 +25,7 @@ import { validateBridge, bridgeSuccess, bridgeError } from '@/lib/bridge-auth'
  *   ]
  * }
  */
-export async function POST(request: NextRequest) {
+export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const authErr = validateBridge(request)
   if (authErr) return authErr
 
@@ -130,4 +131,4 @@ export async function POST(request: NextRequest) {
     patient: patient_name,
     procedure,
   })
-}
+})
