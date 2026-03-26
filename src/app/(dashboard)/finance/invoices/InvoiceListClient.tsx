@@ -35,11 +35,16 @@ function getInvoiceRowActions(inv: Invoice, userRole: string): RowAction[] {
       onExecute: async (id) => {
         try {
           const res = await fetch('/api/invoices/match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ invoice_id: id }) })
-          if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Match failed') }
           const data = await res.json()
-          toast.success(`Match result: ${data.match_status?.replace(/_/g, ' ')}`)
+          if (!res.ok) { toast.error(data.error || 'Match failed'); return false }
+          const status = data.match_status || 'unknown'
+          const reason = data.reason || ''
+          if (status === 'matched') toast.success('3-way match: all items matched')
+          else if (status === 'partial_match') toast('3-way match: partial — some items have discrepancies', { icon: '⚠️', duration: 5000 })
+          else toast.error(reason || '3-way match: mismatch — payment blocked', { duration: 5000 })
+          if (data.warnings?.length) data.warnings.forEach((w: string) => toast(w, { icon: 'ℹ️', duration: 4000 }))
           return true
-        } catch (err: any) { toast.error(err.message); return false }
+        } catch (err: any) { toast.error(err?.message || 'Match failed — network error'); return false }
       },
       visible: inv.match_status === 'pending' && canManage, divider: true,
     },
