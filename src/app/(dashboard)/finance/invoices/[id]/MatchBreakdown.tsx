@@ -86,7 +86,13 @@ export default function MatchBreakdown({
       } else if (data.match_status === 'partial_match') {
         toast('Partial match detected -- some items have discrepancies', { icon: '\u26A0\uFE0F' })
       } else {
-        toast.error('Mismatch detected -- payment blocked until resolved')
+        const reason = data.reason || 'Mismatch detected -- payment blocked until resolved'
+        toast.error(reason, { duration: 6000 })
+      }
+
+      // Show warnings if any
+      if (data.warnings?.length) {
+        data.warnings.forEach((w: string) => toast(w, { icon: '\u26A0\uFE0F', duration: 5000 }))
       }
     } catch {
       toast.error('Network error -- please try again')

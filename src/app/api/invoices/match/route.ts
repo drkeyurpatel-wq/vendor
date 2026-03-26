@@ -87,9 +87,15 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     .eq('po_id', poId)
     .in('status', ['submitted', 'verified'])
 
+  // Also check for discrepancy GRNs — warn user if that's why matching fails
+  const { data: allGrnsForPO } = await supabase
+    .from('grns').select('id, status').eq('po_id', poId)
+  const discrepancyGRNs = allGrnsForPO?.filter(g => g.status === 'discrepancy') ?? []
+  const verifiedGRNs = grns ?? []
+
   let grnItemsMap = new Map<string, number>()
-  if (grns && grns.length > 0) {
-    const grnIds = grns.map(g => g.id)
+  if (verifiedGRNs.length > 0) {
+    const grnIds = verifiedGRNs.map(g => g.id)
     const { data: grnItems } = await supabase
       .from('grn_items')
       .select('item_id, accepted_qty')
@@ -101,11 +107,29 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     })
   }
 
-  // Try to get invoice line items (if table exists)
-  const { data: invoiceItems } = await supabase
-    .from('invoice_items')
-    .select('item_id, qty, rate')
-    .eq('invoice_id', invoice_id)
+  // If no verified/submitted GRNs but discrepancy GRNs exist, inform the user
+  if (verifiedGRNs.length === 0 && discrepancyGRNs.length > 0) {
+    await supabase.from('invoices')
+      .update({ match_status: 'mismatch', updated_at: new Date().toISOString() })
+      .eq('id', invoice_id)
+    return NextResponse.json({
+      match_status: 'mismatch',
+      reason: `${discrepancyGRNs.length} GRN(s) found but all are in DISCREPANCY status. Verify the GRN first, then re-run the match.`,
+      results: [],
+    })
+  }
+
+  // Try to get invoice line items (if table exists — may not be created yet)
+  let invoiceItems: any[] | null = null
+  try {
+    const { data, error } = await supabase
+      .from('invoice_items')
+      .select('item_id, qty, rate')
+      .eq('invoice_id', invoice_id)
+    if (!error) invoiceItems = data
+  } catch {
+    // Table doesn't exist yet — fall back to PO vs GRN comparison
+  }
 
   const invoiceItemsMap = new Map<string, { qty: number; rate: number }>()
   invoiceItems?.forEach((ii: any) => {
@@ -169,27 +193,48 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
 
   // Update invoice
   const now = new Date().toISOString()
-  await supabase.from('invoices')
+  const { error: updateError } = await supabase.from('invoices')
     .update({ match_status: matchStatus, updated_at: now })
     .eq('id', invoice_id)
 
-  // Log activity
-  await supabase.from('activity_log').insert({
-    user_id: user.id,
-    action: 'invoice_matched',
-    entity_type: 'invoice',
-    entity_id: invoice_id,
-    details: { match_status: matchStatus, item_count: results.length },
-  })
+  if (updateError) {
+    return NextResponse.json({
+      error: `Failed to update invoice: ${updateError.message}`,
+      match_status: matchStatus,
+      results,
+    }, { status: 500 })
+  }
 
-  // Notify: in-app notification (especially important on mismatch — payment blocked)
+  // Log activity (non-blocking — never fail the match because of logging)
+  try {
+    await supabase.from('activity_log').insert({
+      user_id: user.id,
+      action: 'invoice_matched',
+      entity_type: 'invoice',
+      entity_id: invoice_id,
+      details: { match_status: matchStatus, item_count: results.length },
+    })
+  } catch { /* non-critical */ }
+
+  // Notify (non-blocking)
   sendInAppNotification(supabase, {
     action: 'invoice_matched',
     entity_type: 'invoice',
     entity_id: invoice_id,
     details: { match_status: matchStatus, invoice_ref: invoice_id },
     actor_user_id: user.id,
-  }).catch(() => {})
+  }).then(() => {}, () => {})
+
+  const warnings: string[] = []
+  if (discrepancyGRNs.length > 0) {
+    warnings.push(`${discrepancyGRNs.length} GRN(s) in discrepancy status — not included in match`)
+  }
+  if (!invoiceItems || invoiceItems.length === 0) {
+    warnings.push('No invoice line items found — matching against PO rates and GRN quantities')
+  }
+  if (verifiedGRNs.length === 0 && discrepancyGRNs.length === 0) {
+    warnings.push('No GRNs found for this PO — all quantities default to 0')
+  }
 
   return NextResponse.json({
     match_status: matchStatus,
@@ -199,5 +244,6 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
       matched: results.filter(r => r.qty_match && r.rate_match).length,
       mismatched: results.filter(r => !r.qty_match || !r.rate_match).length,
     },
+    ...(warnings.length > 0 && { warnings }),
   })
 })
