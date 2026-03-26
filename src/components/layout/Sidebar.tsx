@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, Package, ShoppingCart, ClipboardList,
   FileText, CreditCard, BarChart2, Settings, ChevronDown,
   Building2, LogOut, TrendingDown, Warehouse, AlertTriangle,
-  X, PanelLeftClose, PanelLeftOpen, Search, Heart,
+  X, PanelLeftClose, PanelLeftOpen, Search,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -48,14 +48,11 @@ const NAV: NavItem[] = [
       { label: 'Add Item', href: '/items/new' },
       { label: 'Categories', href: '/items/categories' },
       { label: 'Stock Levels', href: '/items/stock' },
-      { label: 'Consumption Report', href: '/items/consumption' },
-      { label: 'Upload Consumption', href: '/items/consumption/upload' },
     ]
   },
   {
     label: 'Purchase', icon: <ShoppingCart size={18} />,
     children: [
-      { label: 'Purchase Indents', href: '/purchase-orders/indents' },
       { label: 'Purchase Orders', href: '/purchase-orders' },
       { label: 'New PO', href: '/purchase-orders/new' },
     ]
@@ -83,19 +80,7 @@ const NAV: NavItem[] = [
     label: 'Inventory', icon: <Warehouse size={18} />,
     children: [
       { label: 'Stock Levels', href: '/items/stock' },
-      { label: 'Auto-Reorder', href: '/inventory/reorder' },
-      { label: 'Stock Transfers', href: '/inventory/transfers' },
       { label: 'Expiry Alerts', href: '/inventory/expiry-alerts' },
-      { label: 'Demand Forecasting', href: '/inventory/forecasting' },
-    ]
-  },
-  {
-    label: 'Consignment', icon: <Heart size={18} />,
-    children: [
-      { label: 'Dashboard', href: '/consignment' },
-      { label: 'Receive Challan', href: '/consignment/deposits/new' },
-      { label: 'Stock View', href: '/consignment/stock' },
-      { label: 'Usage Log', href: '/consignment/usage' },
     ]
   },
   {
@@ -108,7 +93,6 @@ const NAV: NavItem[] = [
       { label: 'PO Aging', href: '/reports/po-aging' },
       { label: 'Item Purchase History', href: '/reports/item-purchase-history' },
       { label: 'Vendor Performance', href: '/reports/vendor-performance' },
-      { label: 'AI Analytics', href: '/analytics' },
     ]
   },
   {
@@ -119,12 +103,8 @@ const NAV: NavItem[] = [
       { label: 'Users', href: '/settings/users' },
       { label: 'Approval Matrix', href: '/settings/approvals' },
       { label: 'Rate Contracts', href: '/settings/rate-contracts' },
-      { label: 'Document Alerts', href: '/settings/document-alerts' },
-      { label: 'Data Import', href: '/settings/data-import' },
       { label: 'Audit Log', href: '/settings/audit-log' },
       { label: 'Audit Trail', href: '/settings/audit-trail' },
-      { label: 'Tally Integration', href: '/settings/tally' },
-      { label: 'Delegations', href: '/settings/delegations' },
     ]
   },
 ]
