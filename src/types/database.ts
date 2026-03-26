@@ -1,6 +1,12 @@
 // ============================================================
 // H1 VPMS — Hospital-Grade TypeScript Types
 // Matches 002_hospital_grade_overhaul.sql schema
+//
+// PII/PHI Tagging Convention (per Engineering v2 supplement):
+//   @PII           — Personally identifiable (name, phone, email)
+//   @PII-financial — Financial/compliance PII (GSTIN, PAN, bank details)
+//   @PHI           — Protected health information (if applicable)
+// These tags enable automated audit: grep -r "@PII" src/types/
 // ============================================================
 
 // ─── Enums ────────────────────────────────────────────────
@@ -58,8 +64,8 @@ export interface Centre {
   address: string | null
   city: string | null
   state: string | null
-  phone: string | null
-  email: string | null
+  /** @PII */ phone: string | null
+  /** @PII */ email: string | null
   is_active: boolean
   created_at: string
 }
@@ -67,9 +73,9 @@ export interface Centre {
 export interface UserProfile {
   id: string
   tenant_id: string | null
-  full_name: string
-  email: string
-  phone: string | null
+  /** @PII */ full_name: string
+  /** @PII */ email: string
+  /** @PII */ phone: string | null
   role: UserRole
   centre_id: string | null
   is_active: boolean
@@ -97,13 +103,13 @@ export interface Vendor {
   trade_name: string | null
   category_id: string | null
   vendor_type: VendorType
-  gstin: string | null
-  pan: string | null
-  drug_license_no: string | null
-  fssai_no: string | null
+  /** @PII-financial */ gstin: string | null
+  /** @PII-financial */ pan: string | null
+  /** @PII-financial */ drug_license_no: string | null
+  /** @PII-financial */ fssai_no: string | null
   // MSME
-  msme_registration_no: string | null
-  udyam_number: string | null
+  /** @PII-financial */ msme_registration_no: string | null
+  /** @PII-financial */ udyam_number: string | null
   msme_category: MSMECategory | null
   // Compliance
   drug_license_expiry: string | null
@@ -117,12 +123,12 @@ export interface Vendor {
   lower_tds_rate: number | null
   lower_tds_valid_till: string | null
   // Contacts
-  primary_contact_name: string | null
-  primary_contact_phone: string | null
-  primary_contact_email: string | null
-  secondary_contact_name: string | null
-  secondary_contact_phone: string | null
-  secondary_contact_email: string | null
+  /** @PII */ primary_contact_name: string | null
+  /** @PII */ primary_contact_phone: string | null
+  /** @PII */ primary_contact_email: string | null
+  /** @PII */ secondary_contact_name: string | null
+  /** @PII */ secondary_contact_phone: string | null
+  /** @PII */ secondary_contact_email: string | null
   secondary_contact_designation: string | null
   // Address
   address: string | null
@@ -131,8 +137,8 @@ export interface Vendor {
   pincode: string | null
   // Banking
   bank_name: string | null
-  bank_account_no: string | null
-  bank_ifsc: string | null
+  /** @PII-financial */ bank_account_no: string | null
+  /** @PII-financial */ bank_ifsc: string | null
   bank_account_type: string | null
   bank_verified: boolean
   // Commercial
@@ -154,7 +160,7 @@ export interface Vendor {
   pan_verified: boolean
   approved_centres: string[] | null
   portal_access: boolean
-  portal_email: string | null
+  /** @PII */ portal_email: string | null
   // Meta
   created_at: string
   updated_at: string
@@ -171,8 +177,8 @@ export interface VendorContact {
   vendor_id: string
   contact_name: string
   designation: string | null
-  phone: string | null
-  email: string | null
+  /** @PII */ phone: string | null
+  /** @PII */ email: string | null
   is_primary: boolean
   is_active: boolean
   created_at: string
