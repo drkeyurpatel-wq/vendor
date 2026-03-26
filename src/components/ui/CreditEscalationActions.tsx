@@ -46,7 +46,7 @@ export default function CreditEscalationActions({ invoices, userRole }: Props) {
       if (error) throw error
 
       // Log
-      await supabase.from('audit_logs').insert({
+      await supabase.from('activity_log').insert({
         entity_type: 'invoice', action: 'bulk_payment_reminder',
         details: { count: overdueIds.length, ids: overdueIds },
       }).then(() => {}, () => {})

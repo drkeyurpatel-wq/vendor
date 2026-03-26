@@ -52,7 +52,7 @@ export default function PaymentScheduleActions({ payment, userRole }: { payment:
       }).eq('id', payment.id)
       if (error) throw error
 
-      await supabase.from('audit_logs').insert({
+      await supabase.from('activity_log').insert({
         entity_type: 'invoice', entity_id: payment.id, action: 'payment_rescheduled',
         details: { old_due: payment.due_date, new_due: newDate, reason },
       }).then(() => {}, () => {})

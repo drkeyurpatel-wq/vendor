@@ -89,7 +89,7 @@ export default function ExpiryAlertActions({ alert, userRole }: { alert: ExpiryA
       }
 
       // Audit
-      await supabase.from('audit_logs').insert({
+      await supabase.from('activity_log').insert({
         entity_type: 'expiry_alert', entity_id: alert.id,
         action: `expiry_${activeAction}`,
         details: { batch: alert.batch_number, item_id: alert.item_id, quantity: disposeQty, note },

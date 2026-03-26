@@ -43,7 +43,7 @@ export default function IndentActions({ indentId, indentNumber, currentStatus, c
     if (error) { toast.error(error.message); setLoading(false); return }
 
     try {
-      await supabase.from('audit_logs').insert({
+      await supabase.from('activity_log').insert({
         entity_type: 'purchase_indent', entity_id: indentId,
         action: `indent_${newStatus}`,
         details: { indent_number: indentNumber, comment: comment || null },

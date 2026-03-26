@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
 
       // Audit log
       try {
-        await supabase.from('audit_logs').insert({
+        await supabase.from('activity_log').insert({
           entity_type: 'purchase_order', entity_id: po.id,
           action: 'auto_reorder_created',
           details: { po_number: poNumber, items: group.items.length, total: subtotal + gstAmount },

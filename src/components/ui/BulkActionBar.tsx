@@ -61,7 +61,7 @@ export default function BulkActionBar({ selectedIds, entityType, tableName, acti
 
     // Audit log
     try {
-      await supabase.from('audit_logs').insert({
+      await supabase.from('activity_log').insert({
         entity_type: entityType, entity_id: selectedIds[0],
         action: `bulk_${activeAction.newStatus}`,
         details: { count: successCount, ids: selectedIds, comment: comment || null },

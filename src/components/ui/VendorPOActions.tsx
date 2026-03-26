@@ -38,7 +38,7 @@ export default function VendorPOActions({ poId, poNumber, poStatus, vendorId }: 
     if (error) { toast.error(error.message); setLoading(false); return }
 
     try {
-      await supabase.from('audit_logs').insert({
+      await supabase.from('activity_log').insert({
         entity_type: 'purchase_order', entity_id: poId,
         action: 'vendor_acknowledged',
         details: { po_number: poNumber, delivery_date: deliveryDate, notes: comment },
@@ -64,7 +64,7 @@ export default function VendorPOActions({ poId, poNumber, poStatus, vendorId }: 
     if (error) { toast.error(error.message); setLoading(false); return }
 
     try {
-      await supabase.from('audit_logs').insert({
+      await supabase.from('activity_log').insert({
         entity_type: 'purchase_order', entity_id: poId,
         action: 'vendor_dispute',
         details: { po_number: poNumber, reason: comment },
