@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 import { invoiceMatchSchema } from '@/lib/validations'
 import { sendInAppNotification } from '@/lib/notify-server'
+import { RATE_TOLERANCE } from '@/lib/business-rules'
 
 /**
  * 3-Way Matching Engine
@@ -16,8 +17,6 @@ import { sendInAppNotification } from '@/lib/notify-server'
  *
  * Rate tolerance: ±0.5% (for rate contract items)
  */
-
-const RATE_TOLERANCE = 0.005 // 0.5%
 
 interface MatchResult {
   item_id: string

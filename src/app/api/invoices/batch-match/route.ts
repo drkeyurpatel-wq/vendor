@@ -2,15 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuth } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
 import { withApiErrorHandler } from '@/lib/api-error-handler'
+import { RATE_TOLERANCE, QTY_TOLERANCE } from '@/lib/business-rules'
 
 // ============================================================
 // H1 VPMS — Batch 3-Way Match
 // Processes all invoices with match_status = 'pending'
 // Called from: cron/daily, manual button, invoice creation
 // ============================================================
-
-const RATE_TOLERANCE = 0.005 // 0.5%
-const QTY_TOLERANCE = 0.02  // 2%
 
 export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const rateLimitResult = await rateLimit(request, 5, 60000)
