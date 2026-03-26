@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatDate } from '@/lib/utils'
@@ -21,12 +21,9 @@ export default async function AuditTrailPage({
   searchParams: Promise<{ entity_type?: string; entity_id?: string; page?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['group_admin', 'group_cao'].includes(profile.role)) {
+  if (!profile || !isGroupLevel) {
     return (
       <div className="card p-12 text-center">
         <History size={40} className="mx-auto mb-3 text-gray-300" />

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatDate } from '@/lib/utils'
@@ -12,10 +12,7 @@ const DEP_STATUS: Record<string, string> = {
 }
 
 export default async function DepositsListPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: deposits } = await supabase.from('consignment_deposits')
     .select('*, vendor:vendors(legal_name, vendor_code), centre:centres(code, name)')
     .order('challan_date', { ascending: false }).limit(200)

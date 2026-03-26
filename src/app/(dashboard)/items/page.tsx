@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import ItemListClient from './ItemListClient'
@@ -11,7 +11,7 @@ export default async function ItemsPage({
   searchParams: Promise<{ category?: string; q?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
+  const { supabase, role, isGroupLevel } = await requireAuth()
 
   let query = supabase
     .from('items')

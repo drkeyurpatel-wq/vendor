@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { cn, formatDate } from '@/lib/utils'
 import { Shield } from 'lucide-react'
@@ -17,11 +17,7 @@ const ROLE_COLORS: Record<string, string> = {
 }
 
 export default async function SettingsUsersPage() {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId } = await requireAuth()
   const { data: currentProfile } = await supabase
     .from('user_profiles')
     .select('role')

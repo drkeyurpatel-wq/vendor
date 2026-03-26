@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Plus } from 'lucide-react'
@@ -14,13 +14,7 @@ export default async function IndentsPage({
   searchParams: Promise<{ status?: string; centre?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role, centre_id')
-    .eq('id', (await supabase.auth.getUser()).data.user!.id)
-    .single()
+  const { supabase, role, centreId, isGroupLevel } = await requireAuth()
 
   let query = supabase
     .from('purchase_indents')
@@ -30,8 +24,8 @@ export default async function IndentsPage({
 
   if (params.status) query = query.eq('status', params.status)
   if (params.centre) query = query.eq('centre_id', params.centre)
-  else if (profile?.centre_id && !['group_admin', 'group_cao'].includes(profile?.role || '')) {
-    query = query.eq('centre_id', profile.centre_id)
+  else if (centreId && !isGroupLevel) {
+    query = query.eq('centre_id', centreId)
   }
 
   const { data: indents, count } = await query.limit(200)
@@ -64,7 +58,7 @@ export default async function IndentsPage({
       </div>
 
       {/* Centre filter */}
-      {profile?.role && ['group_admin', 'group_cao'].includes(profile.role) && centres && (
+      {isGroupLevel && centres && (
         <div className="mb-5 flex gap-2 flex-wrap">
           <Link href={`/purchase-orders/indents${params.status ? `?status=${params.status}` : ''}`}
             className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
@@ -81,7 +75,7 @@ export default async function IndentsPage({
         </div>
       )}
 
-      <IndentListClient indents={indents ?? []} userRole={profile?.role || 'store_staff'} />
+      <IndentListClient indents={indents ?? []} userRole={role} />
     </div>
   )
 }

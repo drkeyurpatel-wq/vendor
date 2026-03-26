@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate, VENDOR_STATUS_COLORS, PO_STATUS_COLORS, PAYMENT_STATUS_COLORS, formatLakhs } from '@/lib/utils'
@@ -8,12 +8,7 @@ import VendorDetailTabs from './VendorDetailTabs'
 
 export default async function VendorDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
-
-  const { data: { user: authUser } } = await supabase.auth.getUser()
-  if (!authUser) redirect('/login')
-
-  const { data: currentProfile } = await supabase.from('user_profiles').select('role').eq('id', authUser.id).single()
+  const { supabase, role } = await requireAuth()
 
   const { data: vendor, error } = await supabase
     .from('vendors')
@@ -105,16 +100,14 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
           grns={grns ?? []}
           documents={documents ?? []}
           approvedCentreNames={approvedCentreNames}
-          userRole={currentProfile?.role}
+          userRole={role}
         />
       </div>
 
       {/* Vendor Actions (status change, blacklist) */}
-      {currentProfile && (
-        <div className="mt-6">
-          <VendorActions vendorId={vendor.id} currentStatus={vendor.status} userRole={currentProfile.role} />
-        </div>
-      )}
+      <div className="mt-6">
+        <VendorActions vendorId={vendor.id} currentStatus={vendor.status} userRole={role} />
+      </div>
 
       <div className="mt-4 text-xs text-gray-400">
         Created: {formatDate(vendor.created_at)} | Last updated: {formatDate(vendor.updated_at)}

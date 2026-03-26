@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatDate, formatCurrency, formatLakhs, PO_STATUS_COLORS } from '@/lib/utils'
@@ -12,10 +12,7 @@ export default async function POAgingReport({
   searchParams: Promise<{ centre?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   let query = supabase
     .from('purchase_orders')
     .select('id, po_number, po_date, total_amount, status, expected_delivery_date, vendor:vendors(vendor_code, legal_name), centre:centres(code, name)')

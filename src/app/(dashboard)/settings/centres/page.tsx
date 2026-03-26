@@ -1,14 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { Shield } from 'lucide-react'
 import CentresManager from './CentresManager'
 
 export default async function CentresPage() {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: currentProfile } = await supabase
     .from('user_profiles')
     .select('role')

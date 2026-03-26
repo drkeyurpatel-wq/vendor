@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Layers } from 'lucide-react'
@@ -13,11 +13,7 @@ export default async function StockLevelsPage({
   searchParams: Promise<{ centre?: string; status?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-
-  const { data: profile } = await supabase
-    .from('user_profiles').select('role, centre_id')
-    .eq('id', (await supabase.auth.getUser()).data.user!.id).single()
+  const { supabase, role, centreId, isGroupLevel } = await requireAuth()
 
   let query = supabase
     .from('item_centre_stock')
@@ -25,8 +21,8 @@ export default async function StockLevelsPage({
     .order('current_stock', { ascending: true })
 
   if (params.centre) query = query.eq('centre_id', params.centre)
-  else if (profile?.centre_id && !['group_admin', 'group_cao'].includes(profile?.role || '')) {
-    query = query.eq('centre_id', profile.centre_id)
+  else if (centreId && !isGroupLevel) {
+    query = query.eq('centre_id', centreId)
   }
 
   if (params.status === 'out') query = query.lte('current_stock', 0).gt('reorder_level', 0)
@@ -64,7 +60,7 @@ export default async function StockLevelsPage({
       </div>
 
       {/* Centre filter */}
-      {profile?.role && ['group_admin', 'group_cao'].includes(profile.role) && (
+      {isGroupLevel && (
         <div className="mb-5 flex gap-2 flex-wrap">
           <Link href={`/items/stock${params.status ? `?status=${params.status}` : ''}`}
             className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
@@ -82,13 +78,13 @@ export default async function StockLevelsPage({
       )}
 
       {/* Auto-Reorder (admin/purchase manager only) */}
-      {profile?.role && ['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(profile.role) && (
+      {['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(role) && (
         <div className="mb-6">
           <AutoReorderPanel />
         </div>
       )}
 
-      <StockListClient stocks={stocks ?? []} userRole={profile?.role || 'store_staff'} />
+      <StockListClient stocks={stocks ?? []} userRole={role} />
     </div>
   )
 }

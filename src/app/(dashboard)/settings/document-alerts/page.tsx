@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { formatDate } from '@/lib/utils'
 import { cn } from '@/lib/utils'
@@ -38,17 +38,8 @@ export default async function DocumentAlertsPage({
   searchParams: Promise<{ status?: string; type?: string; q?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('role, centre_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || !['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(profile.role)) {
+  const { supabase, user, profile, role, centreId, isGroupLevel } = await requireAuth()
+  if (!profile || !['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(role)) {
     redirect('/')
   }
 
@@ -290,7 +281,7 @@ export default async function DocumentAlertsPage({
                       </td>
                       <td>
                         <div className="flex gap-1 items-center">
-                          <DocumentAlertActions alertId={doc.id} vendorName={vendor?.legal_name || ''} documentType={DOC_TYPE_LABELS[doc.document_type] || doc.document_type} userRole={profile.role} />
+                          <DocumentAlertActions alertId={doc.id} vendorName={vendor?.legal_name || ''} documentType={DOC_TYPE_LABELS[doc.document_type] || doc.document_type} userRole={role} />
                           {(vendor?.primary_contact_email || vendor?.primary_contact_phone) && (
                             <a
                               href={vendor?.primary_contact_email

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatCurrency, formatDate } from '@/lib/utils'
@@ -10,11 +10,7 @@ import ItemDetailActions from '@/components/ui/ItemDetailActions'
 
 export default async function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
-
-  const { data: { user: authUser } } = await supabase.auth.getUser()
-  if (!authUser) redirect('/items')
-  const { data: profile } = await supabase.from('user_profiles').select('id, role').eq('id', authUser.id).single()
+  const { supabase, role } = await requireAuth()
 
   const { data: item, error } = await supabase
     .from('items')
@@ -133,10 +129,9 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       {/* Actions: edit, deactivate, reorder levels */}
-      {profile && (
-        <ItemDetailActions
-          itemId={item.id} itemCode={item.item_code} itemName={item.generic_name}
-          isActive={item.is_active} userRole={profile.role}
+      <ItemDetailActions
+        itemId={item.id} itemCode={item.item_code} itemName={item.generic_name}
+        isActive={item.is_active} userRole={role}
           stockLevels={(stockLevels ?? []).map((sl: any) => ({
             id: sl.id, centre_id: sl.centre_id,
             centre_code: sl.centre?.code || '', centre_name: sl.centre?.name || '',
@@ -144,7 +139,6 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
             max_level: sl.max_level || 0, unit: item.unit,
           }))}
         />
-      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">

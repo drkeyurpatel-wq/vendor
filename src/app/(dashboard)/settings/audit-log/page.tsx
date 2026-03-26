@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { formatDateTime } from '@/lib/utils'
 import Link from 'next/link'
@@ -37,17 +37,8 @@ export default async function AuditLogPage({
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('*, centre:centres(*)')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || !['group_admin', 'group_cao'].includes(profile.role)) {
+  const { supabase, user, profile, role, centreId, isGroupLevel } = await requireAuth()
+  if (!profile || !isGroupLevel) {
     redirect('/')
   }
 

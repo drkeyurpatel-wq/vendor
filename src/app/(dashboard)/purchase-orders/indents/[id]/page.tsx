@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn, formatDate, formatCurrency } from '@/lib/utils'
@@ -20,11 +20,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 
 export default async function IndentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   const { data: profile } = await supabase
     .from('user_profiles').select('id, role, full_name')
     .eq('id', user.id).single()
@@ -112,7 +108,7 @@ export default async function IndentDetailPage({ params }: { params: Promise<{ i
                 indentNumber={indent.indent_number}
                 currentStatus={indent.status}
                 centreId={indent.centre_id}
-                userRole={profile.role}
+                userRole={role}
               />
             )}
           </div>

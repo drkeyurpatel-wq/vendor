@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import VendorCategoriesManager from './VendorCategoriesManager'
 
 export default async function VendorCategoriesPage() {
-  const supabase = await createClient()
+  const { supabase } = await requireAuth()
 
   const { data: categories } = await supabase
     .from('vendor_categories')

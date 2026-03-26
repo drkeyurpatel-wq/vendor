@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn, formatDate, formatLakhs } from '@/lib/utils'
 import { ArrowLeftRight, Plus } from 'lucide-react'
@@ -27,11 +27,7 @@ export default async function StockTransfersPage({
 }) {
   const params = await searchParams
   const currentPage = Math.max(1, parseInt(params.page || '1', 10))
-  const supabase = await createClient()
-
-  const { data: profile } = await supabase
-    .from('user_profiles').select('role')
-    .eq('id', (await supabase.auth.getUser()).data.user!.id).single()
+  const { supabase, role } = await requireAuth()
 
   let query = supabase
     .from('stock_transfers')
@@ -193,8 +189,8 @@ export default async function StockTransfersPage({
                         {t.created_at ? formatDate(t.created_at) : '—'}
                       </td>
                       <td>
-                        {profile && !['received', 'cancelled'].includes(t.status) && (
-                          <TransferActions transferId={t.id} transferNumber={t.transfer_number || ''} currentStatus={t.status} userRole={profile.role} />
+                        {!['received', 'cancelled'].includes(t.status) && (
+                          <TransferActions transferId={t.id} transferNumber={t.transfer_number || ''} currentStatus={t.status} userRole={role} />
                         )}
                       </td>
                     </tr>

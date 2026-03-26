@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn, formatLakhs } from '@/lib/utils'
 import { Plus, Wallet, AlertTriangle, Calendar } from 'lucide-react'
@@ -12,11 +12,7 @@ export default async function PaymentsPage({
   searchParams: Promise<{ status?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
-
-  const { data: profile } = await supabase
-    .from('user_profiles').select('role')
-    .eq('id', (await supabase.auth.getUser()).data.user!.id).single()
+  const { supabase, role } = await requireAuth()
 
   let query = supabase
     .from('payment_batches')
@@ -101,7 +97,7 @@ export default async function PaymentsPage({
         ))}
       </div>
 
-      <PaymentListClient batches={batches ?? []} userRole={profile?.role || 'store_staff'} />
+      <PaymentListClient batches={batches ?? []} userRole={role} />
     </div>
   )
 }

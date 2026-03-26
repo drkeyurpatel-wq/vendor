@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { cn, formatDate, formatDateTime, formatCurrency, formatLakhs } from '@/lib/utils'
 import { ArrowLeft, Wallet, Calendar, User, FileText, Hash, Download } from 'lucide-react'
 import Link from 'next/link'
@@ -15,7 +15,7 @@ const BATCH_STATUS_COLORS: Record<string, string> = {
 
 export default async function PaymentBatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
+  const { supabase, role, isGroupLevel } = await requireAuth()
 
   const { data: batch, error } = await supabase
     .from('payment_batches')

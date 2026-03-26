@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
 // ============================================================
@@ -561,10 +561,7 @@ const METHOD_COLORS: Record<string, { bg: string; text: string }> = {
 }
 
 export default async function ApiDocsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
+  const { supabase, user, role, centreId, isGroupLevel } = await requireAuth()
   return (
     <div className="flex gap-6">
       {/* Sidebar TOC */}

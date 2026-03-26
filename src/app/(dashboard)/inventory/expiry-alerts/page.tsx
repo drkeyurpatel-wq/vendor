@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 import { cn, formatDate, formatCurrency } from '@/lib/utils'
 import { AlertTriangle, ShieldAlert } from 'lucide-react'
@@ -20,7 +20,7 @@ export default async function ExpiryAlertsPage({
   searchParams: Promise<{ centre?: string; alert_level?: string }>
 }) {
   const params = await searchParams
-  const supabase = await createClient()
+  const { supabase, role, isGroupLevel } = await requireAuth()
 
   // Fetch centres for filter
   const { data: centres } = await supabase
