@@ -126,7 +126,7 @@ export default function DataImportPage() {
       </div>
 
       {/* Import order notice */}
-      <div className="bg-[#E6F5F6] rounded-lg p-4 mb-6 text-sm text-[#0D7E8A]">
+      <div className="bg-teal-50 rounded-lg p-4 mb-6 text-sm text-teal-500">
         <strong>Import Order:</strong> Follow this sequence to avoid dependency errors:
         <span className="font-medium"> 1. Vendors → 2. Items → 3. Vendor-Item Mapping → 4. Opening Stock → 5. Vendor Outstanding</span>
       </div>
@@ -141,7 +141,7 @@ export default function DataImportPage() {
               onClick={() => { setSelectedType(type.id); setResult(null); setFile(null) }}
               className={`p-4 rounded-lg border-2 text-left transition-all ${
                 selectedType === type.id
-                  ? 'border-[#0D7E8A] bg-[#E6F5F6] ring-1 ring-[#0D7E8A]/20'
+                  ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-500/20'
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
@@ -183,7 +183,7 @@ export default function DataImportPage() {
           <div className="card p-6">
             <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Step 3 — Upload & Import</h2>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <FileSpreadsheet size={40} className="mx-auto text-gray-300 mb-3" />
+              <FileSpreadsheet size={40} className="mx-auto text-gray-500 mb-3" />
               <div className="mb-3">
                 <label className="cursor-pointer">
                   <span className="btn-secondary inline-flex items-center gap-2">
@@ -205,7 +205,7 @@ export default function DataImportPage() {
                   <strong>{file.name}</strong> ({(file.size / 1024).toFixed(1)} KB)
                 </div>
               ) : (
-                <div className="text-sm text-gray-400">Supports .xlsx, .xls, and .csv files (max 5000 rows)</div>
+                <div className="text-sm text-gray-500">Supports .xlsx, .xls, and .csv files (max 5000 rows)</div>
               )}
             </div>
 
@@ -215,7 +215,7 @@ export default function DataImportPage() {
                   {importing ? <><Loader2 size={16} className="animate-spin" /> Importing {selectedConfig?.label}...</>
                     : <><Upload size={16} /> Import {selectedConfig?.label}</>}
                 </button>
-                <span className="text-xs text-gray-400">This may take a minute for large files</span>
+                <span className="text-xs text-gray-500">This may take a minute for large files</span>
               </div>
             )}
           </div>

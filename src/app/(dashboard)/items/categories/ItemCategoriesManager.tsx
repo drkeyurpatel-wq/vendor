@@ -127,11 +127,11 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Parent Categories</div>
-          <div className="text-2xl font-bold text-[#1B3A6B] mt-1">{parentCategories.length}</div>
+          <div className="text-2xl font-bold text-navy-600 mt-1">{parentCategories.length}</div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Sub-Categories</div>
-          <div className="text-2xl font-bold text-[#0D7E8A] mt-1">{categories.length - parentCategories.length}</div>
+          <div className="text-2xl font-bold text-teal-500 mt-1">{categories.length - parentCategories.length}</div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Active</div>
@@ -139,7 +139,7 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Total Items</div>
-          <div className="text-2xl font-bold text-[#1B3A6B] mt-1">{totalItems}</div>
+          <div className="text-2xl font-bold text-navy-600 mt-1">{totalItems}</div>
         </div>
       </div>
 
@@ -147,11 +147,11 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-4 border-b bg-[#EEF2F9] rounded-t-xl">
-              <h2 className="text-lg font-bold text-[#1B3A6B]">
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-navy-50 rounded-t-xl">
+              <h2 className="text-lg font-bold text-navy-600">
                 {editingId ? 'Edit Category' : 'Add Item Category'}
               </h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 p-1">
+              <button onClick={() => setShowForm(false)} className="text-gray-500 hover:text-gray-600 p-1">
                 <X size={20} />
               </button>
             </div>
@@ -196,7 +196,7 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
                   }
                 </select>
                 <FieldError message={errors.parent_id} />
-                <p className="text-xs text-gray-400 mt-1">Leave empty for a top-level category, or select a parent to create a sub-category</p>
+                <p className="text-xs text-gray-500 mt-1">Leave empty for a top-level category, or select a parent to create a sub-category</p>
               </div>
 
               <div className="flex items-center gap-3">
@@ -207,7 +207,7 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
                     checked={form.is_active}
                     onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))}
                   />
-                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0D7E8A]"></div>
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500"></div>
                 </label>
                 <span className="text-sm text-gray-700">Active</span>
               </div>
@@ -240,7 +240,7 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
                   !parent.is_active && 'opacity-60'
                 )}>
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-[#1B3A6B] rounded-lg flex items-center justify-center">
+                    <div className="w-9 h-9 bg-navy-600 rounded-lg flex items-center justify-center">
                       <FolderTree size={16} className="text-white" />
                     </div>
                     <div>
@@ -260,14 +260,14 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => openAdd(parent.id)}
-                      className="text-[#0D7E8A] hover:text-[#1B3A6B] p-1.5 rounded-lg hover:bg-[#E6F5F6] transition-colors"
+                      className="text-teal-500 hover:text-navy-600 p-1.5 rounded-lg hover:bg-teal-50 transition-colors"
                       title="Add sub-category"
                     >
                       <Plus size={14} />
                     </button>
                     <button
                       onClick={() => openEdit(parent)}
-                      className="text-[#0D7E8A] hover:text-[#1B3A6B] p-1.5 rounded-lg hover:bg-[#E6F5F6] transition-colors"
+                      className="text-teal-500 hover:text-navy-600 p-1.5 rounded-lg hover:bg-teal-50 transition-colors"
                       title="Edit category"
                     >
                       <Pencil size={14} />
@@ -297,18 +297,18 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
                         )}
                       >
                         <div className="flex items-center gap-2">
-                          <ChevronRight size={12} className="text-gray-400" />
+                          <ChevronRight size={12} className="text-gray-500" />
                           <span className="font-mono text-xs bg-white px-2 py-0.5 rounded border">{child.code}</span>
                           <span className="text-sm text-gray-800">{child.name}</span>
                           <span className={cn('badge text-[10px]', child.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500')}>
                             {child.is_active ? 'Active' : 'Inactive'}
                           </span>
-                          <span className="text-xs text-gray-400">{itemCountMap[child.id] ?? 0} items</span>
+                          <span className="text-xs text-gray-500">{itemCountMap[child.id] ?? 0} items</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => openEdit(child)}
-                            className="text-[#0D7E8A] hover:text-[#1B3A6B] p-1 rounded hover:bg-[#E6F5F6] transition-colors"
+                            className="text-teal-500 hover:text-navy-600 p-1 rounded hover:bg-teal-50 transition-colors"
                             title="Edit sub-category"
                           >
                             <Pencil size={12} />
@@ -344,7 +344,7 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
                       <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{cat.code}</span>
                       <span className="text-sm">{cat.name}</span>
                     </div>
-                    <button onClick={() => openEdit(cat)} className="text-[#0D7E8A] p-1">
+                    <button onClick={() => openEdit(cat)} className="text-teal-500 p-1">
                       <Pencil size={12} />
                     </button>
                   </div>
@@ -356,9 +356,9 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
       ) : (
         <div className="card p-12">
           <div className="empty-state">
-            <FolderTree size={40} className="mb-3 text-gray-300" />
+            <FolderTree size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No item categories yet</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
               Click &quot;Add Category&quot; to create your first category
             </p>
           </div>

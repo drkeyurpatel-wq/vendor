@@ -56,7 +56,7 @@ export default function InvoiceListClient({ invoices, userRole }: { invoices: In
         cell: ({ row }) => (
           <div>
             <div className="text-sm font-medium text-gray-900 truncate max-w-[180px]">{row.original.vendor?.legal_name}</div>
-            <div className="font-mono text-[10px] text-gray-400">{row.original.vendor?.vendor_code}</div>
+            <div className="font-mono text-[10px] text-gray-500">{row.original.vendor?.vendor_code}</div>
           </div>
         ),
       },
@@ -83,7 +83,7 @@ export default function InvoiceListClient({ invoices, userRole }: { invoices: In
       {
         accessorKey: 'due_date', header: 'Due Date', size: 100,
         cell: ({ row }) => {
-          if (!row.original.due_date) return <span className="text-xs text-gray-400">—</span>
+          if (!row.original.due_date) return <span className="text-xs text-gray-500">—</span>
           const overdue = row.original.payment_status !== 'paid' && new Date(row.original.due_date) < new Date()
           return (
             <span className={cn('text-sm', overdue ? 'text-red-600 font-medium' : 'text-gray-600')}>
@@ -143,7 +143,7 @@ export default function InvoiceListClient({ invoices, userRole }: { invoices: In
         searchPlaceholder="Search invoice ref, vendor..." showSearch showExport showColumnToggle
         exportFilename="invoices" pageSize={25}
         onRowClick={inv => router.push(`/finance/invoices/${inv.id}`)}
-        emptyIcon={<FileText size={40} className="text-gray-300" />}
+        emptyIcon={<FileText size={40} className="text-gray-500" />}
         emptyTitle="No invoices found" emptyDescription="Invoices are created when GRNs are verified" />
     </>
   )

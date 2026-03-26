@@ -14,9 +14,9 @@ export default async function VendorPODetailPage({
   if (!profile || role !== 'vendor') {
     return (
       <div className="card p-12 text-center">
-        <Package size={40} className="mx-auto mb-3 text-gray-300" />
+        <Package size={40} className="mx-auto mb-3 text-gray-500" />
         <p className="font-medium text-gray-500">Vendor Portal</p>
-        <p className="text-sm text-gray-400 mt-1">This page is only accessible to vendor users</p>
+        <p className="text-sm text-gray-500 mt-1">This page is only accessible to vendor users</p>
       </div>
     )
   }
@@ -32,7 +32,7 @@ export default async function VendorPODetailPage({
       <div className="card p-12 text-center">
         <AlertTriangle size={40} className="mx-auto mb-3 text-yellow-400" />
         <p className="font-medium text-gray-500">Vendor Profile Not Found</p>
-        <p className="text-sm text-gray-400 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
+        <p className="text-sm text-gray-500 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
       </div>
     )
   }
@@ -58,7 +58,7 @@ export default async function VendorPODetailPage({
       <div className="card p-12 text-center">
         <AlertTriangle size={40} className="mx-auto mb-3 text-yellow-400" />
         <p className="font-medium text-gray-500">Purchase Order Not Found</p>
-        <p className="text-sm text-gray-400 mt-1">This PO does not exist or does not belong to your account.</p>
+        <p className="text-sm text-gray-500 mt-1">This PO does not exist or does not belong to your account.</p>
         <Link href="/vendor-portal/orders" className="btn-primary mt-4 inline-block text-sm">Back to Orders</Link>
       </div>
     )
@@ -71,7 +71,7 @@ export default async function VendorPODetailPage({
       {/* Header */}
       <div className="page-header">
         <div className="flex items-center gap-3">
-          <Link href="/vendor-portal/orders" className="text-gray-400 hover:text-[#1B3A6B] transition-colors">
+          <Link href="/vendor-portal/orders" className="text-gray-500 hover:text-navy-600 transition-colors">
             <ArrowLeft size={20} />
           </Link>
           <div>
@@ -130,7 +130,7 @@ export default async function VendorPODetailPage({
       <div className="card overflow-hidden mb-6">
         <div className="px-5 py-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-            <FileText size={18} className="text-[#1B3A6B]" />
+            <FileText size={18} className="text-navy-600" />
             Line Items ({po.items?.length ?? 0})
           </h2>
         </div>
@@ -155,9 +155,9 @@ export default async function VendorPODetailPage({
                   <td>
                     <div className="font-medium text-sm">{item.item?.generic_name}</div>
                     {item.item?.brand_name && (
-                      <div className="text-xs text-gray-400">{item.item.brand_name}</div>
+                      <div className="text-xs text-gray-500">{item.item.brand_name}</div>
                     )}
-                    <div className="text-xs text-gray-400 font-mono">{item.item?.item_code}</div>
+                    <div className="text-xs text-gray-500 font-mono">{item.item?.item_code}</div>
                   </td>
                   <td className="text-xs text-gray-500 font-mono">{item.hsn_code || '-'}</td>
                   <td className="text-sm text-right font-semibold">{item.ordered_qty}</td>
@@ -254,8 +254,8 @@ export default async function VendorPODetailPage({
               </div>
             )}
             <div className="border-t pt-3 mt-2 flex justify-between">
-              <span className="font-semibold text-[#1B3A6B]">Net Amount</span>
-              <span className="text-xl font-bold text-[#1B3A6B]">{formatCurrency(po.net_amount || po.total_amount)}</span>
+              <span className="font-semibold text-navy-600">Net Amount</span>
+              <span className="text-xl font-bold text-navy-600">{formatCurrency(po.net_amount || po.total_amount)}</span>
             </div>
           </div>
         </div>

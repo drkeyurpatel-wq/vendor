@@ -113,8 +113,8 @@ export default async function FinanceStaffDashboard({ profile }: { profile: any 
           label="Payment Due Saturday"
           value={formatLakhs(saturdayTotal)}
           sub={`Due by ${formatDate(nextSaturday)}`}
-          icon={<Calendar size={22} className="text-[#0D7E8A]" />}
-          bg="bg-[#E6F5F6]"
+          icon={<Calendar size={22} className="text-teal-500" />}
+          bg="bg-teal-50"
           href="/finance/payments"
           alert={saturdayTotal > 0}
         />
@@ -131,8 +131,8 @@ export default async function FinanceStaffDashboard({ profile }: { profile: any 
           label="Debit Notes Pending"
           value={debitNotesPending ?? 0}
           sub="Awaiting processing"
-          icon={<FileText size={22} className="text-[#1B3A6B]" />}
-          bg="bg-[#EEF2F9]"
+          icon={<FileText size={22} className="text-navy-600" />}
+          bg="bg-navy-50"
           href="/finance/invoices"
           alert={(debitNotesPending ?? 0) > 0}
         />
@@ -141,7 +141,7 @@ export default async function FinanceStaffDashboard({ profile }: { profile: any 
       {/* Aging Summary */}
       <div className="mb-6">
         <h2 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
-          <Timer size={18} className="text-[#1B3A6B]" />
+          <Timer size={18} className="text-navy-600" />
           Aging Summary
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -171,7 +171,7 @@ export default async function FinanceStaffDashboard({ profile }: { profile: any 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-gray-900">{inv.vendor?.legal_name}</span>
-                      {inv.centre && <span className="text-xs text-gray-400">{inv.centre.code}</span>}
+                      {inv.centre && <span className="text-xs text-gray-500">{inv.centre.code}</span>}
                     </div>
                     <div className="text-xs text-gray-500 mt-0.5">
                       {inv.vendor_invoice_no} · {formatDate(inv.vendor_invoice_date)}
@@ -190,7 +190,7 @@ export default async function FinanceStaffDashboard({ profile }: { profile: any 
 
         {/* Saturday Payment Batch */}
         <div className="card">
-          <SectionHeader title={`Saturday Payment (${formatDate(nextSaturday)})`} href="/finance/payments" icon={<CreditCard size={16} className="text-[#0D7E8A]" />} />
+          <SectionHeader title={`Saturday Payment (${formatDate(nextSaturday)})`} href="/finance/payments" icon={<CreditCard size={16} className="text-teal-500" />} />
           <div className="divide-y divide-gray-100">
             {saturdayPayments && saturdayPayments.length > 0 ? (
               saturdayPayments.map((inv: any) => (
@@ -198,7 +198,7 @@ export default async function FinanceStaffDashboard({ profile }: { profile: any 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-gray-900">{inv.vendor?.legal_name}</span>
-                      {inv.centre && <span className="text-xs text-gray-400">{inv.centre.code}</span>}
+                      {inv.centre && <span className="text-xs text-gray-500">{inv.centre.code}</span>}
                     </div>
                     <div className="text-xs text-gray-500 mt-0.5">
                       Due {formatDate(inv.due_date)} · {inv.vendor_invoice_no}
@@ -215,7 +215,7 @@ export default async function FinanceStaffDashboard({ profile }: { profile: any 
             {saturdayPayments && saturdayPayments.length > 0 && (
               <div className="px-5 py-3 bg-gray-50 flex items-center justify-between">
                 <span className="text-sm font-semibold text-gray-700">Total</span>
-                <span className="text-sm font-bold text-[#1B3A6B]">{formatLakhs(saturdayTotal)}</span>
+                <span className="text-sm font-bold text-navy-600">{formatLakhs(saturdayTotal)}</span>
               </div>
             )}
           </div>

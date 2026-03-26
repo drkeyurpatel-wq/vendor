@@ -188,11 +188,11 @@ export default function ConsumptionUploadPage() {
             <label className="form-label">Upload Mode</label>
             <div className="flex gap-2 mt-1">
               <button onClick={() => setMode('manual')}
-                className={cn('px-4 py-2 rounded-lg text-sm font-medium border', mode === 'manual' ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]' : 'bg-white text-gray-600 border-gray-200')}>
+                className={cn('px-4 py-2 rounded-lg text-sm font-medium border', mode === 'manual' ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-gray-600 border-gray-200')}>
                 <Plus size={14} className="inline mr-1" /> Manual
               </button>
               <button onClick={() => { setMode('csv'); fileRef.current?.click() }}
-                className={cn('px-4 py-2 rounded-lg text-sm font-medium border', mode === 'csv' ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]' : 'bg-white text-gray-600 border-gray-200')}>
+                className={cn('px-4 py-2 rounded-lg text-sm font-medium border', mode === 'csv' ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-gray-600 border-gray-200')}>
                 <FileSpreadsheet size={14} className="inline mr-1" /> CSV
               </button>
             </div>
@@ -201,9 +201,9 @@ export default function ConsumptionUploadPage() {
           {mode === 'manual' && (
             <div className="flex items-end">
               <div className="text-sm text-gray-500">
-                <span className="font-semibold text-[#1B3A6B]">{lines.length}</span> items · 
-                <span className="font-semibold text-[#1B3A6B]"> {totalQty}</span> units · 
-                <span className="font-semibold text-[#1B3A6B]"> {formatCurrency(totalValue)}</span>
+                <span className="font-semibold text-navy-600">{lines.length}</span> items · 
+                <span className="font-semibold text-navy-600"> {totalQty}</span> units · 
+                <span className="font-semibold text-navy-600"> {formatCurrency(totalValue)}</span>
               </div>
             </div>
           )}
@@ -228,7 +228,7 @@ export default function ConsumptionUploadPage() {
                     <tr key={l.id}>
                       <td>
                         <div className="font-medium text-sm text-gray-900">{l.generic_name}</div>
-                        <div className="text-[10px] text-gray-400">{l.item_code} · {l.unit}</div>
+                        <div className="text-[10px] text-gray-500">{l.item_code} · {l.unit}</div>
                       </td>
                       <td>
                         <select className="form-select text-xs" value={l.department} onChange={e => updateLine(l.id, 'department', e.target.value)}>
@@ -254,7 +254,7 @@ export default function ConsumptionUploadPage() {
             </div>
           )}
           {lines.length === 0 && (
-            <div className="py-16 text-center text-gray-400 text-sm">Search and add items above to record consumption</div>
+            <div className="py-16 text-center text-gray-500 text-sm">Search and add items above to record consumption</div>
           )}
         </div>
       )}
@@ -263,7 +263,7 @@ export default function ConsumptionUploadPage() {
       {mode === 'csv' && (
         <div className="card overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="font-semibold text-[#1B3A6B]">CSV Preview ({csvPreview.length} rows)</h2>
+            <h2 className="font-semibold text-navy-600">CSV Preview ({csvPreview.length} rows)</h2>
             <button onClick={() => fileRef.current?.click()} className="btn-secondary text-xs"><Upload size={12} /> Upload Different File</button>
           </div>
           {csvPreview.length > 0 ? (
@@ -276,12 +276,12 @@ export default function ConsumptionUploadPage() {
                   ))}
                 </tbody>
               </table>
-              {csvPreview.length > 20 && <p className="text-xs text-gray-400 p-3">...and {csvPreview.length - 20} more rows</p>}
+              {csvPreview.length > 20 && <p className="text-xs text-gray-500 p-3">...and {csvPreview.length - 20} more rows</p>}
             </div>
           ) : (
             <div className="py-16 text-center">
-              <FileSpreadsheet size={32} className="text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-400 text-sm">Upload a CSV with columns: item_code, quantity, rate, department, ward, patient_name, ip_number, batch_number</p>
+              <FileSpreadsheet size={32} className="text-gray-500 mx-auto mb-3" />
+              <p className="text-gray-500 text-sm">Upload a CSV with columns: item_code, quantity, rate, department, ward, patient_name, ip_number, batch_number</p>
               <button onClick={() => fileRef.current?.click()} className="btn-primary text-sm mt-4"><Upload size={14} /> Choose CSV File</button>
             </div>
           )}

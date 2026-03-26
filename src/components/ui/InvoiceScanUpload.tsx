@@ -147,7 +147,7 @@ export default function InvoiceScanUpload({ vendorId, onExtracted, onFileUploade
           className={`
             relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all
             ${dragOver
-              ? 'border-[#0D7E8A] bg-[#E6F5F6]'
+              ? 'border-teal-500 bg-teal-50'
               : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
             }
           `}
@@ -167,7 +167,7 @@ export default function InvoiceScanUpload({ vendorId, onExtracted, onFileUploade
               <p className="text-sm font-medium text-gray-700">
                 Drop invoice file here or <span style={{ color: '#0D7E8A' }}>browse</span>
               </p>
-              <p className="text-xs text-gray-400 mt-1">PDF, PNG, or JPG up to 10MB</p>
+              <p className="text-xs text-gray-500 mt-1">PDF, PNG, or JPG up to 10MB</p>
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function InvoiceScanUpload({ vendorId, onExtracted, onFileUploade
             {/* File info */}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-500 mt-0.5">
                 {formatFileSize(file.size)} &middot; {file.type === 'application/pdf' ? 'PDF' : file.type.split('/')[1]?.toUpperCase()}
               </p>
 
@@ -203,7 +203,7 @@ export default function InvoiceScanUpload({ vendorId, onExtracted, onFileUploade
                       style={{ width: `${uploadProgress}%`, backgroundColor: '#0D7E8A' }}
                     />
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">Uploading... {uploadProgress}%</p>
+                  <p className="text-xs text-gray-500 mt-1">Uploading... {uploadProgress}%</p>
                 </div>
               )}
             </div>
@@ -215,7 +215,7 @@ export default function InvoiceScanUpload({ vendorId, onExtracted, onFileUploade
                   <button
                     type="button"
                     onClick={handleClear}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                    className="p-1.5 rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-50 transition-colors"
                     title="Remove file"
                   >
                     <X size={16} />
@@ -276,7 +276,7 @@ export default function InvoiceScanUpload({ vendorId, onExtracted, onFileUploade
                   <Eye size={12} /> View File
                 </a>
               )}
-              <button type="button" onClick={handleClear} className="text-xs text-gray-400 hover:text-gray-600">
+              <button type="button" onClick={handleClear} className="text-xs text-gray-500 hover:text-gray-600">
                 Upload Another
               </button>
             </div>
@@ -289,11 +289,11 @@ export default function InvoiceScanUpload({ vendorId, onExtracted, onFileUploade
           )}
 
           {/* Show file info */}
-          <div className="flex items-center gap-3 text-xs text-gray-400 pt-1 border-t border-gray-50">
+          <div className="flex items-center gap-3 text-xs text-gray-500 pt-1 border-t border-gray-50">
             {file?.type === 'application/pdf' ? (
-              <FileText size={14} className="text-gray-300" />
+              <FileText size={14} className="text-gray-500" />
             ) : (
-              <Image size={14} className="text-gray-300" />
+              <Image size={14} className="text-gray-500" />
             )}
             <span>{result.file_name}</span>
             <span>{formatFileSize(result.file_size)}</span>

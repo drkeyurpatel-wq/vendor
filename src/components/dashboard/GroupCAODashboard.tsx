@@ -109,8 +109,8 @@ export default async function GroupCAODashboard({ profile }: { profile: any }) {
           label="Group Spend (MTD)"
           value={formatLakhs(groupSpendMTD)}
           sub={`Since ${formatDate(monthStart)}`}
-          icon={<IndianRupee size={22} className="text-[#1B3A6B]" />}
-          bg="bg-[#EEF2F9]"
+          icon={<IndianRupee size={22} className="text-navy-600" />}
+          bg="bg-navy-50"
           href="/reports"
         />
         <StatCard
@@ -126,8 +126,8 @@ export default async function GroupCAODashboard({ profile }: { profile: any }) {
           label="Payment Due Saturday"
           value={formatLakhs(paymentDueSaturday)}
           sub={`Due by ${formatDate(nextSaturday)}`}
-          icon={<Calendar size={22} className="text-[#0D7E8A]" />}
-          bg="bg-[#E6F5F6]"
+          icon={<Calendar size={22} className="text-teal-500" />}
+          bg="bg-teal-50"
           href="/finance/payments"
           alert={paymentDueSaturday > 0}
         />
@@ -169,7 +169,7 @@ export default async function GroupCAODashboard({ profile }: { profile: any }) {
 
         {/* Top 10 Vendor Outstanding */}
         <div className="card lg:col-span-2">
-          <SectionHeader title="Top 10 Vendor Outstanding" href="/finance/credit" icon={<Users size={16} className="text-[#1B3A6B]" />} />
+          <SectionHeader title="Top 10 Vendor Outstanding" href="/finance/credit" icon={<Users size={16} className="text-navy-600" />} />
           {topVendors.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="data-table">
@@ -184,7 +184,7 @@ export default async function GroupCAODashboard({ profile }: { profile: any }) {
                 <tbody>
                   {topVendors.map((v, idx) => (
                     <tr key={v.code}>
-                      <td className="text-gray-400">{idx + 1}</td>
+                      <td className="text-gray-500">{idx + 1}</td>
                       <td className="font-medium text-gray-900">{v.name}</td>
                       <td><span className="badge bg-gray-100 text-gray-600">{v.code}</span></td>
                       <td className="font-semibold text-red-600">{formatLakhs(v.outstanding)}</td>

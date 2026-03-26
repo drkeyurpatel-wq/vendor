@@ -106,7 +106,7 @@ export default function MatchBreakdown({
     <div className="card overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="font-semibold text-[#1B3A6B]">3-Way Match Breakdown</h2>
+          <h2 className="font-semibold text-navy-600">3-Way Match Breakdown</h2>
           <span className={cn('badge', MATCH_BADGE[matchStatus] || MATCH_BADGE.pending)}>
             {matchStatus.replace(/_/g, ' ')}
           </span>
@@ -130,7 +130,7 @@ export default function MatchBreakdown({
       ) : items.length === 0 ? (
         <div className="p-8 text-center">
           <p className="text-gray-500">No line items available for comparison.</p>
-          <p className="text-sm text-gray-400 mt-1">Click &ldquo;Re-run 3-Way Match&rdquo; to fetch and compare items from the API.</p>
+          <p className="text-sm text-gray-500 mt-1">Click &ldquo;Re-run 3-Way Match&rdquo; to fetch and compare items from the API.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">

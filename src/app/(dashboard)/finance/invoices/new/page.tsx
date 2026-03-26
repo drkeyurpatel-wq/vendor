@@ -265,7 +265,7 @@ export default function NewInvoicePage() {
   if (pageLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 size={24} className="animate-spin text-[#1B3A6B]" />
+        <Loader2 size={24} className="animate-spin text-navy-600" />
       </div>
     )
   }
@@ -292,9 +292,9 @@ export default function NewInvoicePage() {
 
           {grns.length === 0 ? (
             <div className="empty-state">
-              <FileText size={36} className="mb-3 text-gray-300" />
+              <FileText size={36} className="mb-3 text-gray-500" />
               <p className="font-medium text-gray-500">No uninvoiced GRNs available</p>
-              <p className="text-sm text-gray-400 mt-1">All submitted GRNs already have invoices</p>
+              <p className="text-sm text-gray-500 mt-1">All submitted GRNs already have invoices</p>
             </div>
           ) : (
             <div>
@@ -400,7 +400,7 @@ export default function NewInvoicePage() {
                 value={dueDate}
                 onChange={e => setDueDate(e.target.value)}
               />
-              <p className="text-xs text-gray-400 mt-1">Auto-calculated from GRN date + vendor credit period</p>
+              <p className="text-xs text-gray-500 mt-1">Auto-calculated from GRN date + vendor credit period</p>
             </div>
           </div>
         </div>

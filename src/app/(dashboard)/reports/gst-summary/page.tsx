@@ -126,7 +126,7 @@ export default async function GSTSummaryReport({
         <div className="bg-white rounded-xl border border-gray-200/80 shadow-card p-5">
           <div className="text-xs text-gray-500">Invoices</div>
           <div className="text-xl font-bold text-gray-900">{allInvoices.length}</div>
-          <div className="text-xs text-gray-400 mt-1">{vendorMap.size} vendors</div>
+          <div className="text-xs text-gray-500 mt-1">{vendorMap.size} vendors</div>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default async function GSTSummaryReport({
                 ))}
               </tbody>
               <tfoot>
-                <tr className="bg-[#EEF2F9]">
+                <tr className="bg-navy-50">
                   <td className="font-semibold text-navy-600">Total</td>
                   <td className="text-right font-bold font-mono text-navy-600">{formatCurrency(totalTaxable)}</td>
                   <td className="text-right font-bold font-mono text-teal-600">{formatCurrency(totalGST)}</td>
@@ -182,7 +182,7 @@ export default async function GSTSummaryReport({
                     <td><span className="font-mono text-xs text-gray-700">{g.vendor?.gstin || '—'}</span></td>
                     <td>
                       <div className="text-sm font-medium text-gray-900">{g.vendor?.legal_name}</div>
-                      <div className="font-mono text-[10px] text-gray-400">{g.vendor?.vendor_code}</div>
+                      <div className="font-mono text-[10px] text-gray-500">{g.vendor?.vendor_code}</div>
                     </td>
                     <td className="text-sm text-gray-700">{g.invoices.length}</td>
                     <td className="text-sm text-right font-mono">{formatCurrency(g.taxable)}</td>
@@ -196,7 +196,7 @@ export default async function GSTSummaryReport({
               })}
             </tbody>
             <tfoot>
-              <tr className="bg-[#EEF2F9]">
+              <tr className="bg-navy-50">
                 <td colSpan={3} className="font-semibold text-navy-600">Grand Total</td>
                 <td className="text-right font-bold font-mono">{formatCurrency(totalTaxable)}</td>
                 <td className="text-right font-bold font-mono">{formatCurrency(totalGST / 2)}</td>

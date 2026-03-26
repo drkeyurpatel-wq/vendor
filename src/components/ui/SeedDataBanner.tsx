@@ -48,7 +48,7 @@ export default function SeedDataBanner({ hasCentres, hasVendorCategories, hasIte
   }
 
   return (
-    <div className="mb-6 bg-gradient-to-r from-[#1B3A6B] to-[#234880] rounded-xl p-6 text-white shadow-lg animate-fade-in">
+    <div className="mb-6 bg-gradient-to-r from-navy-600 to-[#234880] rounded-xl p-6 text-white shadow-lg animate-fade-in">
       <div className="flex items-start gap-4">
         <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
           <Database size={24} className="text-white" />
@@ -88,7 +88,7 @@ export default function SeedDataBanner({ hasCentres, hasVendorCategories, hasIte
             <button
               onClick={handleSeed}
               disabled={seeding}
-              className="bg-white text-[#1B3A6B] font-bold px-6 py-2.5 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 shadow-md disabled:opacity-50"
+              className="bg-white text-navy-600 font-bold px-6 py-2.5 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 shadow-md disabled:opacity-50"
             >
               {seeding ? (
                 <>

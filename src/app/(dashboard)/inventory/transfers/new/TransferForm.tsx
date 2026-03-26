@@ -176,7 +176,7 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
 
       {/* Centre Selection */}
       <div className="card p-6 mb-6">
-        <h2 className="text-sm font-semibold text-[#1B3A6B] uppercase tracking-wide mb-4">Transfer Details</h2>
+        <h2 className="text-sm font-semibold text-navy-600 uppercase tracking-wide mb-4">Transfer Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="form-label">From Centre *</label>
@@ -192,8 +192,8 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
           </div>
 
           <div className="flex items-center justify-center pt-6">
-            <div className="w-10 h-10 bg-[#EEF2F9] rounded-full flex items-center justify-center">
-              <ArrowLeftRight size={18} className="text-[#1B3A6B]" />
+            <div className="w-10 h-10 bg-navy-50 rounded-full flex items-center justify-center">
+              <ArrowLeftRight size={18} className="text-navy-600" />
             </div>
           </div>
 
@@ -227,8 +227,8 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
 
       {/* Items */}
       <div className="card overflow-hidden mb-6">
-        <div className="px-5 py-4 border-b bg-[#EEF2F9] flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[#1B3A6B] uppercase tracking-wide">
+        <div className="px-5 py-4 border-b bg-navy-50 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-navy-600 uppercase tracking-wide">
             Transfer Items ({lines.length})
           </h2>
           {fromCentreId && (
@@ -257,7 +257,7 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
         {showSearch && fromCentreId && (
           <div className="p-4 bg-gray-50 border-b">
             <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
               <input
                 className="form-input pl-10"
                 placeholder="Search items by name or code..."
@@ -265,7 +265,7 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
                 onChange={e => setSearchTerm(e.target.value)}
                 autoFocus
               />
-              {searching && <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 animate-spin" />}
+              {searching && <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 animate-spin" />}
             </div>
             {searchResults.length > 0 && (
               <div className="mt-2 border rounded-lg bg-white max-h-48 overflow-y-auto">
@@ -273,13 +273,13 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
                   <button
                     key={item.item_id}
                     onClick={() => addLine(item)}
-                    className="w-full text-left px-4 py-2.5 hover:bg-[#E6F5F6] flex items-center justify-between border-b last:border-b-0 transition-colors"
+                    className="w-full text-left px-4 py-2.5 hover:bg-teal-50 flex items-center justify-between border-b last:border-b-0 transition-colors"
                   >
                     <div>
                       <div className="text-sm font-medium text-gray-900">{item.generic_name}</div>
                       <div className="text-xs text-gray-500">{item.item_code}</div>
                     </div>
-                    <span className="text-xs font-semibold text-[#0D7E8A] bg-[#E6F5F6] px-2 py-1 rounded">
+                    <span className="text-xs font-semibold text-teal-500 bg-teal-50 px-2 py-1 rounded">
                       {item.available_stock} {item.unit} available
                     </span>
                   </button>
@@ -287,7 +287,7 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
               </div>
             )}
             {searchTerm.length >= 2 && !searching && searchResults.length === 0 && (
-              <p className="text-xs text-gray-400 mt-2">No items with stock found at source centre</p>
+              <p className="text-xs text-gray-500 mt-2">No items with stock found at source centre</p>
             )}
           </div>
         )}
@@ -311,14 +311,14 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
               <tbody>
                 {lines.map((line, idx) => (
                   <tr key={line.item_id}>
-                    <td className="text-gray-400">{idx + 1}</td>
+                    <td className="text-gray-500">{idx + 1}</td>
                     <td>
                       <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{line.item_code}</span>
                     </td>
                     <td className="font-medium text-gray-900">{line.generic_name}</td>
                     <td className="text-gray-600">{line.unit}</td>
                     <td>
-                      <span className="text-sm font-semibold text-[#0D7E8A]">{line.available_stock}</span>
+                      <span className="text-sm font-semibold text-teal-500">{line.available_stock}</span>
                     </td>
                     <td>
                       <input
@@ -346,7 +346,7 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
           </div>
         ) : (
           <div className="empty-state py-12">
-            <ArrowLeftRight size={32} className="text-gray-300 mb-2" />
+            <ArrowLeftRight size={32} className="text-gray-500 mb-2" />
             <p className="text-sm text-gray-500">
               {fromCentreId ? 'Click "Add Item" to search and add items to transfer' : 'Select a source centre first'}
             </p>
@@ -358,8 +358,8 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
       {lines.length > 0 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            <span className="font-semibold text-[#1B3A6B]">{lines.length}</span> items,{' '}
-            <span className="font-semibold text-[#1B3A6B]">{lines.reduce((s, l) => s + l.transfer_qty, 0)}</span> total units
+            <span className="font-semibold text-navy-600">{lines.length}</span> items,{' '}
+            <span className="font-semibold text-navy-600">{lines.reduce((s, l) => s + l.transfer_qty, 0)}</span> total units
           </div>
           <div className="flex items-center gap-3">
             <button

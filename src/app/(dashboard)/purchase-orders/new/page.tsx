@@ -305,7 +305,7 @@ export default function NewPOPage() {
         {/* Centre, Vendor, Priority */}
         <div className="card p-6">
           <fieldset>
-            <legend className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">Order Details</legend>
+            <legend className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">Order Details</legend>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div>
                 <label htmlFor="po-centre" className="form-label">Centre *</label>
@@ -353,7 +353,7 @@ export default function NewPOPage() {
 
         {/* Line Items */}
         <div className="card p-6">
-          <h2 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">Line Items</h2>
+          <h2 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">Line Items</h2>
           <div className="mt-4">
             <POLineItems items={items} onChange={setItems} vendorId={vendor?.id} supplyType={supplyType} />
           </div>

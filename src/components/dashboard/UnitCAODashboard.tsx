@@ -85,8 +85,8 @@ export default async function UnitCAODashboard({ profile }: { profile: any }) {
           label="Unit Spend (MTD)"
           value={formatLakhs(unitSpendMTD)}
           sub={`${profile.centre?.code || ''} this month`}
-          icon={<IndianRupee size={22} className="text-[#1B3A6B]" />}
-          bg="bg-[#EEF2F9]"
+          icon={<IndianRupee size={22} className="text-navy-600" />}
+          bg="bg-navy-50"
           href="/reports"
         />
         <StatCard
@@ -102,8 +102,8 @@ export default async function UnitCAODashboard({ profile }: { profile: any }) {
           label="Invoices to Verify"
           value={invoicesToVerify ?? 0}
           sub="Awaiting 3-way match"
-          icon={<FileText size={22} className="text-[#0D7E8A]" />}
-          bg="bg-[#E6F5F6]"
+          icon={<FileText size={22} className="text-teal-500" />}
+          bg="bg-teal-50"
           href="/finance/invoices"
           alert={(invoicesToVerify ?? 0) > 0}
         />
@@ -133,7 +133,7 @@ export default async function UnitCAODashboard({ profile }: { profile: any }) {
 
         {/* Pending Invoices */}
         <div className="card">
-          <SectionHeader title="Pending Invoices" href="/finance/invoices" icon={<FileText size={16} className="text-[#0D7E8A]" />} />
+          <SectionHeader title="Pending Invoices" href="/finance/invoices" icon={<FileText size={16} className="text-teal-500" />} />
           <div className="divide-y divide-gray-100">
             {pendingInvoices && pendingInvoices.length > 0 ? (
               pendingInvoices.map((inv: any) => (
@@ -189,7 +189,7 @@ export default async function UnitCAODashboard({ profile }: { profile: any }) {
                 </Link>
               ))
             ) : (
-              <EmptyRow icon={<PackageCheck size={32} className="text-gray-300" />} message="No recent GRNs" />
+              <EmptyRow icon={<PackageCheck size={32} className="text-gray-500" />} message="No recent GRNs" />
             )}
           </div>
         </div>

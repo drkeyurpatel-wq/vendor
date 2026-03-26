@@ -60,7 +60,7 @@ export default function StockListClient({ stocks, userRole }: { stocks: StockRow
       cell: ({ row }) => (
         <div>
           <Link href={`/items/${row.original.item_id}`} className="text-sm font-medium text-gray-900 hover:text-teal-600">{row.original.item?.generic_name}</Link>
-          {row.original.item?.category?.name && <div className="text-xs text-gray-400">{row.original.item.category.name}</div>}
+          {row.original.item?.category?.name && <div className="text-xs text-gray-500">{row.original.item.category.name}</div>}
         </div>
       ),
     },
@@ -98,9 +98,9 @@ export default function StockListClient({ stocks, userRole }: { stocks: StockRow
       cell: ({ row }) => (
         <div className="text-xs text-gray-600">
           <span className="text-red-500 font-medium">{row.original.reorder_level}</span>
-          <span className="text-gray-400"> / </span>
+          <span className="text-gray-500"> / </span>
           <span>{row.original.max_level || '—'}</span>
-          <span className="text-gray-400 ml-1">{row.original.item?.unit}</span>
+          <span className="text-gray-500 ml-1">{row.original.item?.unit}</span>
         </div>
       ),
     },
@@ -132,7 +132,7 @@ export default function StockListClient({ stocks, userRole }: { stocks: StockRow
               </Link>
             )}
             <button onClick={() => setExpandedRow(isExpanded ? null : s.id)}
-              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
               title="Stock actions">
               {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
@@ -180,7 +180,7 @@ export default function StockListClient({ stocks, userRole }: { stocks: StockRow
                 <span className="ml-2 font-semibold text-gray-900">{s.item?.generic_name}</span>
                 <span className="ml-2 badge bg-blue-50 text-blue-700">{s.centre?.code}</span>
               </div>
-              <button onClick={() => setExpandedRow(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button onClick={() => setExpandedRow(null)} className="text-gray-500 hover:text-gray-600">✕</button>
             </div>
             <StockActions
               itemId={s.item_id} itemCode={s.item?.item_code || ''} itemName={s.item?.generic_name || ''}
@@ -201,7 +201,7 @@ export default function StockListClient({ stocks, userRole }: { stocks: StockRow
         showColumnToggle
         exportFilename="stock-levels"
         pageSize={50}
-        emptyIcon={<Package size={40} className="text-gray-300" />}
+        emptyIcon={<Package size={40} className="text-gray-500" />}
         emptyTitle="No stock data"
         emptyDescription="Stock levels populate when GRNs are verified"
       />

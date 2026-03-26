@@ -65,9 +65,9 @@ function ProfileTab({ vendor, approvedCentreNames }: { vendor: any; approvedCent
         <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-3 flex items-center gap-2"><Building2 size={14} className="text-teal-600" /> Contact & Address</h3>
         <div className="space-y-2.5 text-sm">
           {vendor.primary_contact_name && <div className="flex gap-2"><span className="text-gray-500 w-24 shrink-0">Contact:</span><span className="text-gray-900 font-medium">{vendor.primary_contact_name}</span></div>}
-          {vendor.primary_contact_phone && <div className="flex items-center gap-2"><Phone size={13} className="text-gray-400" /><span className="text-gray-900">{vendor.primary_contact_phone}</span></div>}
-          {vendor.primary_contact_email && <div className="flex items-center gap-2"><Mail size={13} className="text-gray-400" /><a href={`mailto:${vendor.primary_contact_email}`} className="text-teal-600 hover:underline">{vendor.primary_contact_email}</a></div>}
-          {vendor.address && <div className="flex items-start gap-2"><MapPin size={13} className="text-gray-400 mt-0.5" /><span className="text-gray-900">{vendor.address}{vendor.city ? `, ${vendor.city}` : ''}{vendor.state ? `, ${vendor.state}` : ''} {vendor.pincode || ''}</span></div>}
+          {vendor.primary_contact_phone && <div className="flex items-center gap-2"><Phone size={13} className="text-gray-500" /><span className="text-gray-900">{vendor.primary_contact_phone}</span></div>}
+          {vendor.primary_contact_email && <div className="flex items-center gap-2"><Mail size={13} className="text-gray-500" /><a href={`mailto:${vendor.primary_contact_email}`} className="text-teal-600 hover:underline">{vendor.primary_contact_email}</a></div>}
+          {vendor.address && <div className="flex items-start gap-2"><MapPin size={13} className="text-gray-500 mt-0.5" /><span className="text-gray-900">{vendor.address}{vendor.city ? `, ${vendor.city}` : ''}{vendor.state ? `, ${vendor.state}` : ''} {vendor.pincode || ''}</span></div>}
         </div>
       </div>
 
@@ -96,7 +96,7 @@ function ProfileTab({ vendor, approvedCentreNames }: { vendor: any; approvedCent
         {approvedCentreNames.length > 0 ? (
           <div className="flex flex-wrap gap-2">{approvedCentreNames.map(c => <span key={c} className="badge bg-blue-50 text-blue-700">{c}</span>)}</div>
         ) : (
-          <p className="text-sm text-gray-400">All centres (no restriction)</p>
+          <p className="text-sm text-gray-500">All centres (no restriction)</p>
         )}
       </div>
     </div>
@@ -106,7 +106,7 @@ function ProfileTab({ vendor, approvedCentreNames }: { vendor: any; approvedCent
 // ─── Orders Tab ───────────────────────────────────────────
 
 function OrdersTab({ pos, vendorId }: { pos: any[]; vendorId: string }) {
-  if (pos.length === 0) return <div className="text-center py-8 text-sm text-gray-400">No purchase orders yet</div>
+  if (pos.length === 0) return <div className="text-center py-8 text-sm text-gray-500">No purchase orders yet</div>
   return (
     <div>
       <div className="overflow-x-auto -mx-6 -mb-6">
@@ -135,7 +135,7 @@ function OrdersTab({ pos, vendorId }: { pos: any[]; vendorId: string }) {
 // ─── Invoices Tab ─────────────────────────────────────────
 
 function InvoicesTab({ invoices }: { invoices: any[] }) {
-  if (invoices.length === 0) return <div className="text-center py-8 text-sm text-gray-400">No invoices yet</div>
+  if (invoices.length === 0) return <div className="text-center py-8 text-sm text-gray-500">No invoices yet</div>
   return (
     <div className="overflow-x-auto -mx-6 -mb-6">
       <table className="data-table">
@@ -165,7 +165,7 @@ function InvoicesTab({ invoices }: { invoices: any[] }) {
 // ─── GRNs Tab ─────────────────────────────────────────────
 
 function GRNsTab({ grns }: { grns: any[] }) {
-  if (grns.length === 0) return <div className="text-center py-8 text-sm text-gray-400">No GRNs yet</div>
+  if (grns.length === 0) return <div className="text-center py-8 text-sm text-gray-500">No GRNs yet</div>
   return (
     <div className="overflow-x-auto -mx-6 -mb-6">
       <table className="data-table">
@@ -218,7 +218,7 @@ function DocumentsTab({ documents, vendorId }: { documents: any[]; vendorId: str
           </table>
         </div>
       ) : (
-        <div className="text-center py-8 text-sm text-gray-400">No documents uploaded</div>
+        <div className="text-center py-8 text-sm text-gray-500">No documents uploaded</div>
       )}
       <div className="mt-4 text-center">
         <Link href={`/vendors/${vendorId}/documents`} className="btn-secondary text-sm">Manage Documents</Link>

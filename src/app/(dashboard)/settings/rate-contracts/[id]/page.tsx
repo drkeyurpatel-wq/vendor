@@ -77,17 +77,17 @@ export default async function RateContractDetailPage({
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-bold text-[#1B3A6B] font-mono">{contract.contract_number}</h1>
+              <h1 className="text-2xl font-bold text-navy-600 font-mono">{contract.contract_number}</h1>
               <span className={cn('badge', STATUS_COLORS[contract.status])}>{contract.status}</span>
               {isExpired && <span className="badge bg-red-100 text-red-700">Expired</span>}
               {isExpiring && <span className="badge bg-yellow-100 text-yellow-700">{daysLeft}d left</span>}
             </div>
             <p className="text-sm text-gray-500">
-              <Link href={`/vendors/${contract.vendor?.id}`} className="text-[#0D7E8A] hover:underline">
+              <Link href={`/vendors/${contract.vendor?.id}`} className="text-teal-500 hover:underline">
                 {contract.vendor?.legal_name}
               </Link>
               {' '}
-              <span className="font-mono text-xs text-gray-400">({contract.vendor?.vendor_code})</span>
+              <span className="font-mono text-xs text-gray-500">({contract.vendor?.vendor_code})</span>
               {contract.centre && (
                 <span className="ml-2">| {contract.centre.code} — {contract.centre.name}</span>
               )}
@@ -143,7 +143,7 @@ export default async function RateContractDetailPage({
 
       {/* Vendor Details */}
       <div className="card p-6 mb-6">
-        <h2 className="text-sm font-semibold text-[#1B3A6B] mb-3 uppercase tracking-wide">Vendor Details</h2>
+        <h2 className="text-sm font-semibold text-navy-600 mb-3 uppercase tracking-wide">Vendor Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div>
             <span className="text-gray-500 block">Name</span>
@@ -163,7 +163,7 @@ export default async function RateContractDetailPage({
       {/* Items Table */}
       <div className="card overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-[#1B3A6B] flex items-center gap-2">
+          <h2 className="font-semibold text-navy-600 flex items-center gap-2">
             <FileText size={16} /> Contract Items ({items.length})
           </h2>
         </div>
@@ -194,7 +194,7 @@ export default async function RateContractDetailPage({
                       <td>
                         <div className="text-sm font-medium">{ci.item?.generic_name}</div>
                         {ci.item?.brand_name && (
-                          <div className="text-xs text-gray-400">{ci.item.brand_name}</div>
+                          <div className="text-xs text-gray-500">{ci.item.brand_name}</div>
                         )}
                       </td>
                       <td className="font-mono text-xs text-gray-500">{ci.item?.hsn_code || '—'}</td>
@@ -215,7 +215,7 @@ export default async function RateContractDetailPage({
           </div>
         ) : (
           <div className="empty-state py-8">
-            <p className="text-gray-400">No items in this contract</p>
+            <p className="text-gray-500">No items in this contract</p>
           </div>
         )}
       </div>

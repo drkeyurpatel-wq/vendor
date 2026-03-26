@@ -219,9 +219,9 @@ export default function CommandPalette() {
           {/* Search input */}
           <div className="flex items-center gap-3 px-4 border-b border-gray-100">
             {loading ? (
-              <Loader2 size={18} className="text-gray-400 animate-spin flex-shrink-0" />
+              <Loader2 size={18} className="text-gray-500 animate-spin flex-shrink-0" />
             ) : (
-              <Search size={18} className="text-gray-400 flex-shrink-0" />
+              <Search size={18} className="text-gray-500 flex-shrink-0" />
             )}
             <input
               ref={inputRef}
@@ -230,11 +230,11 @@ export default function CommandPalette() {
               onChange={e => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Search vendors, items, POs, pages..."
-              className="flex-1 h-12 text-sm bg-transparent border-0 outline-none placeholder:text-gray-400"
+              className="flex-1 h-12 text-sm bg-transparent border-0 outline-none placeholder:text-gray-500"
               autoComplete="off"
               spellCheck={false}
             />
-            <kbd className="hidden sm:flex items-center gap-0.5 h-6 px-1.5 text-[10px] font-medium text-gray-400 bg-gray-100 border border-gray-200 rounded">
+            <kbd className="hidden sm:flex items-center gap-0.5 h-6 px-1.5 text-[10px] font-medium text-gray-500 bg-gray-100 border border-gray-200 rounded">
               ESC
             </kbd>
           </div>
@@ -243,14 +243,14 @@ export default function CommandPalette() {
           <div ref={listRef} className="max-h-[360px] overflow-y-auto py-2">
             {visibleResults.length === 0 && query.trim() && !loading && (
               <div className="px-4 py-8 text-center">
-                <Search size={24} className="mx-auto text-gray-300 mb-2" />
+                <Search size={24} className="mx-auto text-gray-500 mb-2" />
                 <p className="text-sm text-gray-500">No results for &ldquo;{query}&rdquo;</p>
               </div>
             )}
 
             {!query.trim() && (
               <div className="px-3 py-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 px-2">Quick navigation</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 px-2">Quick navigation</span>
               </div>
             )}
 
@@ -273,15 +273,15 @@ export default function CommandPalette() {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-gray-900 truncate">{result.title}</span>
                       {result.code && (
-                        <span className="text-2xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded flex-shrink-0">{result.code}</span>
+                        <span className="text-2xs font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded flex-shrink-0">{result.code}</span>
                       )}
                     </div>
                     {result.subtitle && (
-                      <span className="text-xs text-gray-400 truncate block">{result.subtitle}</span>
+                      <span className="text-xs text-gray-500 truncate block">{result.subtitle}</span>
                     )}
                   </div>
                   {selectedIndex === i && (
-                    <CornerDownLeft size={14} className="text-gray-400 flex-shrink-0" />
+                    <CornerDownLeft size={14} className="text-gray-500 flex-shrink-0" />
                   )}
                 </button>
               )
@@ -289,7 +289,7 @@ export default function CommandPalette() {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2.5 border-t border-gray-100 flex items-center gap-4 text-[10px] text-gray-400">
+          <div className="px-4 py-2.5 border-t border-gray-100 flex items-center gap-4 text-[10px] text-gray-500">
             <span className="flex items-center gap-1"><kbd className="font-mono bg-gray-100 px-1 py-0.5 rounded border border-gray-200">↑↓</kbd> navigate</span>
             <span className="flex items-center gap-1"><kbd className="font-mono bg-gray-100 px-1 py-0.5 rounded border border-gray-200">↵</kbd> open</span>
             <span className="flex items-center gap-1"><kbd className="font-mono bg-gray-100 px-1 py-0.5 rounded border border-gray-200">esc</kbd> close</span>

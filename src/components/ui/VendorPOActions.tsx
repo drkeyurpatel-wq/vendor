@@ -99,7 +99,7 @@ export default function VendorPOActions({ poId, poNumber, poStatus, vendorId }: 
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !loading && setAction(null)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in">
-            <button onClick={() => setAction(null)} disabled={loading} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={18} /></button>
+            <button onClick={() => setAction(null)} disabled={loading} className="absolute top-4 right-4 text-gray-500 hover:text-gray-600"><X size={18} /></button>
             <h3 className="text-base font-semibold text-gray-900 mb-1">
               {action === 'acknowledge' ? 'Acknowledge Purchase Order' : 'Raise Dispute'}
             </h3>
@@ -127,7 +127,7 @@ export default function VendorPOActions({ poId, poNumber, poStatus, vendorId }: 
               <button onClick={() => setAction(null)} disabled={loading} className="btn-secondary text-sm">Cancel</button>
               <button onClick={action === 'acknowledge' ? handleAcknowledge : handleDispute}
                 disabled={loading || (action === 'dispute' && !comment.trim())}
-                className={`text-sm px-4 py-2 rounded-lg text-white font-medium disabled:opacity-50 ${action === 'acknowledge' ? 'bg-[#0D7E8A] hover:bg-[#0b6b75]' : 'bg-red-600 hover:bg-red-700'}`}>
+                className={`text-sm px-4 py-2 rounded-lg text-white font-medium disabled:opacity-50 ${action === 'acknowledge' ? 'bg-teal-500 hover:bg-teal-600' : 'bg-red-600 hover:bg-red-700'}`}>
                 {loading ? <Loader2 size={14} className="animate-spin" /> : action === 'acknowledge' ? 'Acknowledge' : 'Submit Dispute'}
               </button>
             </div>

@@ -26,7 +26,7 @@ export default async function AuditTrailPage({
   if (!profile || !isGroupLevel) {
     return (
       <div className="card p-12 text-center">
-        <History size={40} className="mx-auto mb-3 text-gray-300" />
+        <History size={40} className="mx-auto mb-3 text-gray-500" />
         <p className="font-medium text-gray-500">Access Restricted — Group Admin / CAO only</p>
       </div>
     )
@@ -85,13 +85,13 @@ export default async function AuditTrailPage({
       <div className="flex gap-2 mb-5 flex-wrap">
         <Link href="/settings/audit-trail"
           className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
-            !params.entity_type ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]' : 'bg-white text-gray-500 border-gray-200')}>
+            !params.entity_type ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-gray-500 border-gray-200')}>
           All
         </Link>
         {['purchase_order', 'grn', 'invoice', 'vendor', 'item'].map(et => (
           <Link key={et} href={`/settings/audit-trail?entity_type=${et}`}
             className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
-              params.entity_type === et ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]' : 'bg-white text-gray-500 border-gray-200')}>
+              params.entity_type === et ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-gray-500 border-gray-200')}>
             {et.replace(/_/g, ' ')}
           </Link>
         ))}
@@ -134,9 +134,9 @@ export default async function AuditTrailPage({
           </div>
         ) : (
           <div className="empty-state py-12">
-            <History size={40} className="mb-3 text-gray-300" />
+            <History size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No audit trail entries yet</p>
-            <p className="text-sm text-gray-400 mt-1">Field-level changes will appear here as users modify POs, invoices, and other records</p>
+            <p className="text-sm text-gray-500 mt-1">Field-level changes will appear here as users modify POs, invoices, and other records</p>
           </div>
         )}
       </div>

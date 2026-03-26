@@ -56,10 +56,10 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
         <Menu size={20} />
       </button>
 
-      <button onClick={triggerCommandPalette} className="flex-1 max-w-md h-9 flex items-center gap-2.5 px-3 text-sm text-gray-400 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:border-gray-300 transition-all cursor-text">
-        <Search size={15} className="text-gray-400 flex-shrink-0" />
+      <button onClick={triggerCommandPalette} className="flex-1 max-w-md h-9 flex items-center gap-2.5 px-3 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:border-gray-300 transition-all cursor-text">
+        <Search size={15} className="text-gray-500 flex-shrink-0" />
         <span className="flex-1 text-left">Search vendors, items, POs...</span>
-        <kbd className="hidden sm:flex items-center gap-0.5 h-5 px-1.5 text-[10px] font-medium text-gray-400 bg-white border border-gray-200 rounded shadow-sm">
+        <kbd className="hidden sm:flex items-center gap-0.5 h-5 px-1.5 text-[10px] font-medium text-gray-500 bg-white border border-gray-200 rounded shadow-sm">
           <span className="text-[11px]">&#x2318;</span>K
         </kbd>
       </button>
@@ -81,32 +81,32 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
             aria-expanded={userMenuOpen}
             aria-haspopup="true"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-[#1B3A6B] to-[#234880] rounded-xl flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-navy-600 to-[#234880] rounded-xl flex items-center justify-center shadow-sm">
               <span className="text-white text-[10px] font-bold tracking-wide">{initials}</span>
             </div>
             <div className="hidden md:block text-left">
               <div className="text-sm font-semibold text-gray-800 leading-tight">{user.full_name.split(' ')[0]}</div>
-              <div className="text-[10px] text-gray-400 capitalize leading-tight">{user.role.replace(/_/g, ' ')}</div>
+              <div className="text-[10px] text-gray-500 capitalize leading-tight">{user.role.replace(/_/g, ' ')}</div>
             </div>
-            <ChevronDown size={14} className={`hidden md:block text-gray-400 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={14} className={`hidden md:block text-gray-500 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {userMenuOpen && (
             <div className="absolute right-0 top-full mt-1.5 w-64 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1.5 animate-scale-in">
               <div className="px-4 py-3 border-b border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#1B3A6B] to-[#234880] rounded-xl flex items-center justify-center shadow-sm">
+                  <div className="w-10 h-10 bg-gradient-to-br from-navy-600 to-[#234880] rounded-xl flex items-center justify-center shadow-sm">
                     <span className="text-white text-xs font-bold">{initials}</span>
                   </div>
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-gray-900 truncate">{user.full_name}</div>
                     <div className="text-xs text-gray-500 truncate">{user.email}</div>
-                    <div className="text-[10px] text-[#0D7E8A] font-medium capitalize mt-0.5">{user.role.replace(/_/g, ' ')}</div>
+                    <div className="text-[10px] text-teal-500 font-medium capitalize mt-0.5">{user.role.replace(/_/g, ' ')}</div>
                   </div>
                 </div>
                 {user.centre && (
                   <div className="flex items-center gap-1.5 mt-2.5 px-2.5 py-1.5 bg-gray-50 rounded-lg text-xs text-gray-600">
-                    <Building2 size={12} className="text-gray-400" />
+                    <Building2 size={12} className="text-gray-500" />
                     {user.centre.name}
                   </div>
                 )}
@@ -114,10 +114,10 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
 
               <div className="py-1">
                 <Link href="/settings/users" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                  <Settings size={15} className="text-gray-400" /> Settings
+                  <Settings size={15} className="text-gray-500" /> Settings
                 </Link>
                 <Link href="/settings/audit-log" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                  <User size={15} className="text-gray-400" /> Audit Log
+                  <User size={15} className="text-gray-500" /> Audit Log
                 </Link>
               </div>
 

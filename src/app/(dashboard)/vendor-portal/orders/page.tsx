@@ -31,9 +31,9 @@ export default async function VendorOrdersPage({
   if (!profile || role !== 'vendor') {
     return (
       <div className="card p-12 text-center">
-        <Package size={40} className="mx-auto mb-3 text-gray-300" />
+        <Package size={40} className="mx-auto mb-3 text-gray-500" />
         <p className="font-medium text-gray-500">Vendor Portal</p>
-        <p className="text-sm text-gray-400 mt-1">This page is only accessible to vendor users</p>
+        <p className="text-sm text-gray-500 mt-1">This page is only accessible to vendor users</p>
       </div>
     )
   }
@@ -49,7 +49,7 @@ export default async function VendorOrdersPage({
       <div className="card p-12 text-center">
         <AlertTriangle size={40} className="mx-auto mb-3 text-yellow-400" />
         <p className="font-medium text-gray-500">Vendor Profile Not Found</p>
-        <p className="text-sm text-gray-400 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
+        <p className="text-sm text-gray-500 mt-1">No vendor profile is linked to your email. Contact the admin.</p>
       </div>
     )
   }
@@ -117,7 +117,7 @@ export default async function VendorOrdersPage({
           <form method="GET" action="/vendor-portal/orders" className="flex items-center gap-2 flex-1">
             {statusFilter && <input type="hidden" name="status" value={statusFilter} />}
             <div className="relative flex-1 max-w-sm">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               <input
                 type="text"
                 name="search"
@@ -138,8 +138,8 @@ export default async function VendorOrdersPage({
                 className={cn(
                   'px-3 py-1 rounded-full text-xs font-medium transition-colors border',
                   statusFilter === s.value
-                    ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#0D7E8A] hover:text-[#0D7E8A]'
+                    ? 'bg-navy-600 text-white border-navy-600'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-teal-500 hover:text-teal-500'
                 )}
               >
                 {s.label}
@@ -170,7 +170,7 @@ export default async function VendorOrdersPage({
                   {pos.map((po: any) => (
                     <tr key={po.id} className="hover:bg-gray-50">
                       <td>
-                        <Link href={`/vendor-portal/orders/${po.id}`} className="font-mono text-xs font-semibold text-[#0D7E8A] hover:underline">
+                        <Link href={`/vendor-portal/orders/${po.id}`} className="font-mono text-xs font-semibold text-teal-500 hover:underline">
                           {po.po_number}
                         </Link>
                       </td>
@@ -201,9 +201,9 @@ export default async function VendorOrdersPage({
           </>
         ) : (
           <div className="empty-state">
-            <ShoppingCart size={40} className="mx-auto mb-3 text-gray-300" />
+            <ShoppingCart size={40} className="mx-auto mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No purchase orders found</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
               {searchQuery || statusFilter ? 'Try adjusting your filters' : 'Purchase orders will appear here once created'}
             </p>
           </div>

@@ -50,7 +50,7 @@ export default function Pagination({ totalCount, pageSize = 50, currentPage }: P
         )}
         {pages.map((p, i) =>
           p === '...' ? (
-            <span key={`dots-${i}`} className="px-2 text-gray-400">...</span>
+            <span key={`dots-${i}`} className="px-2 text-gray-500">...</span>
           ) : (
             <Link
               key={p}
@@ -58,7 +58,7 @@ export default function Pagination({ totalCount, pageSize = 50, currentPage }: P
               className={cn(
                 'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
                 p === currentPage
-                  ? 'bg-[#1B3A6B] text-white'
+                  ? 'bg-navy-600 text-white'
                   : 'text-gray-600 hover:bg-gray-100'
               )}
             >

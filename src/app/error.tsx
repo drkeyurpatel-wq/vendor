@@ -28,7 +28,7 @@ export default function Error({
           <AlertTriangle size={32} className="text-red-600" aria-hidden="true" />
         </div>
 
-        <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-[#1B3A6B] mb-2 outline-none">
+        <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-navy-600 mb-2 outline-none">
           Something went wrong
         </h1>
 
@@ -38,7 +38,7 @@ export default function Error({
         </p>
 
         {error.digest && (
-          <p className="text-xs text-gray-400 mb-6 font-mono">
+          <p className="text-xs text-gray-500 mb-6 font-mono">
             Error ID: {error.digest}
           </p>
         )}
@@ -54,7 +54,7 @@ export default function Error({
 
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-[#1B3A6B] bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-navy-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <LayoutDashboard size={15} aria-hidden="true" />
             Go to Dashboard

@@ -323,11 +323,11 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-gray-100 rounded-lg p-0.5 text-sm">
             <button type="button" onClick={() => setQuickMode(false)}
-              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${!quickMode ? 'bg-white shadow text-[#1B3A6B]' : 'text-gray-500 hover:text-gray-700'}`}>
+              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${!quickMode ? 'bg-white shadow text-navy-600' : 'text-gray-500 hover:text-gray-700'}`}>
               Full
             </button>
             <button type="button" onClick={() => setQuickMode(true)}
-              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${quickMode ? 'bg-white shadow text-[#0D7E8A]' : 'text-gray-500 hover:text-gray-700'}`}>
+              className={`px-3 py-1.5 rounded-md font-medium transition-colors ${quickMode ? 'bg-white shadow text-teal-500' : 'text-gray-500 hover:text-gray-700'}`}>
               Quick Add
             </button>
           </div>
@@ -398,7 +398,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
               aria-controls={`tabpanel-${tab.id}`}
               id={`tab-${tab.id}`}
               className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors flex items-center gap-1.5 ${
-                activeTab === tab.id ? 'border-[#0D7E8A] text-[#0D7E8A]' : hasError ? 'border-red-400 text-red-500' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === tab.id ? 'border-teal-500 text-teal-500' : hasError ? 'border-red-400 text-red-500' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}>
               {tab.label}
               {hasError && <span className="w-1.5 h-1.5 rounded-full bg-red-500" />}
@@ -412,12 +412,12 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         {activeTab === 'basic' && (
           <div className="card p-6">
             <fieldset>
-              <legend className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
+              <legend className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
                 Vendor Identification
               </legend>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div className="md:col-span-2">
-                  <label htmlFor="legal_name" className="form-label">Legal Name * <span className="text-gray-400 font-normal">(as per GST certificate)</span></label>
+                  <label htmlFor="legal_name" className="form-label">Legal Name * <span className="text-gray-500 font-normal">(as per GST certificate)</span></label>
                   <input id="legal_name" className="form-input" value={form.legal_name} onChange={e => update('legal_name', e.target.value)} onBlur={() => touch('legal_name')} required aria-required="true" aria-invalid={touched.has('legal_name') && !!errors.legal_name} />
                   <FieldError message={errors.legal_name} show={touched.has('legal_name')} />
                 </div>
@@ -452,7 +452,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
           <div className="space-y-6">
             <div className="card p-6">
               <fieldset>
-                <legend className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
+                <legend className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
                   Tax Registration
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -473,7 +473,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
             </div>
 
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#E6F5F6] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-teal-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Licenses & Certificates
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -518,7 +518,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
           <div className="space-y-6">
             <div className="card p-6">
               <fieldset>
-                <legend className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
+                <legend className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
                   Primary Contact
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -562,7 +562,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         {activeTab === 'banking' && (
           <div className="card p-6">
             <fieldset>
-              <legend className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
+              <legend className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg w-[calc(100%+3rem)]">
                 Banking Details
               </legend>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -594,7 +594,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         {activeTab === 'commercial' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Payment & Credit Terms
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -654,13 +654,13 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         {/* ═══ TDS ═══ */}
         {activeTab === 'tds' && (
           <div className="card p-6">
-            <h3 className="font-semibold text-[#1B3A6B] mb-4 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+            <h3 className="font-semibold text-navy-600 mb-4 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
               TDS (Tax Deducted at Source)
             </h3>
             <div className="mt-4">
               <label className="flex items-center gap-2 cursor-pointer mb-4">
                 <input type="checkbox" checked={form.tds_applicable as boolean} onChange={e => update('tds_applicable', e.target.checked)}
-                  className="w-4 h-4 accent-[#0D7E8A]" />
+                  className="w-4 h-4 accent-teal-500" />
                 <span className="text-sm font-medium">TDS Applicable for this vendor</span>
               </label>
 
@@ -680,7 +680,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
                   <div className="flex items-end">
                     <label className="flex items-center gap-2 cursor-pointer pb-2">
                       <input type="checkbox" checked={form.lower_tds_certificate as boolean}
-                        onChange={e => update('lower_tds_certificate', e.target.checked)} className="w-4 h-4 accent-[#0D7E8A]" />
+                        onChange={e => update('lower_tds_certificate', e.target.checked)} className="w-4 h-4 accent-teal-500" />
                       <span className="text-sm">Lower TDS Certificate</span>
                     </label>
                   </div>
@@ -706,7 +706,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         {activeTab === 'centres' && (
           <div className="space-y-6">
             <div className="card p-6">
-              <h3 className="font-semibold text-[#1B3A6B] mb-2 pb-2 border-b bg-[#EEF2F9] -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
+              <h3 className="font-semibold text-navy-600 mb-2 pb-2 border-b bg-navy-50 -mx-6 -mt-6 px-6 py-3 rounded-t-lg">
                 Approved Centres
               </h3>
               <p className="text-xs text-gray-500 mb-4 mt-2">Select which centres this vendor can supply to. All selected = group-wide vendor.</p>
@@ -715,7 +715,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
                   <button key={c.id} type="button" onClick={() => toggleCentre(c.id)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
                       selectedCentres.includes(c.id)
-                        ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]'
+                        ? 'bg-navy-600 text-white border-navy-600'
                         : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -732,7 +732,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
                   <label className="form-label">Tally Ledger Name</label>
                   <input className="form-input" value={form.tally_ledger_name} onChange={e => update('tally_ledger_name', e.target.value)}
                     placeholder="Exact ledger name in Tally" />
-                  <p className="text-xs text-gray-400 mt-1">Must match exactly for payment sync</p>
+                  <p className="text-xs text-gray-500 mt-1">Must match exactly for payment sync</p>
                 </div>
                 <div>
                   <label className="form-label">Tally Group</label>

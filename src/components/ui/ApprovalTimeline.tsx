@@ -29,7 +29,7 @@ export default function ApprovalTimeline({ approvals, autoApproved = false }: Pr
   }
 
   if (approvals.length === 0) {
-    return <p className="text-sm text-gray-400">No approval records</p>
+    return <p className="text-sm text-gray-500">No approval records</p>
   }
 
   return (
@@ -71,7 +71,7 @@ export default function ApprovalTimeline({ approvals, autoApproved = false }: Pr
               <p className="text-xs text-gray-600 mt-1 italic">&ldquo;{a.comments}&rdquo;</p>
             )}
             {a.approved_at && (
-              <p className="text-xs text-gray-400 mt-0.5">{formatDateTime(a.approved_at)}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{formatDateTime(a.approved_at)}</p>
             )}
           </div>
         </div>

@@ -40,7 +40,7 @@ export default async function ConsignmentDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="stat-card border-l-4 border-blue-500">
           <div className="text-xs text-gray-500">Active Deposits</div>
-          <div className="text-2xl font-bold text-[#1B3A6B]">{deposits?.filter(d => d.status === 'active' || d.status === 'partially_used').length || 0}</div>
+          <div className="text-2xl font-bold text-navy-600">{deposits?.filter(d => d.status === 'active' || d.status === 'partially_used').length || 0}</div>
         </div>
         <div className="stat-card border-l-4 border-teal-500">
           <div className="text-xs text-gray-500">Items Available</div>
@@ -74,7 +74,7 @@ export default async function ConsignmentDashboard() {
         {/* Available Stock */}
         <div className="card overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="font-semibold text-[#1B3A6B]">Available Consignment Stock</h2>
+            <h2 className="font-semibold text-navy-600">Available Consignment Stock</h2>
             <Link href="/consignment/stock" className="text-xs text-teal-600 hover:underline">View all →</Link>
           </div>
           {stock && stock.length > 0 ? (
@@ -85,25 +85,25 @@ export default async function ConsignmentDashboard() {
                   <div key={s.id} className="px-5 py-3 flex items-center justify-between">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{s.item?.generic_name}</div>
-                      <div className="text-xs text-gray-400">{s.item?.item_code} | {s.batch_number || 'No batch'} | {s.serial_number || ''}</div>
+                      <div className="text-xs text-gray-500">{s.item?.item_code} | {s.batch_number || 'No batch'} | {s.serial_number || ''}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-bold text-[#1B3A6B]">{avail} avail</div>
-                      <div className="text-xs text-gray-400">{formatCurrency(s.vendor_rate)}/unit</div>
+                      <div className="text-sm font-bold text-navy-600">{avail} avail</div>
+                      <div className="text-xs text-gray-500">{formatCurrency(s.vendor_rate)}/unit</div>
                     </div>
                   </div>
                 )
               })}
             </div>
           ) : (
-            <div className="p-8 text-center text-sm text-gray-400">No available consignment stock</div>
+            <div className="p-8 text-center text-sm text-gray-500">No available consignment stock</div>
           )}
         </div>
 
         {/* Recent Usage */}
         <div className="card overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="font-semibold text-[#1B3A6B]">Recent Usage</h2>
+            <h2 className="font-semibold text-navy-600">Recent Usage</h2>
             <Link href="/consignment/usage" className="text-xs text-teal-600 hover:underline">View all →</Link>
           </div>
           {usage && usage.length > 0 ? (
@@ -112,7 +112,7 @@ export default async function ConsignmentDashboard() {
                 <div key={u.id} className="px-5 py-3 flex items-center justify-between">
                   <div>
                     <div className="text-sm font-medium text-gray-900">{u.patient_name}</div>
-                    <div className="text-xs text-gray-400">{u.stock?.item?.generic_name} | {u.surgeon_name || ''} | {formatDate(u.usage_date || u.created_at)}</div>
+                    <div className="text-xs text-gray-500">{u.stock?.item?.generic_name} | {u.surgeon_name || ''} | {formatDate(u.usage_date || u.created_at)}</div>
                   </div>
                   <span className={cn('badge text-xs', STATUS_COLORS[u.conversion_status] || STATUS_COLORS.pending)}>
                     {u.conversion_status === 'converted' ? '✓ Converted' : u.conversion_status === 'billed' ? '✓ Billed' : '⏳ Pending'}
@@ -121,7 +121,7 @@ export default async function ConsignmentDashboard() {
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center text-sm text-gray-400">No usage records yet</div>
+            <div className="p-8 text-center text-sm text-gray-500">No usage records yet</div>
           )}
         </div>
       </div>

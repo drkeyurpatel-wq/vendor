@@ -109,7 +109,7 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
         <VendorActions vendorId={vendor.id} currentStatus={vendor.status} userRole={role} />
       </div>
 
-      <div className="mt-4 text-xs text-gray-400">
+      <div className="mt-4 text-xs text-gray-500">
         Created: {formatDate(vendor.created_at)} | Last updated: {formatDate(vendor.updated_at)}
       </div>
     </div>

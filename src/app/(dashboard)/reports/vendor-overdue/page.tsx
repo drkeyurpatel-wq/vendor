@@ -105,7 +105,7 @@ export default async function VendorOverdueReport() {
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
             <div>
               <Link href={`/vendors/${group.vendor?.id}`} className="text-sm font-semibold text-navy-600 hover:underline">{group.vendor?.legal_name}</Link>
-              <span className="ml-2 font-mono text-xs text-gray-400">{group.vendor?.vendor_code}</span>
+              <span className="ml-2 font-mono text-xs text-gray-500">{group.vendor?.vendor_code}</span>
               <span className="ml-3 text-sm font-bold text-red-600">{formatLakhs(group.totalOutstanding)} outstanding</span>
             </div>
             <div className="flex gap-2">
@@ -148,7 +148,7 @@ export default async function VendorOverdueReport() {
         <div className="card p-12 text-center">
           <AlertTriangle size={40} className="mx-auto mb-3 text-green-400" />
           <p className="font-medium text-gray-700">No outstanding invoices</p>
-          <p className="text-sm text-gray-400 mt-1">All vendor payments are current</p>
+          <p className="text-sm text-gray-500 mt-1">All vendor payments are current</p>
         </div>
       )}
     </div>

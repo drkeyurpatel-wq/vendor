@@ -100,7 +100,7 @@ export default async function RateContractsPage({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="relative">
-              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               <input
                 name="search"
                 type="text"
@@ -129,7 +129,7 @@ export default async function RateContractsPage({
           </div>
           {(params.status || params.vendor || params.search) && (
             <div className="mt-2">
-              <Link href="/settings/rate-contracts" className="text-xs text-[#0D7E8A] hover:underline">
+              <Link href="/settings/rate-contracts" className="text-xs text-teal-500 hover:underline">
                 Clear all filters
               </Link>
             </div>
@@ -168,7 +168,7 @@ export default async function RateContractsPage({
                       <td>
                         <Link
                           href={`/settings/rate-contracts/${rc.id}`}
-                          className="font-mono text-xs font-semibold text-[#0D7E8A] hover:underline"
+                          className="font-mono text-xs font-semibold text-teal-500 hover:underline"
                         >
                           {rc.contract_number}
                         </Link>
@@ -178,14 +178,14 @@ export default async function RateContractsPage({
                           <div>
                             <Link
                               href={`/vendors/${rc.vendor.id}`}
-                              className="text-sm font-medium text-[#0D7E8A] hover:underline"
+                              className="text-sm font-medium text-teal-500 hover:underline"
                             >
                               {rc.vendor.legal_name}
                             </Link>
-                            <div className="font-mono text-xs text-gray-400">{rc.vendor.vendor_code}</div>
+                            <div className="font-mono text-xs text-gray-500">{rc.vendor.vendor_code}</div>
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">--</span>
+                          <span className="text-sm text-gray-500">--</span>
                         )}
                       </td>
                       <td className="text-sm text-gray-600 capitalize">
@@ -207,7 +207,7 @@ export default async function RateContractsPage({
                             {daysLeft <= 0 ? 'Expired' : `${daysLeft}d`}
                           </span>
                         ) : (
-                          <span className="text-gray-400">--</span>
+                          <span className="text-gray-500">--</span>
                         )}
                       </td>
                       <td>
@@ -229,9 +229,9 @@ export default async function RateContractsPage({
           </div>
         ) : (
           <div className="empty-state">
-            <FileText size={40} className="mb-3 text-gray-300" />
+            <FileText size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No rate contracts found</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
               Create your first rate contract to lock in vendor pricing
             </p>
             <Link href="/settings/rate-contracts/new" className="btn-primary mt-4 inline-flex items-center gap-1.5">

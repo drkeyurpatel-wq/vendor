@@ -61,7 +61,7 @@ export default async function ConsumptionPage({
 
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-[#1B3A6B]">Consumption Analysis</h1>
+          <h1 className="text-2xl font-bold text-navy-600">Consumption Analysis</h1>
           <p className="text-sm text-gray-500 mt-1">{sortedItems.length} items — {formatCurrency(totalValue)} total — last {monthsBack} months (from GRN data)</p>
         </div>
         <div className="flex gap-2 items-center">
@@ -71,7 +71,7 @@ export default async function ConsumptionPage({
           {[3, 6, 12].map(m => (
             <Link key={m} href={`/items/consumption?months=${m}${params.centre ? `&centre=${params.centre}` : ''}`}
               className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
-                monthsBack === m ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]' : 'bg-white text-gray-500 border-gray-200')}>
+                monthsBack === m ? 'bg-navy-600 text-white border-navy-600' : 'bg-white text-gray-500 border-gray-200')}>
               {m}mo
             </Link>
           ))}
@@ -82,13 +82,13 @@ export default async function ConsumptionPage({
         <div className="mb-5 flex gap-2 flex-wrap">
           <Link href={`/items/consumption?months=${monthsBack}`}
             className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
-              !params.centre ? 'bg-[#0D7E8A] text-white border-[#0D7E8A]' : 'bg-white text-gray-500 border-gray-200')}>
+              !params.centre ? 'bg-teal-500 text-white border-teal-500' : 'bg-white text-gray-500 border-gray-200')}>
             All Centres
           </Link>
           {centres.map(c => (
             <Link key={c.id} href={`/items/consumption?months=${monthsBack}&centre=${c.id}`}
               className={cn('px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
-                params.centre === c.id ? 'bg-[#0D7E8A] text-white border-[#0D7E8A]' : 'bg-white text-gray-500 border-gray-200')}>
+                params.centre === c.id ? 'bg-teal-500 text-white border-teal-500' : 'bg-white text-gray-500 border-gray-200')}>
               {c.code}
             </Link>
           ))}
@@ -117,10 +117,10 @@ export default async function ConsumptionPage({
                   const months = Object.keys(item.monthlyQty).length || 1
                   return (
                     <tr key={item.item_id} className="hover:bg-gray-50">
-                      <td className="text-xs text-gray-400">{idx + 1}</td>
+                      <td className="text-xs text-gray-500">{idx + 1}</td>
                       <td>
                         <Link href={`/items/${item.item_id}`} className="text-sm font-medium text-gray-900 hover:text-teal-600">{info.name}</Link>
-                        <div className="text-xs text-gray-400 font-mono">{info.code}</div>
+                        <div className="text-xs text-gray-500 font-mono">{info.code}</div>
                       </td>
                       <td className="text-xs text-gray-500">{info.unit}</td>
                       {monthHeaders.map((m, mi) => {
@@ -129,7 +129,7 @@ export default async function ConsumptionPage({
                         const trend = prev > 0 ? ((qty - prev) / prev) : 0
                         return (
                           <td key={m} className="text-sm text-right font-mono">
-                            {qty > 0 ? qty.toLocaleString('en-IN') : <span className="text-gray-300">—</span>}
+                            {qty > 0 ? qty.toLocaleString('en-IN') : <span className="text-gray-500">—</span>}
                             {qty > 0 && Math.abs(trend) > 0.2 && (
                               <span className={cn('ml-1 text-[10px]', trend > 0 ? 'text-red-500' : 'text-green-500')}>
                                 {trend > 0 ? '↑' : '↓'}
@@ -138,7 +138,7 @@ export default async function ConsumptionPage({
                           </td>
                         )
                       })}
-                      <td className="text-sm text-right font-semibold text-[#1B3A6B]">{item.totalQty.toLocaleString('en-IN')}</td>
+                      <td className="text-sm text-right font-semibold text-navy-600">{item.totalQty.toLocaleString('en-IN')}</td>
                       <td className="text-sm text-right font-mono text-gray-600">{Math.round(item.totalQty / months).toLocaleString('en-IN')}</td>
                       <td className="text-sm text-right font-semibold">{formatCurrency(item.totalValue)}</td>
                       <td>
@@ -151,12 +151,12 @@ export default async function ConsumptionPage({
                 })}
               </tbody>
               <tfoot>
-                <tr className="bg-[#EEF2F9]">
-                  <td colSpan={3} className="font-semibold text-[#1B3A6B]">Total</td>
-                  {monthHeaders.map(m => <td key={m} className="text-right font-bold text-[#1B3A6B]">{sortedItems.reduce((s, i) => s + (i.monthlyQty[m] || 0), 0).toLocaleString('en-IN')}</td>)}
-                  <td className="text-right font-bold text-[#1B3A6B]">{sortedItems.reduce((s, i) => s + i.totalQty, 0).toLocaleString('en-IN')}</td>
+                <tr className="bg-navy-50">
+                  <td colSpan={3} className="font-semibold text-navy-600">Total</td>
+                  {monthHeaders.map(m => <td key={m} className="text-right font-bold text-navy-600">{sortedItems.reduce((s, i) => s + (i.monthlyQty[m] || 0), 0).toLocaleString('en-IN')}</td>)}
+                  <td className="text-right font-bold text-navy-600">{sortedItems.reduce((s, i) => s + i.totalQty, 0).toLocaleString('en-IN')}</td>
                   <td></td>
-                  <td className="text-right font-bold text-[#1B3A6B]">{formatCurrency(totalValue)}</td>
+                  <td className="text-right font-bold text-navy-600">{formatCurrency(totalValue)}</td>
                   <td></td>
                 </tr>
               </tfoot>
@@ -164,9 +164,9 @@ export default async function ConsumptionPage({
           </div>
         ) : (
           <div className="empty-state py-12">
-            <Package size={40} className="mb-3 text-gray-300" />
+            <Package size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No consumption data found</p>
-            <p className="text-sm text-gray-400 mt-1">Consumption is calculated from GRN accepted quantities</p>
+            <p className="text-sm text-gray-500 mt-1">Consumption is calculated from GRN accepted quantities</p>
           </div>
         )}
       </div>

@@ -35,7 +35,7 @@ export default function VendorDisputeButton({ invoiceId, invoiceRef }: { invoice
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/50" onClick={() => !loading && setOpen(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 animate-scale-in">
-            <button onClick={() => setOpen(false)} disabled={loading} className="absolute top-3 right-3 text-gray-400"><X size={16} /></button>
+            <button onClick={() => setOpen(false)} disabled={loading} className="absolute top-3 right-3 text-gray-500"><X size={16} /></button>
             <h3 className="text-sm font-semibold mb-1">Dispute Invoice {invoiceRef}</h3>
             <textarea className="form-input text-sm mt-2" rows={3} value={reason} onChange={e => setReason(e.target.value)} placeholder="Describe the dispute..." />
             <div className="flex gap-2 justify-end mt-3">

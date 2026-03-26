@@ -138,7 +138,7 @@ export default function StockActions({ itemId, itemCode, itemName, centreId, cen
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !loading && setDialog(null)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in">
-            <button onClick={() => setDialog(null)} disabled={loading} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={18} /></button>
+            <button onClick={() => setDialog(null)} disabled={loading} className="absolute top-4 right-4 text-gray-500 hover:text-gray-600"><X size={18} /></button>
             <h3 className="text-base font-semibold text-gray-900 mb-1">
               {adjustType === 'add' ? 'Add Stock' : 'Issue / Write-off'}
             </h3>
@@ -204,7 +204,7 @@ export default function StockActions({ itemId, itemCode, itemName, centreId, cen
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !loading && setDialog(null)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in">
-            <button onClick={() => setDialog(null)} disabled={loading} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={18} /></button>
+            <button onClick={() => setDialog(null)} disabled={loading} className="absolute top-4 right-4 text-gray-500 hover:text-gray-600"><X size={18} /></button>
             <h3 className="text-base font-semibold text-gray-900 mb-1">Inter-Centre Transfer</h3>
             <p className="text-sm text-gray-500 mb-4">{itemCode} — {itemName} | Available: {currentStock} {unit}</p>
             <div className="space-y-3 mb-4">
@@ -232,7 +232,7 @@ export default function StockActions({ itemId, itemCode, itemName, centreId, cen
             <div className="flex gap-3 justify-end">
               <button onClick={() => setDialog(null)} disabled={loading} className="btn-secondary text-sm">Cancel</button>
               <button onClick={handleTransfer} disabled={loading || !qty || !transferCentre || parseInt(qty) > currentStock}
-                className="text-sm px-4 py-2 rounded-lg bg-[#0D7E8A] text-white hover:bg-[#0b6b75] font-medium disabled:opacity-50">
+                className="text-sm px-4 py-2 rounded-lg bg-teal-500 text-white hover:bg-teal-600 font-medium disabled:opacity-50">
                 {loading ? <Loader2 size={14} className="animate-spin" /> : `Transfer ${qty || 0} ${unit}`}
               </button>
             </div>

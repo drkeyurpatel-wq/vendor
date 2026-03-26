@@ -110,7 +110,7 @@ export default function IndentListClient({ indents, userRole }: { indents: Inden
       <DataTable columns={columns} data={indents}
         searchPlaceholder="Search indent #, centre..." showSearch showExport exportFilename="indents" pageSize={25}
         onRowClick={indent => router.push(`/purchase-orders/indents/${indent.id}`)}
-        emptyIcon={<ClipboardList size={40} className="text-gray-300" />}
+        emptyIcon={<ClipboardList size={40} className="text-gray-500" />}
         emptyTitle="No indents found" emptyDescription="Indents are internal procurement requests"
         emptyAction={<Link href="/purchase-orders/indents/new" className="btn-primary text-sm"><Plus size={15} /> New Indent</Link>} />
     </>

@@ -132,9 +132,9 @@ export default async function VendorPerformancePage({
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="stat-card border-l-4 border-[#1B3A6B]">
+        <div className="stat-card border-l-4 border-navy-600">
           <div className="flex items-center gap-2 mb-1">
-            <BarChart3 size={18} className="text-[#1B3A6B]" />
+            <BarChart3 size={18} className="text-navy-600" />
             <span className="text-sm text-gray-500">Avg Overall Score</span>
           </div>
           <div className={cn(
@@ -143,25 +143,25 @@ export default async function VendorPerformancePage({
           )}>
             {avgOverall}/100
           </div>
-          <div className="text-xs text-gray-400 mt-1">{totalVendors} vendors evaluated</div>
+          <div className="text-xs text-gray-500 mt-1">{totalVendors} vendors evaluated</div>
         </div>
 
-        <div className="stat-card border-l-4 border-[#0D7E8A]">
+        <div className="stat-card border-l-4 border-teal-500">
           <div className="flex items-center gap-2 mb-1">
-            <Award size={18} className="text-[#0D7E8A]" />
+            <Award size={18} className="text-teal-500" />
             <span className="text-sm text-gray-500">Top Performer</span>
           </div>
           {topPerformer ? (
             <>
-              <div className="text-lg font-bold text-[#0D7E8A] truncate">
+              <div className="text-lg font-bold text-teal-500 truncate">
                 {(topPerformer as any).vendor?.legal_name ?? 'Unknown'}
               </div>
-              <div className="text-xs text-gray-400 mt-1">
+              <div className="text-xs text-gray-500 mt-1">
                 Score: {((topPerformer as any).overall_score ?? 0).toFixed(1)}
               </div>
             </>
           ) : (
-            <div className="text-sm text-gray-400">No data</div>
+            <div className="text-sm text-gray-500">No data</div>
           )}
         </div>
 
@@ -173,7 +173,7 @@ export default async function VendorPerformancePage({
           <div className="text-2xl font-bold text-green-600">
             {records.filter((r: any) => (r.overall_score ?? 0) >= 80).length}
           </div>
-          <div className="text-xs text-gray-400 mt-1">out of {totalVendors} vendors</div>
+          <div className="text-xs text-gray-500 mt-1">out of {totalVendors} vendors</div>
         </div>
 
         <div className="stat-card border-l-4 border-red-500">
@@ -182,7 +182,7 @@ export default async function VendorPerformancePage({
             <span className="text-sm text-gray-500">Below 60 (At Risk)</span>
           </div>
           <div className="text-2xl font-bold text-red-600">{belowThreshold}</div>
-          <div className="text-xs text-gray-400 mt-1">need attention</div>
+          <div className="text-xs text-gray-500 mt-1">need attention</div>
         </div>
       </div>
 
@@ -190,7 +190,7 @@ export default async function VendorPerformancePage({
       <div className="card p-4 mb-6">
         <form className="flex flex-col sm:flex-row gap-3" method="GET">
           <div className="flex items-center gap-2 flex-1">
-            <Search size={16} className="text-gray-400" />
+            <Search size={16} className="text-gray-500" />
             <input
               type="text"
               name="q"
@@ -200,7 +200,7 @@ export default async function VendorPerformancePage({
             />
           </div>
           <div className="flex items-center gap-2">
-            <Calendar size={16} className="text-gray-400" />
+            <Calendar size={16} className="text-gray-500" />
             <select
               name="month"
               defaultValue={selectedMonth}
@@ -228,12 +228,12 @@ export default async function VendorPerformancePage({
       {/* Performance Table */}
       <div className="card overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-          <BarChart3 size={16} className="text-[#0D7E8A]" />
+          <BarChart3 size={16} className="text-teal-500" />
           <h2 className="font-semibold text-gray-900">Performance Scorecards</h2>
-          <span className="text-xs text-gray-400 ml-2">
+          <span className="text-xs text-gray-500 ml-2">
             {format(new Date(selectedMonth), 'MMMM yyyy')}
           </span>
-          <span className="text-xs text-gray-400 ml-auto">{records.length} vendors</span>
+          <span className="text-xs text-gray-500 ml-auto">{records.length} vendors</span>
         </div>
 
         {records.length > 0 ? (
@@ -262,11 +262,11 @@ export default async function VendorPerformancePage({
                         <div>
                           <Link
                             href={`/vendors/${row.vendor_id}`}
-                            className="text-sm font-semibold text-[#1B3A6B] hover:underline"
+                            className="text-sm font-semibold text-navy-600 hover:underline"
                           >
                             {row.vendor?.legal_name ?? 'Unknown'}
                           </Link>
-                          <div className="text-xs text-gray-400 font-mono">
+                          <div className="text-xs text-gray-500 font-mono">
                             {row.vendor?.vendor_code}
                           </div>
                         </div>
@@ -296,7 +296,7 @@ export default async function VendorPerformancePage({
                             ) : trendDiff < 0 ? (
                               <TrendingDown size={14} className="text-red-500" />
                             ) : (
-                              <span className="text-gray-400 text-xs">--</span>
+                              <span className="text-gray-500 text-xs">--</span>
                             )}
                             {trendDiff !== 0 && (
                               <span className={cn(
@@ -308,7 +308,7 @@ export default async function VendorPerformancePage({
                             )}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-400">New</span>
+                          <span className="text-xs text-gray-500">New</span>
                         )}
                       </td>
                     </tr>
@@ -319,11 +319,11 @@ export default async function VendorPerformancePage({
           </div>
         ) : (
           <div className="p-12 text-center">
-            <BarChart3 size={40} className="mx-auto mb-3 text-gray-300" />
+            <BarChart3 size={40} className="mx-auto mb-3 text-gray-500" />
             <h3 className="text-lg font-semibold text-gray-500 mb-1">
               No performance data for this period
             </h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-500">
               Performance scores will appear here once vendor evaluations are calculated.
               {uniqueMonths.length > 0 && ' Try selecting a different month.'}
             </p>

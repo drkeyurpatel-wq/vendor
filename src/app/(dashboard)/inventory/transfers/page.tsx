@@ -81,7 +81,7 @@ export default async function StockTransfersPage({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="stat-card">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Transfers</p>
-          <p className="text-2xl font-bold text-[#1B3A6B] mt-1">{totalCount ?? 0}</p>
+          <p className="text-2xl font-bold text-navy-600 mt-1">{totalCount ?? 0}</p>
         </div>
         <div className="stat-card">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">In Transit</p>
@@ -93,7 +93,7 @@ export default async function StockTransfersPage({
         </div>
         <div className="stat-card">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Value</p>
-          <p className="text-2xl font-bold text-[#0D7E8A] mt-1">{formatLakhs(totalValue)}</p>
+          <p className="text-2xl font-bold text-teal-500 mt-1">{formatLakhs(totalValue)}</p>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export default async function StockTransfersPage({
           className={cn(
             'px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap border transition-colors',
             !params.status
-              ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]'
+              ? 'bg-navy-600 text-white border-navy-600'
               : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
           )}
         >
@@ -117,7 +117,7 @@ export default async function StockTransfersPage({
             className={cn(
               'px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap border transition-colors',
               params.status === s
-                ? 'bg-[#1B3A6B] text-white border-[#1B3A6B]'
+                ? 'bg-navy-600 text-white border-navy-600'
                 : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
             )}
           >
@@ -151,18 +151,18 @@ export default async function StockTransfersPage({
                       <td>
                         <Link
                           href={`/inventory/transfers/${t.id}`}
-                          className="font-mono text-xs font-semibold text-[#0D7E8A] hover:underline"
+                          className="font-mono text-xs font-semibold text-teal-500 hover:underline"
                         >
                           {t.transfer_number}
                         </Link>
                       </td>
                       <td>
-                        <span className="badge bg-[#EEF2F9] text-[#1B3A6B]">
+                        <span className="badge bg-navy-50 text-navy-600">
                           {t.from_centre?.code ?? '—'}
                         </span>
                       </td>
                       <td>
-                        <span className="badge bg-[#EEF2F9] text-[#1B3A6B]">
+                        <span className="badge bg-navy-50 text-navy-600">
                           {t.to_centre?.code ?? '—'}
                         </span>
                       </td>
@@ -202,9 +202,9 @@ export default async function StockTransfersPage({
           </>
         ) : (
           <div className="empty-state">
-            <ArrowLeftRight size={40} className="mb-3 text-gray-300" />
+            <ArrowLeftRight size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No stock transfers found</p>
-            <p className="text-sm text-gray-400 mt-1">Create a transfer to move stock between centres</p>
+            <p className="text-sm text-gray-500 mt-1">Create a transfer to move stock between centres</p>
             <Link href="/inventory/transfers/new" className="btn-primary mt-4">
               <Plus size={15} /> Create Transfer
             </Link>

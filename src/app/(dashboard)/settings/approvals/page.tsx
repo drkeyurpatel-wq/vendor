@@ -97,9 +97,9 @@ export default async function ApprovalsSettingsPage() {
       <div>
         <h1 className="page-title mb-4">Approval Matrix</h1>
         <div className="card p-12 text-center">
-          <Shield size={40} className="mx-auto mb-3 text-gray-300" />
+          <Shield size={40} className="mx-auto mb-3 text-gray-500" />
           <p className="font-medium text-gray-500">Access Restricted</p>
-          <p className="text-sm text-gray-400 mt-1">Only Group Admin or Group CAO can view approval settings</p>
+          <p className="text-sm text-gray-500 mt-1">Only Group Admin or Group CAO can view approval settings</p>
         </div>
       </div>
     )
@@ -154,7 +154,7 @@ export default async function ApprovalsSettingsPage() {
 
       {/* Visual Tiered Display */}
       <div className="mb-8">
-        <h2 className="text-sm font-semibold text-[#1B3A6B] uppercase tracking-wide mb-4">
+        <h2 className="text-sm font-semibold text-navy-600 uppercase tracking-wide mb-4">
           Approval Thresholds
         </h2>
         <div className="space-y-3">
@@ -193,7 +193,7 @@ export default async function ApprovalsSettingsPage() {
                     </div>
 
                     {/* Arrow */}
-                    <ChevronRight size={16} className="text-gray-300 hidden sm:block shrink-0" />
+                    <ChevronRight size={16} className="text-gray-500 hidden sm:block shrink-0" />
 
                     {/* Approver */}
                     <div className="flex items-center gap-2 shrink-0">
@@ -215,7 +215,7 @@ export default async function ApprovalsSettingsPage() {
         </div>
 
         {/* Flow diagram */}
-        <div className="mt-4 bg-[#E6F5F6] rounded-lg p-4 text-sm text-[#0D7E8A] flex items-center gap-2">
+        <div className="mt-4 bg-teal-50 rounded-lg p-4 text-sm text-teal-500 flex items-center gap-2">
           <ArrowRight size={16} className="shrink-0" />
           <span>
             <strong>Rule:</strong> Approval chain never skips levels. Every approval records approver, timestamp, and comments.
@@ -225,7 +225,7 @@ export default async function ApprovalsSettingsPage() {
 
       {/* Authorised Approvers by Role */}
       <div className="mb-8">
-        <h2 className="text-sm font-semibold text-[#1B3A6B] uppercase tracking-wide mb-4">
+        <h2 className="text-sm font-semibold text-navy-600 uppercase tracking-wide mb-4">
           Authorised Approvers by Role
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -239,7 +239,7 @@ export default async function ApprovalsSettingsPage() {
                       {ROLE_LABELS[role]}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-400">{users.length} user{users.length !== 1 ? 's' : ''}</span>
+                  <span className="text-xs text-gray-500">{users.length} user{users.length !== 1 ? 's' : ''}</span>
                 </div>
                 {users.length > 0 ? (
                   <ul className="divide-y divide-gray-50">
@@ -247,21 +247,21 @@ export default async function ApprovalsSettingsPage() {
                       <li key={u.id} className="px-5 py-3 flex items-center justify-between">
                         <div>
                           <div className="text-sm font-medium text-gray-900">{u.full_name}</div>
-                          <div className="text-xs text-gray-400">{u.email}</div>
+                          <div className="text-xs text-gray-500">{u.email}</div>
                         </div>
                         {u.centre ? (
                           <span className="badge bg-blue-50 text-blue-700 text-xs">
                             {u.centre.code}
                           </span>
                         ) : (
-                          <span className="text-xs text-gray-400">All Centres</span>
+                          <span className="text-xs text-gray-500">All Centres</span>
                         )}
                       </li>
                     ))}
                   </ul>
                 ) : (
                   <div className="px-5 py-6 text-center">
-                    <p className="text-sm text-gray-400">No active users with this role</p>
+                    <p className="text-sm text-gray-500">No active users with this role</p>
                   </div>
                 )}
               </div>
@@ -272,7 +272,7 @@ export default async function ApprovalsSettingsPage() {
 
       {/* Recent Approval Activity */}
       <div>
-        <h2 className="text-sm font-semibold text-[#1B3A6B] uppercase tracking-wide mb-4">
+        <h2 className="text-sm font-semibold text-navy-600 uppercase tracking-wide mb-4">
           Recent Approval Activity
         </h2>
         <div className="card overflow-hidden">
@@ -309,7 +309,7 @@ export default async function ApprovalsSettingsPage() {
                             {approval.po.centre.code}
                           </span>
                         ) : (
-                          <span className="text-xs text-gray-400">—</span>
+                          <span className="text-xs text-gray-500">—</span>
                         )}
                       </td>
                       <td>
@@ -350,9 +350,9 @@ export default async function ApprovalsSettingsPage() {
             </div>
           ) : (
             <div className="empty-state py-12">
-              <Clock size={40} className="mb-3 text-gray-300" />
+              <Clock size={40} className="mb-3 text-gray-500" />
               <p className="font-medium text-gray-500">No approval activity yet</p>
-              <p className="text-sm text-gray-400 mt-1">Approval records will appear here once POs are submitted</p>
+              <p className="text-sm text-gray-500 mt-1">Approval records will appear here once POs are submitted</p>
             </div>
           )}
         </div>

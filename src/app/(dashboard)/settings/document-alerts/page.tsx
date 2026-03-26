@@ -180,7 +180,7 @@ export default async function DocumentAlertsPage({
           <label className="form-label">Search Vendor</label>
           <form>
             <div className="relative">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               <input
                 name="q"
                 placeholder="Search vendor name or code..."
@@ -237,11 +237,11 @@ export default async function DocumentAlertsPage({
                       <td>
                         <Link
                           href={`/vendors/${doc.vendor_id}`}
-                          className="text-sm font-medium text-[#0D7E8A] hover:underline"
+                          className="text-sm font-medium text-teal-500 hover:underline"
                         >
                           {vendor?.legal_name || 'Unknown'}
                         </Link>
-                        <div className="text-xs text-gray-400 font-mono">{vendor?.vendor_code}</div>
+                        <div className="text-xs text-gray-500 font-mono">{vendor?.vendor_code}</div>
                       </td>
                       <td className="text-sm text-gray-700">
                         {DOC_TYPE_LABELS[doc.document_type] || doc.document_type}
@@ -311,9 +311,9 @@ export default async function DocumentAlertsPage({
           </div>
         ) : (
           <div className="empty-state">
-            <FileCheck size={40} className="mb-3 text-gray-300" />
+            <FileCheck size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No documents matching your filters</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
               {params.status || params.type || params.q
                 ? 'Try adjusting your filters'
                 : 'All vendor documents are up to date'}

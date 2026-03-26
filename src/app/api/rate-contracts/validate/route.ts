@@ -1,7 +1,7 @@
 import { requireApiAuth } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
-import { RATE_TOLERANCE } from '@/lib/business-rules'
+import { RATE_TOLERANCE, validateRateAgainstContract } from '@/lib/business-rules'
 
 // ============================================================
 // H1 VPMS — Rate Contract Validation API

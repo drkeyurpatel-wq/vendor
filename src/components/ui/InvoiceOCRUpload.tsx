@@ -110,9 +110,9 @@ export default function InvoiceOCRUpload({ onExtracted }: Props) {
         >
           <input ref={fileRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden"
             onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }} />
-          <Upload size={24} className="mx-auto text-gray-300 mb-2" />
+          <Upload size={24} className="mx-auto text-gray-500 mb-2" />
           <p className="text-sm text-gray-600">Drop invoice PDF/image here or click to upload</p>
-          <p className="text-xs text-gray-400 mt-1">PDF, PNG, JPG — max 10 MB</p>
+          <p className="text-xs text-gray-500 mt-1">PDF, PNG, JPG — max 10 MB</p>
         </div>
       )}
 
@@ -140,7 +140,7 @@ export default function InvoiceOCRUpload({ onExtracted }: Props) {
               </div>
             </div>
             <button onClick={() => { setResult(null); setPreviewUrl(null); if (fileRef.current) fileRef.current.value = '' }}
-              className="text-gray-400 hover:text-gray-600"><X size={14} /></button>
+              className="text-gray-500 hover:text-gray-600"><X size={14} /></button>
           </div>
 
           {/* Image preview */}

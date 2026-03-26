@@ -87,7 +87,7 @@ export default function TallySettingsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${connected === true ? 'bg-green-100' : connected === false ? 'bg-red-100' : 'bg-gray-100'}`}>
-              {connected === true ? <Wifi size={20} className="text-green-600" /> : connected === false ? <WifiOff size={20} className="text-red-600" /> : <Wifi size={20} className="text-gray-400" />}
+              {connected === true ? <Wifi size={20} className="text-green-600" /> : connected === false ? <WifiOff size={20} className="text-red-600" /> : <Wifi size={20} className="text-gray-500" />}
             </div>
             <div>
               <h3 className="text-sm font-semibold text-gray-900">Tally Server Connection</h3>
@@ -135,7 +135,7 @@ export default function TallySettingsPage() {
       {/* Sync Log */}
       <div className="card overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
-          <h3 className="font-semibold text-[#1B3A6B]">Sync Log</h3>
+          <h3 className="font-semibold text-navy-600">Sync Log</h3>
         </div>
         {logs.length > 0 ? (
           <div className="divide-y divide-gray-50">
@@ -143,19 +143,19 @@ export default function TallySettingsPage() {
               <div key={log.id} className="px-5 py-3 flex items-center gap-3">
                 {log.status === 'success' ? <CheckCircle2 size={14} className="text-green-500 flex-shrink-0" /> :
                   log.status === 'failed' ? <XCircle size={14} className="text-red-500 flex-shrink-0" /> :
-                  <Clock size={14} className="text-gray-400 flex-shrink-0" />}
+                  <Clock size={14} className="text-gray-500 flex-shrink-0" />}
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-900">{log.type.replace(/_/g, ' ')}</div>
                   <div className="text-xs text-gray-500">{log.message}</div>
                 </div>
                 {log.count != null && <span className="badge bg-blue-50 text-blue-700">{log.count} records</span>}
-                <span className="text-[10px] text-gray-400 whitespace-nowrap">{log.timestamp}</span>
+                <span className="text-[10px] text-gray-500 whitespace-nowrap">{log.timestamp}</span>
               </div>
             ))}
           </div>
         ) : (
           <div className="p-8 text-center">
-            <Clock size={24} className="mx-auto text-gray-300 mb-2" />
+            <Clock size={24} className="mx-auto text-gray-500 mb-2" />
             <p className="text-sm text-gray-500">No sync activity yet. Run a sync to see results.</p>
           </div>
         )}

@@ -80,7 +80,7 @@ function CustomTooltip({ active, payload, label, valueFormatter }: any) {
 export function SpendByCentreChart({ data }: {
   data: { centre: string; amount: number }[]
 }) {
-  if (!data?.length) return <div className="text-sm text-gray-400 text-center py-10">No spend data available</div>
+  if (!data?.length) return <div className="text-sm text-gray-500 text-center py-10">No spend data available</div>
   return (
     <ChartCard title="Spend by centre" subtitle="MTD purchase order value" href="/reports">
       <ResponsiveContainer width="100%" height={260}>
@@ -295,7 +295,7 @@ export function MiniTableCard({ title, href, headers, rows, emptyMessage }: {
           </table>
         </div>
       ) : (
-        <div className="text-center py-8 text-sm text-gray-400">
+        <div className="text-center py-8 text-sm text-gray-500">
           {emptyMessage || 'No data'}
         </div>
       )}

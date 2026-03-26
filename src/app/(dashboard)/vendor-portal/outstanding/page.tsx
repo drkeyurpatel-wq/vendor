@@ -21,7 +21,7 @@ export default async function VendorOutstandingPage() {
       <div className="card p-12 text-center">
         <AlertTriangle size={40} className="mx-auto mb-3 text-yellow-400" />
         <p className="font-medium text-gray-500">Access Denied</p>
-        <p className="text-sm text-gray-400 mt-1">This page is only accessible to vendor users</p>
+        <p className="text-sm text-gray-500 mt-1">This page is only accessible to vendor users</p>
       </div>
     )
   }
@@ -93,30 +93,30 @@ export default async function VendorOutstandingPage() {
 
       {/* Aging buckets */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div className="stat-card border-l-4 border-[#1B3A6B]">
+        <div className="stat-card border-l-4 border-navy-600">
           <div className="text-xs text-gray-500 mb-1">Total Outstanding</div>
-          <div className="text-xl font-bold text-[#1B3A6B]">{formatLakhs(totalOutstanding)}</div>
-          <div className="text-xs text-gray-400">{agingData.length} invoices</div>
+          <div className="text-xl font-bold text-navy-600">{formatLakhs(totalOutstanding)}</div>
+          <div className="text-xs text-gray-500">{agingData.length} invoices</div>
         </div>
         <div className="stat-card border-l-4 border-green-500">
           <div className="text-xs text-gray-500 mb-1">Current</div>
           <div className="text-lg font-bold text-green-600">{formatLakhs(sum(current))}</div>
-          <div className="text-xs text-gray-400">{current.length} invoices</div>
+          <div className="text-xs text-gray-500">{current.length} invoices</div>
         </div>
         <div className="stat-card border-l-4 border-yellow-500">
           <div className="text-xs text-gray-500 mb-1">31-60 Days</div>
           <div className="text-lg font-bold text-yellow-600">{formatLakhs(sum(bucket60))}</div>
-          <div className="text-xs text-gray-400">{bucket60.length} invoices</div>
+          <div className="text-xs text-gray-500">{bucket60.length} invoices</div>
         </div>
         <div className="stat-card border-l-4 border-orange-500">
           <div className="text-xs text-gray-500 mb-1">61-90 Days</div>
           <div className="text-lg font-bold text-orange-600">{formatLakhs(sum(bucket90))}</div>
-          <div className="text-xs text-gray-400">{bucket90.length} invoices</div>
+          <div className="text-xs text-gray-500">{bucket90.length} invoices</div>
         </div>
         <div className="stat-card border-l-4 border-red-500">
           <div className="text-xs text-gray-500 mb-1">&gt;90 Days</div>
           <div className="text-lg font-bold text-red-600">{formatLakhs(sum(bucket90plus))}</div>
-          <div className="text-xs text-gray-400">{bucket90plus.length} invoices</div>
+          <div className="text-xs text-gray-500">{bucket90plus.length} invoices</div>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default async function VendorOutstandingPage() {
               </div>
             )}
           </div>
-          <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+          <div className="flex justify-between text-[10px] text-gray-500 mt-1">
             <span>Current</span>
             <span>1-30d</span>
             <span>31-60d</span>
@@ -185,7 +185,7 @@ export default async function VendorOutstandingPage() {
                   <tr key={inv.id}>
                     <td>
                       <div className="font-mono text-xs font-semibold">{inv.invoice_ref}</div>
-                      <div className="text-xs text-gray-400">{inv.vendor_invoice_no}</div>
+                      <div className="text-xs text-gray-500">{inv.vendor_invoice_no}</div>
                     </td>
                     <td><span className="badge bg-blue-50 text-blue-700">{inv.centre?.code || '—'}</span></td>
                     <td className="text-sm text-gray-600">{inv.grn_date ? formatDate(inv.grn_date) : '—'}</td>
@@ -202,9 +202,9 @@ export default async function VendorOutstandingPage() {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="bg-[#EEF2F9]">
-                  <td colSpan={4} className="font-semibold text-[#1B3A6B]">Total</td>
-                  <td className="text-right font-bold text-[#1B3A6B]">{formatCurrency(agingData.reduce((s, i) => s + (i.total_amount || 0), 0))}</td>
+                <tr className="bg-navy-50">
+                  <td colSpan={4} className="font-semibold text-navy-600">Total</td>
+                  <td className="text-right font-bold text-navy-600">{formatCurrency(agingData.reduce((s, i) => s + (i.total_amount || 0), 0))}</td>
                   <td className="text-right font-bold text-green-600">{formatCurrency(agingData.reduce((s, i) => s + (i.paid_amount || 0), 0))}</td>
                   <td className="text-right font-bold text-red-600">{formatCurrency(totalOutstanding)}</td>
                   <td colSpan={2}></td>
@@ -214,9 +214,9 @@ export default async function VendorOutstandingPage() {
           </div>
         ) : (
           <div className="empty-state">
-            <IndianRupee size={40} className="mb-3 text-gray-300" />
+            <IndianRupee size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No outstanding invoices</p>
-            <p className="text-sm text-gray-400 mt-1">All your invoices are fully paid</p>
+            <p className="text-sm text-gray-500 mt-1">All your invoices are fully paid</p>
           </div>
         )}
       </div>

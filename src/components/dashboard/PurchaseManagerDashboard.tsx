@@ -89,16 +89,16 @@ export default async function PurchaseManagerDashboard({ profile }: { profile: a
           label="Active POs"
           value={activePOs ?? 0}
           sub="Pending + Approved + In transit"
-          icon={<ShoppingCart size={22} className="text-[#0D7E8A]" />}
-          bg="bg-[#E6F5F6]"
+          icon={<ShoppingCart size={22} className="text-teal-500" />}
+          bg="bg-teal-50"
           href="/purchase-orders"
         />
         <StatCard
           label="Pending Indents"
           value={pendingIndents ?? 0}
           sub="Awaiting PO creation"
-          icon={<ClipboardList size={22} className="text-[#1B3A6B]" />}
-          bg="bg-[#EEF2F9]"
+          icon={<ClipboardList size={22} className="text-navy-600" />}
+          bg="bg-navy-50"
           href="/purchase-orders/indents"
           alert={(pendingIndents ?? 0) > 0}
         />
@@ -130,14 +130,14 @@ export default async function PurchaseManagerDashboard({ profile }: { profile: a
             {draftPOs && draftPOs.length > 0 ? (
               draftPOs.map((po: any) => <PORow key={po.id} po={po} />)
             ) : (
-              <EmptyRow icon={<ShoppingCart size={32} className="text-gray-300" />} message="No draft POs" />
+              <EmptyRow icon={<ShoppingCart size={32} className="text-gray-500" />} message="No draft POs" />
             )}
           </div>
         </div>
 
         {/* Open Indents */}
         <div className="card">
-          <SectionHeader title="Open Indents" href="/purchase-orders/indents" icon={<ClipboardList size={16} className="text-[#1B3A6B]" />} />
+          <SectionHeader title="Open Indents" href="/purchase-orders/indents" icon={<ClipboardList size={16} className="text-navy-600" />} />
           <div className="divide-y divide-gray-100">
             {openIndents && openIndents.length > 0 ? (
               openIndents.map((indent: any) => (
@@ -161,13 +161,13 @@ export default async function PurchaseManagerDashboard({ profile }: { profile: a
                     </div>
                   </div>
                   <Link href={`/purchase-orders/new?indent=${indent.id}`}
-                    className="text-xs text-[#0D7E8A] hover:underline font-medium ml-4">
+                    className="text-xs text-teal-500 hover:underline font-medium ml-4">
                     Create PO
                   </Link>
                 </div>
               ))
             ) : (
-              <EmptyRow icon={<ClipboardList size={32} className="text-gray-300" />} message="No open indents" />
+              <EmptyRow icon={<ClipboardList size={32} className="text-gray-500" />} message="No open indents" />
             )}
           </div>
         </div>
@@ -199,7 +199,7 @@ export default async function PurchaseManagerDashboard({ profile }: { profile: a
                 </Link>
               ))
             ) : (
-              <EmptyRow icon={<Truck size={32} className="text-gray-300" />} message="No pending deliveries" />
+              <EmptyRow icon={<Truck size={32} className="text-gray-500" />} message="No pending deliveries" />
             )}
           </div>
         </div>
@@ -213,7 +213,7 @@ export default async function PurchaseManagerDashboard({ profile }: { profile: a
                 <div key={s.id} className="flex items-center px-5 py-3">
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-900">{s.item?.generic_name}</div>
-                    <div className="text-xs text-gray-400">{s.item?.item_code}</div>
+                    <div className="text-xs text-gray-500">{s.item?.item_code}</div>
                   </div>
                   <div className="text-right ml-4">
                     <span className={cn('text-sm font-semibold',
@@ -223,7 +223,7 @@ export default async function PurchaseManagerDashboard({ profile }: { profile: a
                     </span>
                   </div>
                   <Link href={`/purchase-orders/new?item=${s.item_id}`}
-                    className="text-xs text-[#0D7E8A] hover:underline font-medium ml-3">
+                    className="text-xs text-teal-500 hover:underline font-medium ml-3">
                     PO
                   </Link>
                 </div>

@@ -638,7 +638,7 @@ export default function GRNForm() {
               <span className="font-semibold text-sm" style={{ color: '#1B3A6B' }}>
                 Transport Details {(dcNumber || lrNumber || ewayBillNo) && <span className="text-green-600 text-xs ml-2">● filled</span>}
               </span>
-              {showTransport ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+              {showTransport ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
             </button>
             {showTransport && (
               <div className="px-6 pb-6">
@@ -749,11 +749,11 @@ export default function GRNForm() {
                 </thead>
                 <tbody>
                   {lineItems.map((li, idx) => (
-                    <tr key={li.po_item_id} id={`grn-line-${idx}`} className={`${highlightedItemIdx === idx ? 'ring-2 ring-[#0D7E8A] bg-[#E6F5F6]' : li.short_qty > 0 ? 'bg-yellow-50' : li.excess_qty > 0 ? 'bg-orange-50' : ''} transition-all duration-300`}>
+                    <tr key={li.po_item_id} id={`grn-line-${idx}`} className={`${highlightedItemIdx === idx ? 'ring-2 ring-teal-500 bg-teal-50' : li.short_qty > 0 ? 'bg-yellow-50' : li.excess_qty > 0 ? 'bg-orange-50' : ''} transition-all duration-300`}>
                       <td>
                         <div className="font-medium text-gray-900 text-sm">{li.generic_name}</div>
-                        <div className="font-mono text-xs text-gray-400">{li.item_code} | {li.unit}</div>
-                        {li.hsn_code && <div className="text-xs text-gray-400">HSN: {li.hsn_code}</div>}
+                        <div className="font-mono text-xs text-gray-500">{li.item_code} | {li.unit}</div>
+                        {li.hsn_code && <div className="text-xs text-gray-500">HSN: {li.hsn_code}</div>}
                       </td>
                       <td className="text-sm font-medium text-center">{li.ordered_qty}</td>
                       <td className="text-sm text-gray-500 text-center">{li.already_received}</td>
@@ -835,12 +835,12 @@ export default function GRNForm() {
                       <td className="text-right text-sm font-medium">
                         {formatCurrency(li.rate)}
                         {li.trade_discount_percent > 0 && (
-                          <div className="text-xs text-gray-400">-{li.trade_discount_percent}%</div>
+                          <div className="text-xs text-gray-500">-{li.trade_discount_percent}%</div>
                         )}
                       </td>
                       <td className="text-right text-sm font-medium" style={{ color: '#1B3A6B' }}>
                         {formatCurrency(li.total_amount)}
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-gray-500">
                           {li.cgst_amount > 0 && `C:${formatCurrency(li.cgst_amount)}`}
                           {li.sgst_amount > 0 && ` S:${formatCurrency(li.sgst_amount)}`}
                           {li.igst_amount > 0 && `I:${formatCurrency(li.igst_amount)}`}

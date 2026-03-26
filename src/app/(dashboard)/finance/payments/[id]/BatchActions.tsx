@@ -129,7 +129,7 @@ export default function BatchActions({ batchId, batchNumber, status, totalAmount
         )}
         {status === 'approved' && (
           <button onClick={() => setShowPay(!showPay)} disabled={!!loading}
-            className="text-sm px-4 py-2 rounded-lg bg-[#1B3A6B] text-white hover:bg-[#152d54] font-medium flex items-center gap-1.5">
+            className="text-sm px-4 py-2 rounded-lg bg-navy-600 text-white hover:bg-[#152d54] font-medium flex items-center gap-1.5">
             <Banknote size={14} /> Mark as Paid — {formatCurrency(totalAmount)}
           </button>
         )}
@@ -143,8 +143,8 @@ export default function BatchActions({ batchId, batchNumber, status, totalAmount
 
       {/* Mark Paid form */}
       {showPay && (
-        <div className="card p-4 border-2 border-[#1B3A6B]">
-          <h3 className="font-semibold text-sm text-[#1B3A6B] mb-3">Enter Payment Reference</h3>
+        <div className="card p-4 border-2 border-navy-600">
+          <h3 className="font-semibold text-sm text-navy-600 mb-3">Enter Payment Reference</h3>
           <div className="flex gap-3">
             <input className="form-input flex-1" placeholder="UTR number / cheque number / reference..."
               value={utrNumber} onChange={e => setUtrNumber(e.target.value)}
@@ -155,7 +155,7 @@ export default function BatchActions({ batchId, batchNumber, status, totalAmount
               Confirm Payment
             </button>
           </div>
-          <p className="text-xs text-gray-400 mt-2">This will update all invoice paid amounts and mark them as paid/partial.</p>
+          <p className="text-xs text-gray-500 mt-2">This will update all invoice paid amounts and mark them as paid/partial.</p>
         </div>
       )}
 

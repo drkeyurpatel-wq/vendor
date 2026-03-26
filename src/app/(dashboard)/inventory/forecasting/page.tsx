@@ -75,12 +75,12 @@ export default async function ForecastingPage({
         </div>
         <div className="stat-card">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#E6F5F6] flex items-center justify-center">
-              <Package size={20} className="text-[#0D7E8A]" />
+            <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
+              <Package size={20} className="text-teal-500" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Items Tracked</p>
-              <p className="text-2xl font-bold text-[#1B3A6B]">{stockItems?.length || 0}</p>
+              <p className="text-2xl font-bold text-navy-600">{stockItems?.length || 0}</p>
             </div>
           </div>
         </div>
@@ -120,7 +120,7 @@ export default async function ForecastingPage({
               href="/inventory/forecasting"
               className={cn(
                 'px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
-                !params.centre_id ? 'bg-[#0D7E8A] text-white border-[#0D7E8A]' : 'bg-white text-gray-500 border-gray-200'
+                !params.centre_id ? 'bg-teal-500 text-white border-teal-500' : 'bg-white text-gray-500 border-gray-200'
               )}
             >
               All Centres
@@ -131,7 +131,7 @@ export default async function ForecastingPage({
                 href={`/inventory/forecasting?centre_id=${c.id}`}
                 className={cn(
                   'px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors',
-                  params.centre_id === c.id ? 'bg-[#0D7E8A] text-white border-[#0D7E8A]' : 'bg-white text-gray-500 border-gray-200'
+                  params.centre_id === c.id ? 'bg-teal-500 text-white border-teal-500' : 'bg-white text-gray-500 border-gray-200'
                 )}
               >
                 {c.code}
@@ -146,7 +146,7 @@ export default async function ForecastingPage({
 
       {/* Reorder Recommendations Table */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-[#1B3A6B] mb-4 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-navy-600 mb-4 flex items-center gap-2">
           <Target size={20} />
           Reorder Recommendations
         </h2>
@@ -188,12 +188,12 @@ export default async function ForecastingPage({
                         <td>
                           <Link
                             href={`/inventory/forecasting?item_id=${item?.id}${params.centre_id ? `&centre_id=${params.centre_id}` : ''}`}
-                            className="text-sm font-medium text-[#0D7E8A] hover:underline"
+                            className="text-sm font-medium text-teal-500 hover:underline"
                           >
                             {item?.generic_name}
                           </Link>
                           {item?.brand_name && (
-                            <div className="text-xs text-gray-400">{item.brand_name}</div>
+                            <div className="text-xs text-gray-500">{item.brand_name}</div>
                           )}
                         </td>
                         <td>
@@ -226,7 +226,7 @@ export default async function ForecastingPage({
                         <td className="text-xs text-gray-500">
                           {stock.last_grn_date ? formatDate(stock.last_grn_date) : '—'}
                           {stock.last_grn_rate ? (
-                            <div className="text-gray-400">{formatCurrency(stock.last_grn_rate)}</div>
+                            <div className="text-gray-500">{formatCurrency(stock.last_grn_rate)}</div>
                           ) : null}
                         </td>
                         <td>
@@ -246,9 +246,9 @@ export default async function ForecastingPage({
             </div>
           ) : (
             <div className="empty-state">
-              <TrendingUp size={40} className="mb-3 text-gray-300" />
+              <TrendingUp size={40} className="mb-3 text-gray-500" />
               <p className="font-medium text-gray-500">All items are adequately stocked</p>
-              <p className="text-sm text-gray-400 mt-1">No items currently below reorder level</p>
+              <p className="text-sm text-gray-500 mt-1">No items currently below reorder level</p>
             </div>
           )}
         </div>

@@ -140,7 +140,7 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
                 className="form-input"
               />
               {searching && (
-                <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400" />
+                <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-500" />
               )}
             </div>
             <BarcodeScanButton onScan={async (code) => {
@@ -158,14 +158,14 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
                 <button
                   key={item.id}
                   onClick={() => loadForecast(item.id)}
-                  className="w-full text-left px-4 py-3 hover:bg-[#EEF2F9] transition-colors border-b border-gray-100 last:border-0"
+                  className="w-full text-left px-4 py-3 hover:bg-navy-50 transition-colors border-b border-gray-100 last:border-0"
                 >
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{item.item_code}</span>
                     <div>
                       <div className="text-sm font-medium text-gray-900">{item.generic_name}</div>
                       {item.brand_name && (
-                        <div className="text-xs text-gray-400">{item.brand_name}</div>
+                        <div className="text-xs text-gray-500">{item.brand_name}</div>
                       )}
                     </div>
                   </div>
@@ -179,7 +179,7 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
       {/* Loading State */}
       {loading && (
         <div className="card p-12 flex items-center justify-center">
-          <Loader2 size={32} className="animate-spin text-[#0D7E8A]" />
+          <Loader2 size={32} className="animate-spin text-teal-500" />
           <span className="ml-3 text-gray-500">Analyzing consumption patterns...</span>
         </div>
       )}
@@ -195,7 +195,7 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
                   <span className="font-mono text-sm bg-gray-100 px-2.5 py-1 rounded font-semibold">
                     {data.item.item_code}
                   </span>
-                  <h2 className="text-lg font-semibold text-[#1B3A6B]">{data.item.generic_name}</h2>
+                  <h2 className="text-lg font-semibold text-navy-600">{data.item.generic_name}</h2>
                 </div>
                 {data.item.brand_name && (
                   <p className="text-sm text-gray-500">{data.item.brand_name}</p>
@@ -214,15 +214,15 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
             <div className="stat-card">
               <p className="text-xs text-gray-500 mb-1">Current Stock</p>
-              <p className="text-xl font-bold text-[#1B3A6B]">{data.current_stock}</p>
+              <p className="text-xl font-bold text-navy-600">{data.current_stock}</p>
             </div>
             <div className="stat-card">
               <p className="text-xs text-gray-500 mb-1">Avg Monthly Use</p>
-              <p className="text-xl font-bold text-[#1B3A6B]">{data.avg_monthly_consumption}</p>
+              <p className="text-xl font-bold text-navy-600">{data.avg_monthly_consumption}</p>
             </div>
             <div className="stat-card">
               <p className="text-xs text-gray-500 mb-1">Avg Daily Use</p>
-              <p className="text-xl font-bold text-[#1B3A6B]">{data.reorder.avg_daily_usage}</p>
+              <p className="text-xl font-bold text-navy-600">{data.reorder.avg_daily_usage}</p>
             </div>
             <div className="stat-card">
               <p className="text-xs text-gray-500 mb-1">Days of Stock</p>
@@ -236,32 +236,32 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
             </div>
             <div className="stat-card">
               <p className="text-xs text-gray-500 mb-1">Reorder Point</p>
-              <p className="text-xl font-bold text-[#0D7E8A]">{data.reorder.reorder_point}</p>
+              <p className="text-xl font-bold text-teal-500">{data.reorder.reorder_point}</p>
             </div>
             <div className="stat-card">
               <p className="text-xs text-gray-500 mb-1">EOQ</p>
-              <p className="text-xl font-bold text-[#0D7E8A]">{data.reorder.eoq}</p>
+              <p className="text-xl font-bold text-teal-500">{data.reorder.eoq}</p>
             </div>
           </div>
 
           {/* Safety & Lead Time */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="card p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#E6F5F6] flex items-center justify-center">
-                <ShieldCheck size={20} className="text-[#0D7E8A]" />
+              <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
+                <ShieldCheck size={20} className="text-teal-500" />
               </div>
               <div>
                 <p className="text-xs text-gray-500">Safety Stock</p>
-                <p className="text-lg font-semibold text-[#1B3A6B]">{data.reorder.safety_stock} units</p>
+                <p className="text-lg font-semibold text-navy-600">{data.reorder.safety_stock} units</p>
               </div>
             </div>
             <div className="card p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#EEF2F9] flex items-center justify-center">
-                <Calendar size={20} className="text-[#1B3A6B]" />
+              <div className="w-10 h-10 rounded-lg bg-navy-50 flex items-center justify-center">
+                <Calendar size={20} className="text-navy-600" />
               </div>
               <div>
                 <p className="text-xs text-gray-500">Lead Time</p>
-                <p className="text-lg font-semibold text-[#1B3A6B]">{data.item.lead_time_days} days</p>
+                <p className="text-lg font-semibold text-navy-600">{data.item.lead_time_days} days</p>
               </div>
             </div>
             <div className="card p-4 flex items-center gap-3">
@@ -270,7 +270,7 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
               </div>
               <div>
                 <p className="text-xs text-gray-500">Forecast Method</p>
-                <p className="text-lg font-semibold text-[#1B3A6B] capitalize">
+                <p className="text-lg font-semibold text-navy-600 capitalize">
                   {data.forecast[0]?.method?.replace(/_/g, ' ') || 'N/A'}
                 </p>
               </div>
@@ -281,8 +281,8 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Historical */}
             <div className="card overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 bg-[#EEF2F9]">
-                <h3 className="text-sm font-semibold text-[#1B3A6B] flex items-center gap-2">
+              <div className="px-4 py-3 border-b border-gray-100 bg-navy-50">
+                <h3 className="text-sm font-semibold text-navy-600 flex items-center gap-2">
                   <BarChart2 size={16} />
                   Historical Consumption (Last 12 Months)
                 </h3>
@@ -303,12 +303,12 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
                       return (
                         <tr key={h.month}>
                           <td className="text-sm font-medium text-gray-700">{monthLabel(h.month)}</td>
-                          <td className="text-sm font-semibold text-[#1B3A6B]">{h.qty}</td>
+                          <td className="text-sm font-semibold text-navy-600">{h.qty}</td>
                           <td className="text-sm">
                             {i > 0 && (
                               <span className={cn(
                                 'font-medium',
-                                change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : 'text-gray-400'
+                                change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : 'text-gray-500'
                               )}>
                                 {change > 0 ? '+' : ''}{change}
                               </span>
@@ -329,7 +329,7 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
                     return (
                       <div
                         key={h.month}
-                        className="flex-1 bg-[#0D7E8A] rounded-t-sm min-h-[2px] transition-all hover:bg-[#1B3A6B]"
+                        className="flex-1 bg-teal-500 rounded-t-sm min-h-[2px] transition-all hover:bg-navy-600"
                         style={{ height: `${height}%` }}
                         title={`${monthLabel(h.month)}: ${h.qty}`}
                       />
@@ -341,8 +341,8 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
 
             {/* Forecast */}
             <div className="card overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 bg-[#E6F5F6]">
-                <h3 className="text-sm font-semibold text-[#0D7E8A] flex items-center gap-2">
+              <div className="px-4 py-3 border-b border-gray-100 bg-teal-50">
+                <h3 className="text-sm font-semibold text-teal-500 flex items-center gap-2">
                   <TrendingUp size={16} />
                   Forecast (Next 3 Months)
                 </h3>
@@ -361,7 +361,7 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
                     {data.forecast.map(f => (
                       <tr key={f.month}>
                         <td className="text-sm font-medium text-gray-700">{monthLabel(f.month)}</td>
-                        <td className="text-sm font-bold text-[#1B3A6B]">{f.predicted_qty}</td>
+                        <td className="text-sm font-bold text-navy-600">{f.predicted_qty}</td>
                         <td>
                           <span className={cn('badge', confidenceColor(f.confidence))}>
                             {f.confidence}
@@ -387,12 +387,12 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
                         <div
                           className={cn(
                             'w-full rounded-t-sm min-h-[2px] transition-all',
-                            idx >= 1.0 ? 'bg-[#0D7E8A]' : 'bg-gray-300'
+                            idx >= 1.0 ? 'bg-teal-500' : 'bg-gray-300'
                           )}
                           style={{ height: `${height}%` }}
                           title={`${months[i]}: ${idx.toFixed(2)}`}
                         />
-                        <span className="text-[9px] text-gray-400">{months[i]}</span>
+                        <span className="text-[9px] text-gray-500">{months[i]}</span>
                       </div>
                     )
                   })}
@@ -442,9 +442,9 @@ export default function ForecastingClient({ centreId }: { centreId: string }) {
       {/* Empty state when no item selected */}
       {!data && !loading && (
         <div className="card p-12 text-center">
-          <TrendingUp size={48} className="mx-auto mb-4 text-gray-300" />
+          <TrendingUp size={48} className="mx-auto mb-4 text-gray-500" />
           <p className="text-gray-500 font-medium">Select an item above to view demand forecast</p>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-gray-500 mt-1">
             Search by item name, code, or brand to analyze consumption patterns
           </p>
         </div>

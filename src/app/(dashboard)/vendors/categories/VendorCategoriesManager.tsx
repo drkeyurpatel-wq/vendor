@@ -118,11 +118,11 @@ export default function VendorCategoriesManager({ initialCategories, vendorCount
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-4 border-b bg-[#EEF2F9] rounded-t-xl">
-              <h2 className="text-lg font-bold text-[#1B3A6B]">
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-navy-50 rounded-t-xl">
+              <h2 className="text-lg font-bold text-navy-600">
                 {editingId ? 'Edit Category' : 'Add Vendor Category'}
               </h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 p-1">
+              <button onClick={() => setShowForm(false)} className="text-gray-500 hover:text-gray-600 p-1">
                 <X size={20} />
               </button>
             </div>
@@ -170,7 +170,7 @@ export default function VendorCategoriesManager({ initialCategories, vendorCount
                     checked={form.is_active}
                     onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))}
                   />
-                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#0D7E8A]"></div>
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500"></div>
                 </label>
                 <span className="text-sm text-gray-700">Active</span>
               </div>
@@ -212,7 +212,7 @@ export default function VendorCategoriesManager({ initialCategories, vendorCount
                     </td>
                     <td className="font-medium text-gray-900">{cat.name}</td>
                     <td className="text-sm text-gray-600 max-w-xs truncate">
-                      {cat.description || <span className="text-gray-400">--</span>}
+                      {cat.description || <span className="text-gray-500">--</span>}
                     </td>
                     <td>
                       <span className={cn(
@@ -223,7 +223,7 @@ export default function VendorCategoriesManager({ initialCategories, vendorCount
                       </span>
                     </td>
                     <td>
-                      <span className="text-sm font-semibold text-[#1B3A6B]">
+                      <span className="text-sm font-semibold text-navy-600">
                         {vendorCountMap[cat.id] ?? 0}
                       </span>
                     </td>
@@ -231,7 +231,7 @@ export default function VendorCategoriesManager({ initialCategories, vendorCount
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => openEdit(cat)}
-                          className="text-[#0D7E8A] hover:text-[#1B3A6B] p-1.5 rounded-lg hover:bg-[#E6F5F6] transition-colors"
+                          className="text-teal-500 hover:text-navy-600 p-1.5 rounded-lg hover:bg-teal-50 transition-colors"
                           title="Edit category"
                         >
                           <Pencil size={14} />
@@ -257,9 +257,9 @@ export default function VendorCategoriesManager({ initialCategories, vendorCount
           </div>
         ) : (
           <div className="empty-state py-12">
-            <Tag size={40} className="mb-3 text-gray-300" />
+            <Tag size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No vendor categories yet</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
               Click &quot;Add Category&quot; to create your first category
             </p>
           </div>

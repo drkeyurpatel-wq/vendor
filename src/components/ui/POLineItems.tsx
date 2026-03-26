@@ -267,7 +267,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
         <>
           {/* Toggle discount columns */}
           <button type="button" onClick={() => setShowDiscounts(!showDiscounts)}
-            className="text-xs text-[#0D7E8A] hover:underline mb-2 flex items-center gap-1">
+            className="text-xs text-teal-500 hover:underline mb-2 flex items-center gap-1">
             {showDiscounts ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             {showDiscounts ? 'Hide' : 'Show'} discount columns
           </button>
@@ -302,8 +302,8 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                   <tr key={item.item_id} className={item.rate_warning ? 'bg-red-50/50' : item.is_unmapped ? 'bg-amber-50/40' : ''}>
                     <td>
                       <div className="font-medium text-gray-900 text-sm">{item.generic_name}</div>
-                      <div className="font-mono text-xs text-gray-400">{item.item_code}</div>
-                      {item.manufacturer && <div className="text-[10px] text-gray-400">{item.manufacturer}</div>}
+                      <div className="font-mono text-xs text-gray-500">{item.item_code}</div>
+                      {item.manufacturer && <div className="text-[10px] text-gray-500">{item.manufacturer}</div>}
                       {item.is_unmapped && (
                         <div className="flex items-center gap-1 mt-0.5">
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">NOT MAPPED</span>
@@ -317,10 +317,10 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                       )}
                       {item.price_history && item.price_history.length > 0 && (
                         <div className="mt-1 space-y-0.5">
-                          <div className="text-[9px] text-gray-400 font-semibold uppercase">Last {item.price_history.length} PO rate{item.price_history.length > 1 ? 's' : ''}:</div>
+                          <div className="text-[9px] text-gray-500 font-semibold uppercase">Last {item.price_history.length} PO rate{item.price_history.length > 1 ? 's' : ''}:</div>
                           {item.price_history.map((ph, i) => (
                             <div key={i} className="text-[10px] text-gray-500">
-                              ₹{ph.rate.toFixed(2)} <span className="text-gray-300">—</span> {ph.po_number}
+                              ₹{ph.rate.toFixed(2)} <span className="text-gray-500">—</span> {ph.po_number}
                             </div>
                           ))}
                         </div>
@@ -331,7 +331,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                       {item.purchase_unit !== item.unit ? (
                         <div>
                           <div>{item.purchase_unit}</div>
-                          <div className="text-[10px] text-gray-400">×{item.conversion_factor} {item.unit}</div>
+                          <div className="text-[10px] text-gray-500">×{item.conversion_factor} {item.unit}</div>
                         </div>
                       ) : item.unit}
                     </td>
@@ -348,7 +348,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                         <input type="number" min="0" step="0.01"
                           className={`form-input w-24 text-right text-sm ${item.rate_warning ? 'border-red-400 bg-red-50' : ''}`}
                           value={item.rate || ''} onChange={e => updateItem(idx, 'rate', parseFloat(e.target.value) || 0)} />
-                        <span className="text-[10px] text-gray-400 whitespace-nowrap">/{item.purchase_unit || item.unit}</span>
+                        <span className="text-[10px] text-gray-500 whitespace-nowrap">/{item.purchase_unit || item.unit}</span>
                       </div>
                       {item.rate_warning && (
                         <div className="flex items-start gap-1 mt-1 max-w-[140px]">
@@ -357,7 +357,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                         </div>
                       )}
                       {item.mrp > 0 && item.rate > 0 && !item.rate_warning && (
-                        <div className="text-[9px] mt-0.5 text-gray-400">
+                        <div className="text-[9px] mt-0.5 text-gray-500">
                           Margin: <span className={((1 - item.rate / item.mrp) * 100) >= 10 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
                             {((1 - item.rate / item.mrp) * 100).toFixed(1)}%
                           </span> (MRP ₹{item.mrp})
@@ -378,7 +378,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                     )}
                     <td className="text-sm text-gray-600 text-right">
                       <span className="font-mono">{formatCurrency(item.net_rate)}</span>
-                      <span className="text-[10px] text-gray-400">/{item.purchase_unit || item.unit}</span>
+                      <span className="text-[10px] text-gray-500">/{item.purchase_unit || item.unit}</span>
                     </td>
                     {supplyType === 'intra_state' ? (
                       <>
@@ -399,7 +399,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
                     )}
                     <td className="text-sm font-semibold text-gray-900 text-right">{formatCurrency(item.total_amount)}</td>
                     <td>
-                      <button type="button" onClick={() => removeItem(idx)} className="text-gray-400 hover:text-red-500">
+                      <button type="button" onClick={() => removeItem(idx)} className="text-gray-500 hover:text-red-500">
                         <Trash2 size={15} />
                       </button>
                     </td>
@@ -445,15 +445,15 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
               <div className="flex justify-between"><span className="text-gray-500">IGST:</span><span className="font-medium font-mono">{formatCurrency(totalIGST)}</span></div>
             )}
             <div className="flex justify-between border-t pt-2 border-gray-200">
-              <span className="font-semibold text-[#1B3A6B]">Grand Total:</span>
-              <span className="font-bold text-[#1B3A6B] text-base font-mono">{formatCurrency(grandTotal)}</span>
+              <span className="font-semibold text-navy-600">Grand Total:</span>
+              <span className="font-bold text-navy-600 text-base font-mono">{formatCurrency(grandTotal)}</span>
             </div>
           </div>
         </div>
       )}
 
       {items.length === 0 && (
-        <div className="text-center py-8 text-gray-400 text-sm">
+        <div className="text-center py-8 text-gray-500 text-sm">
           Search and add items above to build your order
         </div>
       )}

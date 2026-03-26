@@ -16,15 +16,15 @@ const TYPE_CONFIG = {
     label: 'Vendors',
     icon: Users,
     href: (id: string) => `/vendors/${id}`,
-    color: 'text-[#1B3A6B]',
-    bg: 'bg-[#EEF2F9]',
+    color: 'text-navy-600',
+    bg: 'bg-navy-50',
   },
   item: {
     label: 'Items',
     icon: Package,
     href: (id: string) => `/items/${id}`,
-    color: 'text-[#0D7E8A]',
-    bg: 'bg-[#E6F5F6]',
+    color: 'text-teal-500',
+    bg: 'bg-teal-50',
   },
   purchase_order: {
     label: 'Purchase Orders',
@@ -169,7 +169,7 @@ export default function GlobalSearch() {
       <div className="relative group">
         <Search
           size={15}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#0D7E8A] transition-colors pointer-events-none z-10"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-teal-500 transition-colors pointer-events-none z-10"
         />
         <input
           ref={inputRef}
@@ -182,11 +182,11 @@ export default function GlobalSearch() {
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleInputKeyDown}
           placeholder="Search vendors, POs, items..."
-          className="w-full pl-11 pr-12 py-2 bg-gray-50/80 border border-gray-200/80 rounded-xl text-sm focus:outline-none focus:border-[#0D7E8A]/40 focus:bg-white focus:shadow-md focus:shadow-[#0D7E8A]/5 transition-all placeholder:text-gray-400"
+          className="w-full pl-11 pr-12 py-2 bg-gray-50/80 border border-gray-200/80 rounded-xl text-sm focus:outline-none focus:border-teal-500/40 focus:bg-white focus:shadow-md focus:shadow-teal-500/5 transition-all placeholder:text-gray-500"
         />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 text-gray-400 pointer-events-none">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 text-gray-500 pointer-events-none">
           {isLoading ? (
-            <Loader2 size={14} className="animate-spin text-[#0D7E8A]" />
+            <Loader2 size={14} className="animate-spin text-teal-500" />
           ) : (
             <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] font-mono border border-gray-200">/</kbd>
           )}
@@ -196,14 +196,14 @@ export default function GlobalSearch() {
       {showDropdown && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 max-h-[400px] overflow-y-auto z-50">
           {isLoading && !hasResults && (
-            <div className="flex items-center justify-center gap-2 py-8 text-gray-400">
+            <div className="flex items-center justify-center gap-2 py-8 text-gray-500">
               <Loader2 size={18} className="animate-spin" />
               <span className="text-sm">Searching...</span>
             </div>
           )}
 
           {!isLoading && !hasResults && (
-            <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+            <div className="flex flex-col items-center justify-center py-8 text-gray-500">
               <Search size={24} className="mb-2 opacity-40" />
               <span className="text-sm">No results for &ldquo;{query.trim()}&rdquo;</span>
               <span className="text-xs mt-1">Try a different search term</span>
@@ -222,7 +222,7 @@ export default function GlobalSearch() {
                   <div key={type}>
                     <div className="px-4 py-1.5 flex items-center gap-2">
                       <Icon size={12} className={config.color} />
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
                         {config.label}
                       </span>
                     </div>
@@ -235,7 +235,7 @@ export default function GlobalSearch() {
                           onClick={() => navigateTo(result)}
                           onMouseEnter={() => setActiveIndex(globalIdx)}
                           className={`w-full px-4 py-2.5 flex items-center gap-3 text-left transition-colors ${
-                            isActive ? 'bg-[#EEF2F9]' : 'hover:bg-gray-50'
+                            isActive ? 'bg-navy-50' : 'hover:bg-gray-50'
                           }`}
                         >
                           <div className={`w-8 h-8 rounded-lg ${config.bg} flex items-center justify-center flex-shrink-0`}>
@@ -246,7 +246,7 @@ export default function GlobalSearch() {
                               {result.title}
                             </div>
                             {result.subtitle && (
-                              <div className="text-xs text-gray-400 truncate">
+                              <div className="text-xs text-gray-500 truncate">
                                 {result.subtitle}
                               </div>
                             )}

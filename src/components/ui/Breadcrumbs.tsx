@@ -42,7 +42,7 @@ export default function Breadcrumbs() {
   })
 
   return (
-    <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-4">
+    <nav className="flex items-center gap-1.5 text-xs text-gray-500 mb-4">
       <Link href="/" className="hover:text-gray-600 transition-colors">
         <Home size={13} />
       </Link>

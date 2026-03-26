@@ -69,11 +69,11 @@ export default async function PaymentSchedulePage() {
                 <tr key={inv.id} className="hover:bg-gray-50">
                   <td>
                     <Link href={`/finance/invoices/${inv.id}`} className="font-mono text-xs text-teal-600 hover:underline font-semibold">{inv.invoice_ref}</Link>
-                    {inv.vendor_invoice_no && <div className="text-[10px] text-gray-400">{inv.vendor_invoice_no}</div>}
+                    {inv.vendor_invoice_no && <div className="text-[10px] text-gray-500">{inv.vendor_invoice_no}</div>}
                   </td>
                   <td>
                     <Link href={`/vendors/${inv.vendor?.id}`} className="text-sm text-gray-900 hover:text-teal-600">{inv.vendor?.legal_name}</Link>
-                    {inv.vendor?.bank_name && <div className="text-[10px] text-gray-400">{inv.vendor.bank_name}</div>}
+                    {inv.vendor?.bank_name && <div className="text-[10px] text-gray-500">{inv.vendor.bank_name}</div>}
                   </td>
                   <td><span className="badge bg-blue-50 text-blue-700 text-xs">{inv.centre?.code}</span></td>
                   <td className={cn('text-xs font-medium', inv.isOverdue ? 'text-red-600' : 'text-gray-600')}>{inv.due_date ? formatDate(inv.due_date) : '—'}</td>

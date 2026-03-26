@@ -42,10 +42,10 @@ export default async function ConsignmentStockPage() {
                   const isExpiring = s.expiry_date && new Date(s.expiry_date) < new Date(Date.now() + 90 * 86400000)
                   return (
                     <tr key={s.id} className={cn('hover:bg-gray-50', avail <= 0 && 'opacity-50')}>
-                      <td className="text-xs text-gray-400">{idx + 1}</td>
+                      <td className="text-xs text-gray-500">{idx + 1}</td>
                       <td>
                         <Link href={`/items/${s.item_id}`} className="text-sm font-medium text-gray-900 hover:text-teal-600">{s.item?.generic_name}</Link>
-                        <div className="text-xs text-gray-400 font-mono">{s.item?.item_code} | {s.item?.manufacturer || ''}</div>
+                        <div className="text-xs text-gray-500 font-mono">{s.item?.item_code} | {s.item?.manufacturer || ''}</div>
                       </td>
                       <td className="text-sm text-gray-600">{s.deposit?.vendor?.legal_name}</td>
                       <td><span className="badge bg-blue-50 text-blue-700 text-xs">{s.deposit?.centre?.code}</span></td>
@@ -57,7 +57,7 @@ export default async function ConsignmentStockPage() {
                       </td>
                       <td className="text-sm text-center">{s.qty_deposited}</td>
                       <td className="text-sm text-center text-orange-600">{s.qty_used}</td>
-                      <td className="text-sm text-center font-bold text-[#1B3A6B]">{avail}</td>
+                      <td className="text-sm text-center font-bold text-navy-600">{avail}</td>
                       <td className="text-sm text-right font-mono">{formatCurrency(s.vendor_rate)}</td>
                       <td className="text-sm text-right font-semibold">{formatCurrency(avail * (s.vendor_rate || 0))}</td>
                       <td><span className={cn('badge text-xs',
@@ -68,11 +68,11 @@ export default async function ConsignmentStockPage() {
                 })}
               </tbody>
               <tfoot>
-                <tr className="bg-[#EEF2F9]">
-                  <td colSpan={9} className="font-semibold text-[#1B3A6B]">Total Available</td>
-                  <td className="text-center font-bold text-[#1B3A6B]">{available.reduce((s, i) => s + (i.qty_deposited - i.qty_used - i.qty_returned), 0)}</td>
+                <tr className="bg-navy-50">
+                  <td colSpan={9} className="font-semibold text-navy-600">Total Available</td>
+                  <td className="text-center font-bold text-navy-600">{available.reduce((s, i) => s + (i.qty_deposited - i.qty_used - i.qty_returned), 0)}</td>
                   <td></td>
-                  <td className="text-right font-bold text-[#1B3A6B]">{formatCurrency(totalValue)}</td>
+                  <td className="text-right font-bold text-navy-600">{formatCurrency(totalValue)}</td>
                   <td></td>
                 </tr>
               </tfoot>
@@ -80,9 +80,9 @@ export default async function ConsignmentStockPage() {
           </div>
         ) : (
           <div className="empty-state py-12">
-            <Package size={40} className="mb-3 text-gray-300" />
+            <Package size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No consignment stock</p>
-            <p className="text-sm text-gray-400 mt-1">Create a deposit to receive vendor consignment items</p>
+            <p className="text-sm text-gray-500 mt-1">Create a deposit to receive vendor consignment items</p>
           </div>
         )}
       </div>

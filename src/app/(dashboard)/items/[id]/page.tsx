@@ -91,20 +91,20 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
               {item.department && <span className="badge bg-blue-50 text-blue-700">{item.department}</span>}
               {item.item_type && <span className="badge bg-gray-100 text-gray-600">{item.item_type}</span>}
             </div>
-            <h1 className="text-2xl font-bold text-[#1B3A6B]">{item.generic_name}</h1>
+            <h1 className="text-2xl font-bold text-navy-600">{item.generic_name}</h1>
             <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-gray-500">
               {item.brand_name && <span>Brand: <strong>{item.brand_name}</strong></span>}
-              {item.manufacturer && <><span className="text-gray-300">|</span><span>Mfg: <strong>{item.manufacturer}</strong></span></>}
-              {item.strength && <><span className="text-gray-300">|</span><span>{item.strength}</span></>}
-              {item.dosage_form && <><span className="text-gray-300">|</span><span>{item.dosage_form}</span></>}
+              {item.manufacturer && <><span className="text-gray-500">|</span><span>Mfg: <strong>{item.manufacturer}</strong></span></>}
+              {item.strength && <><span className="text-gray-500">|</span><span>{item.strength}</span></>}
+              {item.dosage_form && <><span className="text-gray-500">|</span><span>{item.dosage_form}</span></>}
             </div>
             <div className="flex flex-wrap gap-2 mt-3">
               {item.category && <span className="badge bg-blue-50 text-blue-700">{item.category.name}</span>}
               <span className="badge bg-gray-100 text-gray-700">Unit: {item.unit}</span>
               <span className="badge bg-gray-100 text-gray-700">GST: {item.gst_percent}%</span>
               {item.hsn_code && <span className="badge bg-gray-100 text-gray-600">HSN: {item.hsn_code}</span>}
-              {item.item_nature_abc && <span className="badge bg-[#EEF2F9] text-[#1B3A6B]">ABC: {item.item_nature_abc}</span>}
-              {item.item_nature_ved && <span className="badge bg-[#E6F5F6] text-[#0D7E8A]">VED: {item.item_nature_ved}</span>}
+              {item.item_nature_abc && <span className="badge bg-navy-50 text-navy-600">ABC: {item.item_nature_abc}</span>}
+              {item.item_nature_ved && <span className="badge bg-teal-50 text-teal-500">VED: {item.item_nature_ved}</span>}
               {item.item_nature_fsn && <span className="badge bg-gray-100 text-gray-700">FSN: {item.item_nature_fsn}</span>}
             </div>
           </div>
@@ -144,11 +144,11 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Total Stock</div>
-          <div className="text-xl font-bold text-[#1B3A6B]">{totalStock} {item.issue_unit || item.unit}</div>
+          <div className="text-xl font-bold text-navy-600">{totalStock} {item.issue_unit || item.unit}</div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Centres Stocking</div>
-          <div className="text-xl font-bold text-[#0D7E8A]">{stockLevels?.length ?? 0}</div>
+          <div className="text-xl font-bold text-teal-500">{stockLevels?.length ?? 0}</div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Low Stock</div>
@@ -158,11 +158,11 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Vendors</div>
-          <div className="text-xl font-bold text-[#1B3A6B]">{vendorItems?.length ?? 0}</div>
+          <div className="text-xl font-bold text-navy-600">{vendorItems?.length ?? 0}</div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Batches</div>
-          <div className="text-xl font-bold text-[#0D7E8A]">{batchStocks?.length ?? 0}</div>
+          <div className="text-xl font-bold text-teal-500">{batchStocks?.length ?? 0}</div>
         </div>
       </div>
 
@@ -171,7 +171,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
         {/* Column 1: Item Details */}
         <div className="space-y-6">
           <div className="card p-5">
-            <h2 className="font-semibold text-[#1B3A6B] mb-3 flex items-center gap-2">
+            <h2 className="font-semibold text-navy-600 mb-3 flex items-center gap-2">
               <Tag size={16} /> Identification
             </h2>
             <div className="divide-y divide-gray-50">
@@ -191,7 +191,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
           {/* Drug Details */}
           {(item.manufacturer || item.dosage_form || item.strength) && (
             <div className="card p-5">
-              <h2 className="font-semibold text-[#1B3A6B] mb-3 flex items-center gap-2">
+              <h2 className="font-semibold text-navy-600 mb-3 flex items-center gap-2">
                 <FlaskConical size={16} /> Drug Details
               </h2>
               <div className="divide-y divide-gray-50">
@@ -210,7 +210,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
 
           {/* Unit Hierarchy */}
           <div className="card p-5">
-            <h2 className="font-semibold text-[#1B3A6B] mb-3 flex items-center gap-2">
+            <h2 className="font-semibold text-navy-600 mb-3 flex items-center gap-2">
               <Layers size={16} /> Unit Hierarchy
             </h2>
             <div className="divide-y divide-gray-50">
@@ -227,7 +227,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
 
           {/* Pricing */}
           <div className="card p-5">
-            <h2 className="font-semibold text-[#1B3A6B] mb-3 flex items-center gap-2">
+            <h2 className="font-semibold text-navy-600 mb-3 flex items-center gap-2">
               <Factory size={16} /> Pricing & Tax
             </h2>
             <div className="divide-y divide-gray-50">
@@ -245,7 +245,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
           {/* Integration */}
           {(item.ecw_item_code || item.tally_item_name) && (
             <div className="card p-5">
-              <h2 className="font-semibold text-[#1B3A6B] mb-3 flex items-center gap-2">
+              <h2 className="font-semibold text-navy-600 mb-3 flex items-center gap-2">
                 <Beaker size={16} /> Integration
               </h2>
               <div className="divide-y divide-gray-50">
@@ -260,7 +260,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
         <div className="space-y-6">
           <div className="card overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-100">
-              <h2 className="font-semibold text-[#1B3A6B]">Approved Vendors (L-Rank)</h2>
+              <h2 className="font-semibold text-navy-600">Approved Vendors (L-Rank)</h2>
             </div>
             {vendorItems && vendorItems.length > 0 ? (
               <div className="overflow-x-auto">
@@ -281,10 +281,10 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
                           </span>
                         </td>
                         <td>
-                          <Link href={`/vendors/${vi.vendor?.id || vi.vendor_id}`} className="text-[#0D7E8A] hover:underline font-medium text-sm">
+                          <Link href={`/vendors/${vi.vendor?.id || vi.vendor_id}`} className="text-teal-500 hover:underline font-medium text-sm">
                             {vi.vendor?.legal_name}
                           </Link>
-                          <div className="font-mono text-xs text-gray-400">{vi.vendor?.vendor_code}</div>
+                          <div className="font-mono text-xs text-gray-500">{vi.vendor?.vendor_code}</div>
                         </td>
                         <td className="text-sm font-medium">{vi.last_quoted_rate ? formatCurrency(vi.last_quoted_rate) : '—'}</td>
                         <td>
@@ -300,7 +300,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
                 </table>
               </div>
             ) : (
-              <div className="p-8 text-center text-gray-400 text-sm">No vendor mappings yet</div>
+              <div className="p-8 text-center text-gray-500 text-sm">No vendor mappings yet</div>
             )}
           </div>
         </div>
@@ -309,8 +309,8 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
         <div className="space-y-6">
           <div className="card overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-              <Building2 size={16} className="text-[#0D7E8A]" />
-              <h2 className="font-semibold text-[#1B3A6B]">Stock by Centre</h2>
+              <Building2 size={16} className="text-teal-500" />
+              <h2 className="font-semibold text-navy-600">Stock by Centre</h2>
             </div>
             {stockLevels && stockLevels.length > 0 ? (
               <div className="divide-y">
@@ -343,8 +343,8 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
                 })}
               </div>
             ) : (
-              <div className="p-8 text-center text-gray-400 text-sm">
-                <AlertTriangle size={20} className="mx-auto mb-2 text-gray-300" />
+              <div className="p-8 text-center text-gray-500 text-sm">
+                <AlertTriangle size={20} className="mx-auto mb-2 text-gray-500" />
                 No stock records yet
               </div>
             )}
@@ -356,8 +356,8 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
       {batchStocks && batchStocks.length > 0 && (
         <div className="card overflow-hidden mt-6">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-            <Package size={16} className="text-[#0D7E8A]" />
-            <h2 className="font-semibold text-[#1B3A6B]">Batch-wise Stock (FIFO)</h2>
+            <Package size={16} className="text-teal-500" />
+            <h2 className="font-semibold text-navy-600">Batch-wise Stock (FIFO)</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="data-table">

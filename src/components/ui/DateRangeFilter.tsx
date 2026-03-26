@@ -39,7 +39,7 @@ export default function DateRangeFilter() {
         onChange={e => setFrom(e.target.value)}
         placeholder="From"
       />
-      <span className="text-xs text-gray-400">to</span>
+      <span className="text-xs text-gray-500">to</span>
       <input
         type="date"
         className="form-input !py-1.5 !text-xs !w-auto"
@@ -47,7 +47,7 @@ export default function DateRangeFilter() {
         onChange={e => setTo(e.target.value)}
         placeholder="To"
       />
-      <button onClick={apply} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#1B3A6B] text-white">
+      <button onClick={apply} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-navy-600 text-white">
         Apply
       </button>
       {(from || to) && (

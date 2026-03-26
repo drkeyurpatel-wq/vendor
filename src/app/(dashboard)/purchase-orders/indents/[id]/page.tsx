@@ -78,21 +78,21 @@ export default async function IndentDetailPage({ params }: { params: Promise<{ i
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-bold text-[#1B3A6B] font-mono">{indent.indent_number}</h1>
+              <h1 className="text-2xl font-bold text-navy-600 font-mono">{indent.indent_number}</h1>
               <span className={cn('badge', INDENT_STATUS_COLORS[indent.status])}>{indent.status?.replace(/_/g, ' ')}</span>
               <span className={cn('badge', PRIORITY_COLORS[indent.priority])}>{indent.priority}</span>
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-gray-500">
               <span>Centre: <strong>{indent.centre?.code} — {indent.centre?.name}</strong></span>
-              <span className="text-gray-300">|</span>
+              <span className="text-gray-500">|</span>
               <span>Requested by: <strong>{requestedByName || '—'}</strong></span>
-              <span className="text-gray-300">|</span>
+              <span className="text-gray-500">|</span>
               <span>Date: <strong>{formatDate(indent.created_at)}</strong></span>
             </div>
             {approvedByName && (
               <div className="text-sm text-gray-500 mt-1">
                 Approved by: <strong>{approvedByName}</strong>
-                {indent.approved_at && <span className="text-gray-400"> on {formatDate(indent.approved_at)}</span>}
+                {indent.approved_at && <span className="text-gray-500"> on {formatDate(indent.approved_at)}</span>}
               </div>
             )}
           </div>
@@ -126,11 +126,11 @@ export default async function IndentDetailPage({ params }: { params: Promise<{ i
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Items</div>
-          <div className="text-xl font-bold text-[#1B3A6B]">{items.length}</div>
+          <div className="text-xl font-bold text-navy-600">{items.length}</div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Estimated Value</div>
-          <div className="text-xl font-bold text-[#0D7E8A]">{formatCurrency(estimatedTotal)}</div>
+          <div className="text-xl font-bold text-teal-500">{formatCurrency(estimatedTotal)}</div>
         </div>
         <div className="stat-card">
           <div className="text-xs text-gray-500 uppercase tracking-wide">Priority</div>
@@ -147,7 +147,7 @@ export default async function IndentDetailPage({ params }: { params: Promise<{ i
       {/* Items table */}
       <div className="card overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
-          <h2 className="font-semibold text-[#1B3A6B]">Requested Items</h2>
+          <h2 className="font-semibold text-navy-600">Requested Items</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="data-table">
@@ -167,22 +167,22 @@ export default async function IndentDetailPage({ params }: { params: Promise<{ i
             <tbody>
               {items.map((item: any, idx: number) => (
                 <tr key={item.id}>
-                  <td className="text-xs text-gray-400">{idx + 1}</td>
+                  <td className="text-xs text-gray-500">{idx + 1}</td>
                   <td>
-                    <Link href={`/items/${item.item_id}`} className="font-mono text-xs font-semibold text-[#0D7E8A] hover:underline">
+                    <Link href={`/items/${item.item_id}`} className="font-mono text-xs font-semibold text-teal-500 hover:underline">
                       {item.item?.item_code}
                     </Link>
                   </td>
                   <td>
                     <div className="text-sm font-medium text-gray-900">{item.item?.generic_name}</div>
-                    {item.item?.brand_name && <div className="text-xs text-gray-400">{item.item.brand_name}</div>}
-                    {item.item?.manufacturer && <div className="text-xs text-gray-400">Mfg: {item.item.manufacturer}</div>}
+                    {item.item?.brand_name && <div className="text-xs text-gray-500">{item.item.brand_name}</div>}
+                    {item.item?.manufacturer && <div className="text-xs text-gray-500">Mfg: {item.item.manufacturer}</div>}
                   </td>
                   <td className="text-xs text-gray-500">{item.unit || item.item?.unit}</td>
                   <td className={cn('text-sm text-right', item.current_stock <= 0 ? 'text-red-600 font-bold' : 'text-gray-700')}>
                     {item.current_stock ?? '—'}
                   </td>
-                  <td className="text-sm text-right font-semibold text-[#1B3A6B]">{item.requested_qty}</td>
+                  <td className="text-sm text-right font-semibold text-navy-600">{item.requested_qty}</td>
                   <td className="text-sm text-right font-mono text-gray-600">{item.last_purchase_rate ? formatCurrency(item.last_purchase_rate) : '—'}</td>
                   <td className="text-sm text-right font-semibold">{item.estimated_value ? formatCurrency(item.estimated_value) : '—'}</td>
                   <td className="text-xs text-gray-500 max-w-[150px] truncate">{item.notes || '—'}</td>
@@ -190,11 +190,11 @@ export default async function IndentDetailPage({ params }: { params: Promise<{ i
               ))}
             </tbody>
             <tfoot>
-              <tr className="bg-[#EEF2F9]">
-                <td colSpan={5} className="font-semibold text-[#1B3A6B]">Total</td>
-                <td className="text-right font-bold text-[#1B3A6B]">{items.reduce((s: number, i: any) => s + (i.requested_qty || 0), 0)}</td>
+              <tr className="bg-navy-50">
+                <td colSpan={5} className="font-semibold text-navy-600">Total</td>
+                <td className="text-right font-bold text-navy-600">{items.reduce((s: number, i: any) => s + (i.requested_qty || 0), 0)}</td>
                 <td></td>
-                <td className="text-right font-bold text-[#1B3A6B]">{formatCurrency(estimatedTotal)}</td>
+                <td className="text-right font-bold text-navy-600">{formatCurrency(estimatedTotal)}</td>
                 <td></td>
               </tr>
             </tfoot>

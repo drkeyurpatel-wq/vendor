@@ -30,9 +30,9 @@ export default async function PaymentBatchDetailPage({ params }: { params: Promi
           <ArrowLeft size={14} /> Back
         </Link>
         <div className="card p-8 text-center">
-          <Wallet size={40} className="mx-auto mb-3 text-gray-300" />
+          <Wallet size={40} className="mx-auto mb-3 text-gray-500" />
           <h2 className="text-xl font-semibold text-gray-700">Payment Batch Not Found</h2>
-          <p className="text-sm text-gray-400 mt-1">This batch may have been deleted or does not exist.</p>
+          <p className="text-sm text-gray-500 mt-1">This batch may have been deleted or does not exist.</p>
         </div>
       </div>
     )
@@ -73,7 +73,7 @@ export default async function PaymentBatchDetailPage({ params }: { params: Promi
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-bold text-[#1B3A6B] font-mono">{batch.batch_number}</h1>
+              <h1 className="text-2xl font-bold text-navy-600 font-mono">{batch.batch_number}</h1>
               <span className={cn('badge', BATCH_STATUS_COLORS[batch.status] || 'bg-gray-100 text-gray-700')}>
                 {batch.status?.replace(/_/g, ' ')}
               </span>
@@ -100,19 +100,19 @@ export default async function PaymentBatchDetailPage({ params }: { params: Promi
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="stat-card border-l-4 border-[#1B3A6B]">
+        <div className="stat-card border-l-4 border-navy-600">
           <div className="flex items-center gap-2 mb-1">
-            <Wallet size={18} className="text-[#1B3A6B]" />
+            <Wallet size={18} className="text-navy-600" />
             <span className="text-sm font-semibold text-gray-700">Total Amount</span>
           </div>
-          <div className="text-2xl font-bold text-[#1B3A6B]">{formatLakhs(batch.total_amount || 0)}</div>
+          <div className="text-2xl font-bold text-navy-600">{formatLakhs(batch.total_amount || 0)}</div>
         </div>
-        <div className="stat-card border-l-4 border-[#0D7E8A]">
+        <div className="stat-card border-l-4 border-teal-500">
           <div className="flex items-center gap-2 mb-1">
-            <Hash size={18} className="text-[#0D7E8A]" />
+            <Hash size={18} className="text-teal-500" />
             <span className="text-sm font-semibold text-gray-700">Payment Count</span>
           </div>
-          <div className="text-2xl font-bold text-[#0D7E8A]">{batch.payment_count || batchItems.length}</div>
+          <div className="text-2xl font-bold text-teal-500">{batch.payment_count || batchItems.length}</div>
         </div>
         <div className="stat-card border-l-4 border-orange-500">
           <div className="flex items-center gap-2 mb-1">
@@ -132,7 +132,7 @@ export default async function PaymentBatchDetailPage({ params }: { params: Promi
 
       {/* Approval Info */}
       <div className="card p-5 mb-6">
-        <h2 className="text-lg font-semibold text-[#1B3A6B] mb-3 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-navy-600 mb-3 flex items-center gap-2">
           <User size={18} /> Batch Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -163,8 +163,8 @@ export default async function PaymentBatchDetailPage({ params }: { params: Promi
 
       {/* Batch Items Table */}
       <div className="card overflow-hidden">
-        <div className="px-5 py-4 border-b bg-[#EEF2F9]">
-          <h2 className="text-lg font-semibold text-[#1B3A6B]">Payment Items</h2>
+        <div className="px-5 py-4 border-b bg-navy-50">
+          <h2 className="text-lg font-semibold text-navy-600">Payment Items</h2>
           <p className="text-sm text-gray-500 mt-0.5">{batchItems.length} invoice{batchItems.length !== 1 ? 's' : ''} in this batch</p>
         </div>
         {batchItems.length > 0 ? (
@@ -188,13 +188,13 @@ export default async function PaymentBatchDetailPage({ params }: { params: Promi
                     <tr key={item.id}>
                       <td className="text-sm text-gray-500">{index + 1}</td>
                       <td>
-                        <Link href={`/finance/invoices/${item.invoice_id}`} className="font-mono text-xs font-semibold text-[#0D7E8A] hover:underline">
+                        <Link href={`/finance/invoices/${item.invoice_id}`} className="font-mono text-xs font-semibold text-teal-500 hover:underline">
                           {invoice?.invoice_ref || '-'}
                         </Link>
                       </td>
                       <td>
                         <Link href={`/vendors/${invoice?.vendor?.id || '#'}`} className="text-sm font-medium text-gray-800 hover:text-teal-600">{invoice?.vendor?.legal_name || '-'}</Link>
-                        <div className="text-xs text-gray-400 font-mono">{invoice?.vendor?.vendor_code || ''}</div>
+                        <div className="text-xs text-gray-500 font-mono">{invoice?.vendor?.vendor_code || ''}</div>
                       </td>
                       <td className="text-sm text-gray-700">{invoice?.vendor_invoice_no || '-'}</td>
                       <td className="text-sm text-gray-700">
@@ -206,18 +206,18 @@ export default async function PaymentBatchDetailPage({ params }: { params: Promi
                 })}
               </tbody>
               <tfoot>
-                <tr className="bg-[#EEF2F9] font-semibold">
-                  <td colSpan={5} className="text-right text-sm text-[#1B3A6B]">Total Outstanding</td>
-                  <td className="text-right text-sm text-[#1B3A6B]">{formatCurrency(totalOutstanding)}</td>
+                <tr className="bg-navy-50 font-semibold">
+                  <td colSpan={5} className="text-right text-sm text-navy-600">Total Outstanding</td>
+                  <td className="text-right text-sm text-navy-600">{formatCurrency(totalOutstanding)}</td>
                 </tr>
               </tfoot>
             </table>
           </div>
         ) : (
           <div className="empty-state py-12">
-            <FileText size={40} className="mb-3 text-gray-300" />
+            <FileText size={40} className="mb-3 text-gray-500" />
             <p className="font-medium text-gray-500">No items in this batch</p>
-            <p className="text-sm text-gray-400 mt-1">Add invoices to this payment batch to proceed.</p>
+            <p className="text-sm text-gray-500 mt-1">Add invoices to this payment batch to proceed.</p>
           </div>
         )}
       </div>
