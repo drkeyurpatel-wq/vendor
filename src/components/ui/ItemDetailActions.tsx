@@ -48,7 +48,7 @@ export default function ItemDetailActions({ itemId, itemCode, itemName, isActive
     if (error) { toast.error(error.message); return }
 
     try {
-      await supabase.from('activity_log').insert({
+      await supabase.from('audit_logs').insert({
         entity_type: 'item', entity_id: itemId,
         action: isActive ? 'item_deactivated' : 'item_reactivated',
         details: { item_code: itemCode, reason: comment || null },

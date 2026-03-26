@@ -50,7 +50,7 @@ export default function POStatusActions({ poId, poNumber, currentStatus, vendorE
     }})
 
     // Log audit
-    await supabase.from('activity_log').insert({
+    await supabase.from('audit_logs').insert({
       entity_type: 'purchase_order', entity_id: poId,
       action: `status_changed_to_${newStatus}`,
       details: { from: currentStatus, to: newStatus, comment: comment || null, po_number: poNumber },

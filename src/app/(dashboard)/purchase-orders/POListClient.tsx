@@ -46,7 +46,7 @@ function getPORowActions(po: PO, userRole: string, onDuplicate: (id: string) => 
     {
       key: 'send', label: 'Mark sent to vendor', icon: <Send size={14} />, variant: 'primary',
       statusField: 'status', newStatus: 'sent_to_vendor',
-      extraUpdates: { sent_at: new Date().toISOString() },
+      extraUpdates: { sent_to_vendor_at: new Date().toISOString() },
       visible: po.status === 'approved',
     },
     {

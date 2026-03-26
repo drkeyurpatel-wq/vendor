@@ -65,7 +65,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   // Also try to fetch invoice line items if they exist
   const { data: invoiceItems } = await supabase
     .from('invoice_items')
-    .select('item_id, qty, rate')
+    .select('item_id, quantity, rate')
     .eq('invoice_id', id)
 
   // Build GRN items map (aggregate accepted_qty per item)
@@ -78,7 +78,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   // Build invoice items map
   const invoiceItemsMap = new Map<string, { qty: number; rate: number }>()
   invoiceItems?.forEach((ii: any) => {
-    invoiceItemsMap.set(ii.item_id, { qty: ii.qty, rate: ii.rate })
+    invoiceItemsMap.set(ii.item_id, { qty: ii.quantity, rate: ii.rate })
   })
 
   // Build match comparison items from PO items

@@ -101,9 +101,9 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
   // ── Fetch invoice line items (table may not exist) ──
   let invoiceItemsMap = new Map<string, { qty: number; rate: number }>()
   try {
-    const { data, error } = await supabase.from('invoice_items').select('item_id, qty, rate').eq('invoice_id', invoice_id)
+    const { data, error } = await supabase.from('invoice_items').select('item_id, quantity, rate').eq('invoice_id', invoice_id)
     if (!error && data) {
-      data.forEach((ii: any) => invoiceItemsMap.set(ii.item_id, { qty: ii.qty, rate: ii.rate }))
+      data.forEach((ii: any) => invoiceItemsMap.set(ii.item_id, { qty: ii.quantity, rate: ii.rate }))
     }
   } catch { /* table doesn't exist */ }
 

@@ -40,10 +40,8 @@ export default function ExpiryAlertActions({ alert, userRole }: { alert: ExpiryA
         // Mark as acknowledged — update GRN item or stock ledger
         await supabase.from('stock_ledger').insert({
           item_id: alert.item_id, centre_id: alert.centre_id,
-          movement_type: 'expiry_acknowledged', quantity: 0,
+          transaction_type: 'expiry_acknowledged', quantity: 0,
           balance_after: alert.quantity,
-          reference_type: 'expiry_alert', reference_id: alert.id,
-          batch_number: alert.batch_number,
           notes: note || `Expiry acknowledged for batch ${alert.batch_number}`,
         })
         toast.success('Expiry acknowledged')
@@ -68,10 +66,8 @@ export default function ExpiryAlertActions({ alert, userRole }: { alert: ExpiryA
 
         await supabase.from('stock_ledger').insert({
           item_id: alert.item_id, centre_id: alert.centre_id,
-          movement_type: 'expired_disposal', quantity: qty,
+          transaction_type: 'expired_disposal', quantity: qty,
           balance_after: stockRow ? Math.max(0, stockRow.current_stock - qty) : 0,
-          reference_type: 'expiry_alert', reference_id: alert.id,
-          batch_number: alert.batch_number,
           notes: note || `Disposed ${qty} expired units from batch ${alert.batch_number}`,
         })
         toast.success(`${qty} units disposed`)
@@ -79,17 +75,15 @@ export default function ExpiryAlertActions({ alert, userRole }: { alert: ExpiryA
         // Log return-to-vendor intent
         await supabase.from('stock_ledger').insert({
           item_id: alert.item_id, centre_id: alert.centre_id,
-          movement_type: 'return_to_vendor', quantity: parseFloat(disposeQty) || alert.quantity,
+          transaction_type: 'return_to_vendor', quantity: parseFloat(disposeQty) || alert.quantity,
           balance_after: 0,
-          reference_type: 'expiry_alert', reference_id: alert.id,
-          batch_number: alert.batch_number,
           notes: note || `Return-to-vendor initiated for batch ${alert.batch_number}`,
         })
         toast.success('Return-to-vendor logged')
       }
 
       // Audit
-      await supabase.from('activity_log').insert({
+      await supabase.from('audit_logs').insert({
         entity_type: 'expiry_alert', entity_id: alert.id,
         action: `expiry_${activeAction}`,
         details: { batch: alert.batch_number, item_id: alert.item_id, quantity: disposeQty, note },

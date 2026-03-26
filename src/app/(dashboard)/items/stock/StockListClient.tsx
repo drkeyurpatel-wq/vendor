@@ -149,8 +149,7 @@ export default function StockListClient({ stocks, userRole }: { stocks: StockIte
     // Log to stock ledger
     await supabase.from('stock_ledger').insert({
       item_id: itemId, centre_id: centreId,
-      movement_type: type === 'add' ? 'adjustment_in' : 'adjustment_out',
-      quantity: qty, balance_after: newQty, reference_type: 'manual_adjustment',
+      transaction_type: type === 'add' ? 'adjustment_in' : 'adjustment_out',
       notes: reason,
     }).then(() => {}, () => {})
 

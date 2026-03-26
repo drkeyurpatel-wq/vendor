@@ -53,7 +53,7 @@ function getPaymentRowActions(batch: PaymentBatch, userRole: string): RowAction[
       confirm: true, confirmTitle: `Complete batch ${batch.batch_number}`,
       confirmDescription: `Confirm all ${batch.item_count || 0} payments in this batch have been disbursed (${formatLakhs(batch.total_amount)}).`,
       statusField: 'status', newStatus: 'completed',
-      extraUpdates: { completed_at: new Date().toISOString() },
+      
       visible: batch.status === 'processing' && canProcess,
     },
     {

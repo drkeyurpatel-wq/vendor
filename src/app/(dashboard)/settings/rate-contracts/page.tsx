@@ -223,7 +223,7 @@ export default async function RateContractsPage({
                           contractId={rc.id}
                           contractNumber={rc.contract_number}
                           status={rc.status}
-                          endDate={rc.end_date}
+                          endDate={rc.valid_to}
                           vendorName={rc.vendor?.legal_name}
                           userRole={role}
                           compact

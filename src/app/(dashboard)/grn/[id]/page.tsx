@@ -81,7 +81,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
   const { data: backorderPO } = grn.po_id ? await supabase
     .from('purchase_orders')
     .select('id, po_number, status, total_amount')
-    .eq('amended_from', grn.po_id)
+    .like('notes', `[BACKORDER:${grn.po_id}]%`)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .limit(1)

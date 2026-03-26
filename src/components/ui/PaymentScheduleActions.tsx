@@ -47,12 +47,11 @@ export default function PaymentScheduleActions({ payment, userRole }: { payment:
     try {
       const { error } = await supabase.from('invoices').update({
         due_date: newDate,
-        reschedule_reason: reason || null,
         updated_at: new Date().toISOString(),
       }).eq('id', payment.id)
       if (error) throw error
 
-      await supabase.from('activity_log').insert({
+      await supabase.from('audit_logs').insert({
         entity_type: 'invoice', entity_id: payment.id, action: 'payment_rescheduled',
         details: { old_due: payment.due_date, new_due: newDate, reason },
       }).then(() => {}, () => {})
@@ -99,7 +98,7 @@ export default function PaymentScheduleActions({ payment, userRole }: { payment:
       // Update batch total
       const { data: items } = await supabase.from('payment_batch_items').select('amount').eq('batch_id', batch!.id)
       const total = items?.reduce((s, i) => s + (i.amount || 0), 0) || 0
-      await supabase.from('payment_batches').update({ total_amount: total, item_count: items?.length, updated_at: new Date().toISOString() }).eq('id', batch!.id)
+      await supabase.from('payment_batches').update({ total_amount: total, updated_at: new Date().toISOString() }).eq('id', batch!.id)
 
       toast.success(`Added to ${batch!.batch_number} (Saturday ${satDate})`)
       router.refresh()

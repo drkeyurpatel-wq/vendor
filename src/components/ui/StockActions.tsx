@@ -64,7 +64,7 @@ export default function StockActions({ itemId, itemCode, itemName, centreId, cen
       quantity: q, reason, previous_stock: currentStock, new_stock: newStock,
     })
     // Also log to audit
-    await supabase.from('activity_log').insert({
+    await supabase.from('audit_logs').insert({
       entity_type: 'stock', entity_id: `${itemId}_${centreId}`,
       action: `stock_${adjustType}`,
       details: { item_code: itemCode, centre: centreName, qty: q, from: currentStock, to: newStock, reason },
@@ -99,7 +99,7 @@ export default function StockActions({ itemId, itemCode, itemName, centreId, cen
       current_stock: destQty, reorder_level: reorderLevel, max_level: maxLevel,
     }, { onConflict: 'item_id,centre_id' })
 
-    await supabase.from('activity_log').insert({
+    await supabase.from('audit_logs').insert({
       entity_type: 'stock_transfer', entity_id: `${itemId}`,
       action: 'inter_centre_transfer',
       details: { item_code: itemCode, from_centre: centreId, to_centre: transferCentre, qty: q, reason: reason || null },

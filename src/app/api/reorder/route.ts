@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
 
       // Audit log
       try {
-        await supabase.from('activity_log').insert({
+        await supabase.from('audit_logs').insert({
           entity_type: 'purchase_order',
           entity_id: newPO.id,
           action: 'auto_reorder_created',

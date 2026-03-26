@@ -37,17 +37,17 @@ export default function RateContractActions({ contractId, contractNumber, status
       switch (action) {
         case 'activate':
           updates.status = 'active'
-          updates.activated_at = new Date().toISOString()
+          updates.approved_at = new Date().toISOString()
           break
         case 'terminate':
           updates.status = 'terminated'
-          updates.terminated_at = new Date().toISOString()
+          
           if (comment) updates.termination_reason = comment
           break
         case 'extend':
           if (!extendDate) { toast.error('Select new end date'); setLoading(false); return }
-          updates.end_date = extendDate
-          updates.extended = true
+          updates.valid_to = extendDate
+          
           break
         case 'renew':
           // Create new contract as draft, copy from current
@@ -56,7 +56,7 @@ export default function RateContractActions({ contractId, contractNumber, status
             .eq('id', contractId).single()
           if (!original) { toast.error('Contract not found'); setLoading(false); return }
 
-          const newStart = original.end_date || new Date().toISOString().split('T')[0]
+          const newStart = original.valid_to || new Date().toISOString().split('T')[0]
           const startDate = new Date(newStart)
           const newEnd = new Date(startDate)
           if (original.contract_type === 'annual') newEnd.setFullYear(newEnd.getFullYear() + 1)
@@ -66,7 +66,7 @@ export default function RateContractActions({ contractId, contractNumber, status
           const { data: newContract, error: createErr } = await supabase.from('rate_contracts').insert({
             vendor_id: original.vendor_id, centre_id: original.centre_id,
             contract_type: original.contract_type, status: 'draft',
-            start_date: newStart, end_date: newEnd.toISOString().split('T')[0],
+            valid_from: newStart, valid_to: newEnd.toISOString().split('T')[0],
             notes: `Renewed from ${contractNumber || contractId}`,
           }).select('id').single()
 

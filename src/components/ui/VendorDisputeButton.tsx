@@ -21,7 +21,7 @@ export default function VendorDisputeButton({ invoiceId, invoiceRef }: { invoice
       disputed_at: new Date().toISOString(), updated_at: new Date().toISOString(),
     }).eq('id', invoiceId)
     if (error) { toast.error(error.message); setLoading(false); return }
-    try { await supabase.from('activity_log').insert({ entity_type: 'invoice', entity_id: invoiceId, action: 'vendor_dispute', details: { invoice_ref: invoiceRef, reason } }) } catch {}
+    try { await supabase.from('audit_logs').insert({ entity_type: 'invoice', entity_id: invoiceId, action: 'vendor_dispute', details: { invoice_ref: invoiceRef, reason } }) } catch {}
     toast.success('Dispute submitted')
     setOpen(false); setReason(''); setLoading(false); router.refresh()
   }

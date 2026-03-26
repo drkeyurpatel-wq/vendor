@@ -154,7 +154,7 @@ export default function RowActions({
         }
 
         // Audit log (non-blocking)
-        supabase.from('activity_log').insert({
+        supabase.from('audit_logs').insert({
           entity_type: entityType,
           entity_id: entityId,
           action: `row_${action.key}`,

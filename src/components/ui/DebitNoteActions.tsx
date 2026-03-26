@@ -35,21 +35,17 @@ export default function DebitNoteActions({ debitNoteId, dnNumber, status, amount
       switch (action) {
         case 'approve':
           updates.status = 'approved'
-          updates.approved_at = new Date().toISOString()
           break
         case 'send':
           updates.status = 'sent'
-          updates.sent_at = new Date().toISOString()
           break
         case 'adjust':
           updates.status = 'adjusted'
-          updates.adjusted_at = new Date().toISOString()
-          if (comment) updates.adjustment_notes = comment
+          if (comment) updates.notes = comment
           break
         case 'cancel':
           updates.status = 'cancelled'
-          updates.cancelled_at = new Date().toISOString()
-          if (comment) updates.cancellation_reason = comment
+          if (comment) updates.notes = comment
           break
       }
 

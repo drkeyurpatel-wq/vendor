@@ -133,7 +133,7 @@ export default function DataImportHandler() {
     }
 
     try {
-      await supabase.from('activity_log').insert({
+      await supabase.from('audit_logs').insert({
         entity_type: config.table, entity_id: 'bulk_import',
         action: 'data_import',
         details: { type: importType, total: parsed.rows.length, success, failed },

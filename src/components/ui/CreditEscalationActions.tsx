@@ -41,15 +41,17 @@ export default function CreditEscalationActions({ invoices, userRole }: Props) {
     try {
       // Mark as reminded
       const { error } = await supabase.from('invoices')
-        .update({ last_reminder_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .update({ updated_at: new Date().toISOString() })
         .in('id', overdueIds)
       if (error) throw error
 
-      // Log
-      await supabase.from('activity_log').insert({
-        entity_type: 'invoice', action: 'bulk_payment_reminder',
-        details: { count: overdueIds.length, ids: overdueIds },
-      }).then(() => {}, () => {})
+      // Log reminders in audit
+      try {
+        await supabase.from('audit_logs').insert({
+          entity_type: 'invoice', action: 'bulk_payment_reminder',
+          details: { count: overdueIds.length, ids: overdueIds },
+        })
+      } catch { /* non-critical */ }
 
       fireNotification({
         action: 'payment_reminder_sent', entity_type: 'invoice',
@@ -66,15 +68,17 @@ export default function CreditEscalationActions({ invoices, userRole }: Props) {
     setLoading(true)
     try {
       const { error } = await supabase.from('invoices').update({
-        escalated: true, escalated_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }).eq('id', invoice.id)
       if (error) throw error
 
-      fireNotification({
-        action: 'invoice_escalated', entity_type: 'invoice', entity_id: invoice.id,
-        details: { vendor: invoice.vendor_name, amount: invoice.total_amount, days_overdue: invoice.days_overdue },
-      })
+      // Log escalation in audit
+      try {
+        await supabase.from('audit_logs').insert({
+          entity_type: 'invoice', entity_id: invoice.id, action: 'invoice_escalated',
+          details: { vendor: invoice.vendor_name, amount: invoice.total_amount, days_overdue: invoice.days_overdue },
+        })
+      } catch { /* non-critical */ }
 
       toast.success(`${invoice.vendor_invoice_no} escalated to management`)
       router.refresh()
@@ -87,11 +91,17 @@ export default function CreditEscalationActions({ invoices, userRole }: Props) {
     setLoading(true)
     try {
       const { error } = await supabase.from('invoices').update({
-        payment_commitment_date: commitDate,
-        payment_commitment_notes: commitNote || null,
         updated_at: new Date().toISOString(),
       }).eq('id', showCommitModal.id)
       if (error) throw error
+
+      // Log commitment in audit (columns don't exist on invoices table)
+      try {
+        await supabase.from('audit_logs').insert({
+          entity_type: 'invoice', entity_id: showCommitModal.id, action: 'payment_commitment',
+          details: { commitment_date: commitDate, notes: commitNote, vendor: showCommitModal.vendor_name, amount: showCommitModal.total_amount },
+        })
+      } catch { /* non-critical */ }
 
       toast.success(`Payment commitment set for ${showCommitModal.vendor_invoice_no}`)
       setShowCommitModal(null); setCommitDate(''); setCommitNote(''); router.refresh()

@@ -108,7 +108,7 @@ export default async function RateContractDetailPage({
         <h3 className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-3">Actions</h3>
         <RateContractActions
           contractId={contract.id} contractNumber={contract.contract_number}
-          status={contract.status} endDate={contract.end_date}
+          status={contract.status} endDate={contract.valid_to}
           vendorName={contract.vendor?.legal_name}
           userRole={role}
         />

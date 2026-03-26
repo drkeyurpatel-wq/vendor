@@ -38,7 +38,7 @@ export default function TransferActions({ transferId, transferNumber, currentSta
     }).eq('id', transferId)
 
     if (error) { toast.error(error.message); return }
-    try { await supabase.from('activity_log').insert({ entity_type: 'stock_transfer', entity_id: transferId, action: `transfer_${newStatus}`, details: { transfer_number: transferNumber, comment: comment || null } }) } catch {}
+    try { await supabase.from('audit_logs').insert({ entity_type: 'stock_transfer', entity_id: transferId, action: `transfer_${newStatus}`, details: { transfer_number: transferNumber, comment: comment || null } }) } catch {}
     toast.success(`Transfer ${transferNumber} → ${newStatus.replace(/_/g, ' ')}`)
     fireNotification({ action: `transfer_${newStatus}`, entity_type: 'stock_transfer', entity_id: transferId, details: { transfer_number: transferNumber } })
     setDialog(null); setComment(''); router.refresh()

@@ -186,11 +186,10 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
                 po_date: new Date().toISOString().split('T')[0],
                 status: 'draft',
                 priority: 'urgent',
-                amended_from: poId,
                 delivery_address: originalPO.delivery_address,
                 payment_terms: originalPO.payment_terms,
                 terms_and_conditions: originalPO.terms_and_conditions,
-                notes: `Backorder from ${originalPO.po_number} — GRN ${grnNumber} short delivery (${shortItems.length} items)`,
+                notes: `[BACKORDER:${poId}] from ${originalPO.po_number} — GRN ${grnNumber} short delivery (${shortItems.length} items)`,
                 subtotal, gst_amount: gstTotal, total_amount: totalAmount, net_amount: totalAmount,
                 created_by: userId,
               }).select('id, po_number').single()

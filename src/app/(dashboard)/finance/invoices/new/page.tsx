@@ -260,7 +260,7 @@ export default function NewInvoicePage() {
         const invoiceLineItems = grnItems.map((gi: any) => ({
           invoice_id: invoice.id,
           item_id: gi.item_id,
-          qty: gi.accepted_qty,
+          quantity: gi.accepted_qty,
           rate: gi.rate,
           gst_percent: gi.gst_percent || 0,
           total_amount: gi.total_amount || (gi.accepted_qty * gi.rate),
