@@ -169,8 +169,8 @@ const doc = new Document({
         "GitHub: drkeyurpatel-wq | Email: drkeyurpatel@gmail.com",
         "Repo: https://github.com/drkeyurpatel-wq/vendor.git",
         "Live URL: https://vendor-rm26gxmw2-drkeyurpatel-6272s-projects.vercel.app",
-        "Supabase Project ID: dwukvdtacwvnudqjlwrb",
-        "Supabase URL: https://dwukvdtacwvnudqjlwrb.supabase.co",
+        "Supabase Project ID: [see .env]",
+        "Supabase URL: [see NEXT_PUBLIC_SUPABASE_URL in .env]",
       ], LIGHT_BLUE, NAVY),
       spacer(),
 
@@ -500,7 +500,7 @@ const doc = new Document({
       h2("8.2 Environment Variables"),
       para("Set in Vercel dashboard (not in code). Never commit .env.local to GitHub."),
       twoCol(["Variable", "Value"], [
-        ["NEXT_PUBLIC_SUPABASE_URL", "https://dwukvdtacwvnudqjlwrb.supabase.co"],
+        ["NEXT_PUBLIC_SUPABASE_URL", "[from Supabase dashboard]"],
         ["NEXT_PUBLIC_SUPABASE_ANON_KEY", "eyJhbGci... (anon key \u2014 safe to use client-side)"],
         ["SUPABASE_SERVICE_ROLE_KEY", "Rotated \u2014 Keyur has the new value (server-side only)"],
       ]),
