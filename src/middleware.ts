@@ -1,7 +1,45 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
+// Vendor portal subdomain — routes to /vendor/* pages
+const VENDOR_HOSTNAME = 'vendors.health1.co.in'
+
 export async function middleware(request: NextRequest) {
+  const hostname = request.headers.get('host') || ''
+  const pathname = request.nextUrl.pathname
+
+  // ── Vendor Portal Subdomain Routing ──
+  const isVendorSubdomain = hostname === VENDOR_HOSTNAME || hostname.startsWith('vendors.')
+
+  if (isVendorSubdomain) {
+    // Allow static assets, API routes, _next through
+    if (pathname.startsWith('/_next') || pathname.startsWith('/api/') || pathname.match(/\.(svg|png|jpg|jpeg|gif|webp|ico|css|js)$/)) {
+      return NextResponse.next()
+    }
+
+    // Rewrite root to vendor portal dashboard
+    if (pathname === '/' || pathname === '') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/vendor'
+      return NextResponse.rewrite(url)
+    }
+
+    // If path doesn't start with /vendor, prefix it
+    if (!pathname.startsWith('/vendor')) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/vendor${pathname}`
+      return NextResponse.rewrite(url)
+    }
+
+    // Vendor paths use own cookie auth, skip Supabase session
+    return NextResponse.next()
+  }
+
+  // ── Vendor portal paths on main domain (direct /vendor/* access) ──
+  if (pathname.startsWith('/vendor/') || pathname === '/vendor') {
+    return NextResponse.next()
+  }
+
   // ── CSRF Protection ──
   // Verify Origin header for state-changing requests
   const method = request.method.toUpperCase()
@@ -22,7 +60,8 @@ export async function middleware(request: NextRequest) {
         )
       }
 
-      if (originHost !== host) {
+      // Allow vendor subdomain to call main domain APIs
+      if (originHost !== host && originHost !== VENDOR_HOSTNAME) {
         return NextResponse.json(
           { error: 'Cross-origin request blocked' },
           { status: 403 }
