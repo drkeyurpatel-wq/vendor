@@ -11,4 +11,7 @@ out/
 # misc
 .DS_Store
 *.pem
-.claude/
+# .claude/ — ECC config tracked in git
+
+# Claude Code session state (auto-generated)
+.claude/session-state.json
