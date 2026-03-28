@@ -96,6 +96,6 @@ export async function POST(request: NextRequest) {
 
   } catch (err: any) {
     console.error('[Vendor OTP] Error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: err?.message || 'Internal server error' }, { status: 500 })
   }
 }

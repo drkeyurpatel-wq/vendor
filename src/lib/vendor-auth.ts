@@ -8,9 +8,6 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient as createAdminClient, SupabaseClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
 const COOKIE_NAME = 'h1-vendor-session'
 const PORTAL_LOGIN_PATH = '/vendor/login'
 
@@ -28,7 +25,10 @@ export interface VendorSession {
  * Get admin Supabase client (bypasses RLS, typed as any for untyped DB)
  */
 function getAdminClient(): AnySupabaseClient {
-  return createAdminClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  return createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 }
 
 /**

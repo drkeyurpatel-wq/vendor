@@ -6,10 +6,14 @@
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
 // ─── Provider Config ─────────────────────────────────────────
+
+function getSupabaseAdmin() {
+  return createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 type WhatsAppProvider = 'gupshup' | 'wati' | 'interakt' | 'console'
 
@@ -208,7 +212,7 @@ export async function sendWhatsApp(
 
   // Log to vendor_notifications table
   try {
-    const admin = createAdminClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    const admin = getSupabaseAdmin()
     await admin.from('vendor_notifications').insert({
       vendor_id: vendorId,
       channel: 'whatsapp',
