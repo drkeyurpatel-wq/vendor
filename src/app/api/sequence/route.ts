@@ -53,18 +53,30 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ number: data })
   }
 
-  // Fallback: count-based numbering if RPC/sequence doesn't exist
+  // Fallback: max-code-based numbering if RPC/sequence doesn't exist
   try {
     const tableMap: Record<string, string> = {
       vendor: 'vendors', item: 'items', po: 'purchase_orders',
       grn: 'grns', indent: 'purchase_indents', invoice: 'invoices', batch: 'payment_batches',
     }
+    const codeCol: Record<string, string> = {
+      vendor: 'vendor_code', item: 'item_code', po: 'po_number',
+      grn: 'grn_number', indent: 'indent_number', invoice: 'invoice_ref', batch: 'batch_number',
+    }
     const table = tableMap[type]
-    if (!table) {
+    const col = codeCol[type]
+    if (!table || !col) {
       return NextResponse.json({ error: `No fallback for type: ${type}` }, { status: 500 })
     }
-    const { count } = await supabase.from(table).select('*', { count: 'exact', head: true })
-    const seq = (count ?? 0) + 1
+
+    // Get the highest existing code and extract the numeric part
+    const { data: latest } = await supabase.from(table).select(col).order(col, { ascending: false }).limit(1)
+    const row = latest?.[0] as Record<string, unknown> | undefined
+    const lastCode = row?.[col] as string | undefined
+    const numMatch = lastCode?.match(/(\d+)$/)
+    const lastNum = numMatch ? parseInt(numMatch[1]) : 0
+    const seq = lastNum + 1
+
     const ym = new Date().toISOString().slice(2, 4) + String(new Date().getMonth() + 1).padStart(2, '0')
 
     const formatMap: Record<string, string> = {
