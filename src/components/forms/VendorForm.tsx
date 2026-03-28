@@ -151,49 +151,68 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
       const { data: dup } = await supabase.from('vendors').select('id, vendor_code, legal_name').eq('pan', form.pan.trim().toUpperCase()).is('deleted_at', null).limit(1)
       if (dup && dup.length > 0) { toast.error(`PAN already registered to ${dup[0].vendor_code} — ${dup[0].legal_name}`); setLoading(false); return }
     }
-    let vendor_code: string
-    try {
-      const r = await fetch('/api/sequence?type=vendor'); const d = await r.json()
-      if (!r.ok || !d.number) throw new Error(); vendor_code = d.number
-    } catch {
-      // Fallback: find highest existing vendor_code and increment
-      const { data: latest } = await supabase.from('vendors').select('vendor_code').order('vendor_code', { ascending: false }).limit(1)
-      const lastNum = latest?.[0]?.vendor_code ? parseInt(latest[0].vendor_code.replace('H1V-', '')) : 0
-      vendor_code = `H1V-${String((lastNum || 0) + 1).padStart(4, '0')}`
+    // Generate vendor code with retry on duplicate
+    let vendor_code = ''
+    let insertData: any = null
+    let insertError: any = null
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      // Try sequence API first
+      try {
+        const r = await fetch('/api/sequence?type=vendor')
+        const d = await r.json()
+        if (r.ok && d.number) { vendor_code = d.number }
+        else throw new Error()
+      } catch {
+        // Fallback: find max vendor_code across ALL vendors (including soft-deleted)
+        const { data: latest } = await supabase
+          .from('vendors')
+          .select('vendor_code')
+          .like('vendor_code', 'H1V-%')
+          .order('vendor_code', { ascending: false })
+          .limit(1)
+        const lastNum = latest?.[0]?.vendor_code ? parseInt(latest[0].vendor_code.replace('H1V-', '')) : 0
+        vendor_code = `H1V-${String((lastNum || 0) + 1 + attempt).padStart(4, '0')}`
+      }
+
+      const { data, error } = await supabase.from('vendors').insert({
+        vendor_code, legal_name: form.legal_name.trim(), trade_name: form.trade_name.trim() || null,
+        category_id: form.category_id || null, vendor_type: form.vendor_type,
+        gstin: form.gstin.trim().toUpperCase() || null, pan: form.pan.trim().toUpperCase() || null,
+        drug_license_no: form.drug_license_no.trim() || null, fssai_no: form.fssai_no.trim() || null,
+        drug_license_expiry: form.drug_license_expiry || null, fssai_expiry: form.fssai_expiry || null,
+        msme_registration_no: form.msme_registration_no.trim() || null, udyam_number: form.udyam_number.trim() || null,
+        msme_category: form.msme_category || null, gst_return_status: form.gst_return_status || null,
+        primary_contact_name: form.primary_contact_name.trim() || null, primary_contact_phone: form.primary_contact_phone.trim() || null,
+        primary_contact_email: form.primary_contact_email.trim() || null,
+        secondary_contact_name: form.secondary_contact_name.trim() || null, secondary_contact_phone: form.secondary_contact_phone.trim() || null,
+        secondary_contact_email: form.secondary_contact_email.trim() || null, secondary_contact_designation: form.secondary_contact_designation.trim() || null,
+        address: form.address.trim() || null, city: form.city.trim() || null, state: form.state || null, pincode: form.pincode.trim() || null,
+        bank_name: form.bank_name.trim() || null, bank_account_no: form.bank_account_no.trim() || null,
+        bank_ifsc: form.bank_ifsc.trim().toUpperCase() || null, bank_account_type: form.bank_account_type || null,
+        credit_period_days: parseInt(form.credit_period_days) || 30, credit_limit: form.credit_limit ? parseFloat(form.credit_limit) : null,
+        payment_terms: form.payment_terms.trim() || null, payment_mode_preferred: form.payment_mode_preferred || null,
+        minimum_order_value: form.minimum_order_value ? parseFloat(form.minimum_order_value) : null,
+        trade_discount_percent: parseFloat(form.trade_discount_percent) || 0, cash_discount_percent: parseFloat(form.cash_discount_percent) || 0,
+        cash_discount_days: form.cash_discount_days ? parseInt(form.cash_discount_days) : null, delivery_terms: form.delivery_terms.trim() || null,
+        tds_applicable: form.tds_applicable, tds_section: form.tds_applicable ? form.tds_section || null : null,
+        tds_rate: form.tds_applicable && form.tds_rate ? parseFloat(form.tds_rate) : null,
+        lower_tds_certificate: form.lower_tds_certificate,
+        lower_tds_rate: form.lower_tds_certificate && form.lower_tds_rate ? parseFloat(form.lower_tds_rate) : null,
+        lower_tds_valid_till: form.lower_tds_certificate ? form.lower_tds_valid_till || null : null,
+        tally_ledger_name: form.tally_ledger_name.trim() || null, tally_group: form.tally_group.trim() || null,
+        approved_centres: selectedCentres.length > 0 && selectedCentres.length < centres.length ? selectedCentres : null,
+        status: 'pending', onboarding_status: quickMode ? 'quick_draft' : 'complete',
+      }).select().single()
+
+      if (!error) { insertData = data; break }
+      if (error.message?.includes('vendor_code_key')) { continue } // Retry with next code
+      insertError = error; break // Non-duplicate error, stop
     }
 
-    const { data, error } = await supabase.from('vendors').insert({
-      vendor_code, legal_name: form.legal_name.trim(), trade_name: form.trade_name.trim() || null,
-      category_id: form.category_id || null, vendor_type: form.vendor_type,
-      gstin: form.gstin.trim().toUpperCase() || null, pan: form.pan.trim().toUpperCase() || null,
-      drug_license_no: form.drug_license_no.trim() || null, fssai_no: form.fssai_no.trim() || null,
-      drug_license_expiry: form.drug_license_expiry || null, fssai_expiry: form.fssai_expiry || null,
-      msme_registration_no: form.msme_registration_no.trim() || null, udyam_number: form.udyam_number.trim() || null,
-      msme_category: form.msme_category || null, gst_return_status: form.gst_return_status || null,
-      primary_contact_name: form.primary_contact_name.trim() || null, primary_contact_phone: form.primary_contact_phone.trim() || null,
-      primary_contact_email: form.primary_contact_email.trim() || null,
-      secondary_contact_name: form.secondary_contact_name.trim() || null, secondary_contact_phone: form.secondary_contact_phone.trim() || null,
-      secondary_contact_email: form.secondary_contact_email.trim() || null, secondary_contact_designation: form.secondary_contact_designation.trim() || null,
-      address: form.address.trim() || null, city: form.city.trim() || null, state: form.state || null, pincode: form.pincode.trim() || null,
-      bank_name: form.bank_name.trim() || null, bank_account_no: form.bank_account_no.trim() || null,
-      bank_ifsc: form.bank_ifsc.trim().toUpperCase() || null, bank_account_type: form.bank_account_type || null,
-      credit_period_days: parseInt(form.credit_period_days) || 30, credit_limit: form.credit_limit ? parseFloat(form.credit_limit) : null,
-      payment_terms: form.payment_terms.trim() || null, payment_mode_preferred: form.payment_mode_preferred || null,
-      minimum_order_value: form.minimum_order_value ? parseFloat(form.minimum_order_value) : null,
-      trade_discount_percent: parseFloat(form.trade_discount_percent) || 0, cash_discount_percent: parseFloat(form.cash_discount_percent) || 0,
-      cash_discount_days: form.cash_discount_days ? parseInt(form.cash_discount_days) : null, delivery_terms: form.delivery_terms.trim() || null,
-      tds_applicable: form.tds_applicable, tds_section: form.tds_applicable ? form.tds_section || null : null,
-      tds_rate: form.tds_applicable && form.tds_rate ? parseFloat(form.tds_rate) : null,
-      lower_tds_certificate: form.lower_tds_certificate,
-      lower_tds_rate: form.lower_tds_certificate && form.lower_tds_rate ? parseFloat(form.lower_tds_rate) : null,
-      lower_tds_valid_till: form.lower_tds_certificate ? form.lower_tds_valid_till || null : null,
-      tally_ledger_name: form.tally_ledger_name.trim() || null, tally_group: form.tally_group.trim() || null,
-      approved_centres: selectedCentres.length > 0 && selectedCentres.length < centres.length ? selectedCentres : null,
-      status: 'pending', onboarding_status: quickMode ? 'quick_draft' : 'complete',
-    }).select().single()
-    if (error) { toast.error(error.message); setLoading(false); return }
+    if (!insertData) { toast.error(insertError?.message || 'Failed to create vendor after retries'); setLoading(false); return }
     toast.success(quickMode ? `Vendor ${vendor_code} quick-added` : `Vendor ${vendor_code} created`)
-    router.push(`/vendors/${data.id}`)
+    router.push(`/vendors/${insertData.id}`)
   }
 
   function SH({ n, t }: { n: number; t: string }) {
