@@ -127,9 +127,19 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
     setErrors(newErrors)
     setTouched(new Set(mandatory.map(String)))
     if (Object.keys(newErrors).length > 0) {
-      const el = document.getElementById(Object.keys(newErrors)[0])
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      toast.error('Please fix the highlighted errors')
+      // List the missing fields in the toast
+      const fieldLabels: Record<string, string> = {
+        legal_name: 'Legal Name', gstin: 'GSTIN', pan: 'PAN',
+        primary_contact_name: 'Contact Name', primary_contact_phone: 'Contact Phone',
+        bank_name: 'Bank Name', bank_account_no: 'Account Number', bank_ifsc: 'IFSC Code',
+      }
+      const missing = Object.keys(newErrors).map(f => fieldLabels[f] || f).join(', ')
+      toast.error(`Missing: ${missing}`, { duration: 6000 })
+      // Scroll to first error after DOM update
+      setTimeout(() => {
+        const el = document.getElementById(Object.keys(newErrors)[0])
+        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus() }
+      }, 100)
       return
     }
     setLoading(true)
