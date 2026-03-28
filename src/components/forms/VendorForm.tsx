@@ -59,10 +59,9 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
   // Red asterisk for mandatory fields
   function Req() { return <span className="text-red-500 font-bold ml-0.5">*</span> }
 
-  // Error-aware field wrapper: shows red background tint when field has error
-  function EW({ field, children }: { field: keyof FormState; children: React.ReactNode }) {
-    const hasError = touched.has(field) && !!errors[field]
-    return <div className={hasError ? 'bg-red-50 rounded-lg p-2 -m-2 ring-1 ring-red-300' : ''}>{children}</div>
+  // Error class for field wrappers
+  function errCls(field: keyof FormState) {
+    return touched.has(field) && errors[field] ? 'bg-red-50 rounded-lg p-2 ring-1 ring-red-300' : ''
   }
 
   function validateField(field: keyof FormState, value: string): string | undefined {
@@ -222,7 +221,7 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         {/* 1. Basic */}
         <div className="card p-6"><SH n={1} t="Vendor Identification" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <EW field="legal_name"><div className="md:col-span-2"><label className="form-label">Legal Name<Req /> <span className="text-gray-500 font-normal">(as per GST certificate)</span></label><input className="form-input" {...fp('legal_name')} required autoFocus /><FieldError message={errors.legal_name} show={touched.has('legal_name')} /></div></EW>
+            <div className={`md:col-span-2 ${errCls('legal_name')}`}><label className="form-label">Legal Name<Req /> <span className="text-gray-500 font-normal">(as per GST certificate)</span></label><input className="form-input" {...fp('legal_name')} required autoFocus /><FieldError message={errors.legal_name} show={touched.has('legal_name')} /></div>
             <div><label className="form-label">Trade / Brand Name</label><input className="form-input" {...fp('trade_name')} /></div>
             <div><label className="form-label">Category</label><select className="form-select" value={form.category_id} onChange={e => update('category_id', e.target.value)}><option value="">Select category</option>{categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
             <div><label className="form-label">Vendor Type<Req /></label><select className="form-select" value={form.vendor_type} onChange={e => update('vendor_type', e.target.value)}>{VENDOR_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}</select></div>
@@ -233,8 +232,8 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         {/* 2. Tax & KYC */}
         <div className="card p-6"><SH n={2} t="Tax Registration & KYC" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <EW field="gstin"><div><label className="form-label">GSTIN<Req /></label><input className="form-input uppercase" {...fp('gstin')} maxLength={15} placeholder="24AABCU9603R1ZM" /><FieldError message={errors.gstin} show={touched.has('gstin')} /></div></EW>
-            <EW field="pan"><div><label className="form-label">PAN<Req /></label><input className="form-input uppercase" {...fp('pan')} maxLength={10} placeholder="AABCU9603R" /><FieldError message={errors.pan} show={touched.has('pan')} /></div></EW>
+            <div className={errCls('gstin')}><label className="form-label">GSTIN<Req /></label><input className="form-input uppercase" {...fp('gstin')} maxLength={15} placeholder="24AABCU9603R1ZM" /><FieldError message={errors.gstin} show={touched.has('gstin')} /></div>
+            <div className={errCls('pan')}><label className="form-label">PAN<Req /></label><input className="form-input uppercase" {...fp('pan')} maxLength={10} placeholder="AABCU9603R" /><FieldError message={errors.pan} show={touched.has('pan')} /></div>
             <div><label className="form-label">GST Filing Status</label><select className="form-select" value={form.gst_return_status} onChange={e => update('gst_return_status', e.target.value)}><option value="regular">Regular</option><option value="irregular">Irregular</option><option value="defaulter">Defaulter</option></select></div>
             <div><label className="form-label">Drug License No.</label><input className="form-input" {...fp('drug_license_no')} /></div>
             <div><label className="form-label">FSSAI No.</label><input className="form-input" {...fp('fssai_no')} /></div>
@@ -248,8 +247,8 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         <div className="card p-6"><SH n={3} t="Contact & Address" />
           <p className="text-xs text-gray-500 mb-3 mt-4 font-medium uppercase tracking-wider">Primary Contact</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <EW field="primary_contact_name"><div><label className="form-label">Name<Req /></label><input className="form-input" {...fp('primary_contact_name')} /><FieldError message={errors.primary_contact_name} show={touched.has('primary_contact_name')} /></div></EW>
-            <EW field="primary_contact_phone"><div><label className="form-label">Phone<Req /></label><input className="form-input" {...fp('primary_contact_phone')} placeholder="+91 98765 43210" /><FieldError message={errors.primary_contact_phone} show={touched.has('primary_contact_phone')} /></div></EW>
+            <div className={errCls('primary_contact_name')}><label className="form-label">Name<Req /></label><input className="form-input" {...fp('primary_contact_name')} /><FieldError message={errors.primary_contact_name} show={touched.has('primary_contact_name')} /></div>
+            <div className={errCls('primary_contact_phone')}><label className="form-label">Phone<Req /></label><input className="form-input" {...fp('primary_contact_phone')} placeholder="+91 98765 43210" /><FieldError message={errors.primary_contact_phone} show={touched.has('primary_contact_phone')} /></div>
             <div><label className="form-label">Email</label><input type="email" className="form-input" {...fp('primary_contact_email')} /><FieldError message={errors.primary_contact_email} show={touched.has('primary_contact_email')} /></div>
           </div>
           <p className="text-xs text-gray-500 mb-3 mt-6 font-medium uppercase tracking-wider">Secondary Contact (optional)</p>
@@ -271,10 +270,10 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         {/* 4. Banking */}
         <div className="card p-6"><SH n={4} t="Banking Details" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <EW field="bank_name"><div><label className="form-label">Bank Name<Req /></label><input className="form-input" {...fp('bank_name')} /><FieldError message={errors.bank_name} show={touched.has('bank_name')} /></div></EW>
+            <div className={errCls('bank_name')}><label className="form-label">Bank Name<Req /></label><input className="form-input" {...fp('bank_name')} /><FieldError message={errors.bank_name} show={touched.has('bank_name')} /></div>
             <div><label className="form-label">Account Type</label><select className="form-select" value={form.bank_account_type} onChange={e => update('bank_account_type', e.target.value)}><option value="current">Current</option><option value="savings">Savings</option><option value="cc">Cash Credit</option><option value="od">Overdraft</option></select></div>
-            <EW field="bank_account_no"><div><label className="form-label">Account Number<Req /></label><input className="form-input" {...fp('bank_account_no')} /><FieldError message={errors.bank_account_no} show={touched.has('bank_account_no')} /></div></EW>
-            <EW field="bank_ifsc"><div><label className="form-label">IFSC Code<Req /></label><input className="form-input uppercase" {...fp('bank_ifsc')} maxLength={11} /><FieldError message={errors.bank_ifsc} show={touched.has('bank_ifsc')} /></div></EW>
+            <div className={errCls('bank_account_no')}><label className="form-label">Account Number<Req /></label><input className="form-input" {...fp('bank_account_no')} /><FieldError message={errors.bank_account_no} show={touched.has('bank_account_no')} /></div>
+            <div className={errCls('bank_ifsc')}><label className="form-label">IFSC Code<Req /></label><input className="form-input uppercase" {...fp('bank_ifsc')} maxLength={11} /><FieldError message={errors.bank_ifsc} show={touched.has('bank_ifsc')} /></div>
           </div>
           <div className="mt-4 p-3 bg-yellow-50 rounded-lg text-xs text-yellow-800">Bank details need verification via cancelled cheque before first payment.</div>
         </div>
@@ -325,8 +324,8 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
           </div>
         </div>
 
-        {/* Sticky Save */}
-        <div className="sticky bottom-0 bg-[#F4F7FA] border-t border-gray-200 py-4 -mx-4 px-4 lg:-mx-7 lg:px-7 z-10 flex gap-3">
+        {/* Save */}
+        <div className="flex gap-3 pt-4 pb-8 mt-6 border-t border-gray-200">
           <button type="submit" disabled={loading} className="btn-primary cursor-pointer">{loading ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : <><Save size={16} /> Save Vendor</>}</button>
           <Link href="/vendors" className="btn-secondary">Cancel</Link>
         </div>
