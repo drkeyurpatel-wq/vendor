@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendOTP } from '@/lib/whatsapp'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanPhone = phone.replace(/\D/g, '').slice(-10) // Last 10 digits
+    const supabaseAdmin = getAdmin()
 
     // Find vendor by phone (check primary_contact_phone, secondary_contact_phone, portal_phone)
     const { data: vendor, error: vendorErr } = await supabaseAdmin

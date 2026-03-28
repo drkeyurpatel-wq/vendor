@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
       action: 'vendor_dispute_raised',
       changes: { reason },
       performed_by: session.vendorId,
-    }).catch(() => {})
+    })
+    // Non-critical: activity log failure is silent
 
     return NextResponse.json({ success: true })
   } catch (err: any) {

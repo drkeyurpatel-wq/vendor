@@ -116,7 +116,8 @@ export async function POST(
       action: 'vendor_quote_submitted',
       changes: { rfq_id: rfqId, total_amount, items_count: items.length },
       performed_by: session.vendorId,
-    }).catch(() => {})
+    })
+    // Non-critical: activity log failure is silent
 
     return NextResponse.json({ success: true, quote_id: quoteId })
   } catch (err: any) {

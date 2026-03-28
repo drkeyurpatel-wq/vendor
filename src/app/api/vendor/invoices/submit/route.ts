@@ -39,9 +39,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Invoice ${vendor_invoice_no} already exists. Duplicate submission blocked.` }, { status: 409 })
     }
 
-    // Generate invoice reference
-    const { data: seq } = await session.supabase.rpc('get_next_sequence', { p_type: 'invoice' }).single()
-    const invoiceRef = `H1-INV-${String(seq?.val || Date.now()).padStart(6, '0')}`
+    // Generate invoice reference (count-based)
+    const { count: invCount } = await session.supabase.from('invoices').select('*', { count: 'exact', head: true })
+    const seq = (invCount ?? 0) + 1
+    const ym = new Date().toISOString().slice(2, 4) + String(new Date().getMonth() + 1).padStart(2, '0')
+    const invoiceRef = `H1-VP-INV-${ym}-${String(seq).padStart(4, '0')}`
 
     // Get vendor credit period
     const { data: vendor } = await session.supabase
@@ -100,7 +102,8 @@ export async function POST(request: NextRequest) {
       action: 'vendor_invoice_submitted',
       changes: { vendor_invoice_no, total_amount, match_status: matchStatus },
       performed_by: session.vendorId,
-    }).catch(() => {})
+    })
+    // Non-critical: activity log failure is silent
 
     return NextResponse.json({
       success: true,

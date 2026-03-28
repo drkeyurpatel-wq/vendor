@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
       action: 'vendor_acknowledged',
       changes: { delivery_date, notes },
       performed_by: session.vendorId,
-    }).catch(() => {}) // Non-critical
+    })
+    // Non-critical: activity log failure is silent
 
     return NextResponse.json({ success: true })
   } catch (err: any) {

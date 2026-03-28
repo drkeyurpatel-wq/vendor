@@ -6,13 +6,16 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createClient as createAdminClient, SupabaseClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 const COOKIE_NAME = 'h1-vendor-session'
 const PORTAL_LOGIN_PATH = '/vendor/login'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySupabaseClient = SupabaseClient<any, any, any>
 
 export interface VendorSession {
   vendorId: string
@@ -22,9 +25,9 @@ export interface VendorSession {
 }
 
 /**
- * Get admin Supabase client (bypasses RLS)
+ * Get admin Supabase client (bypasses RLS, typed as any for untyped DB)
  */
-function getAdminClient() {
+function getAdminClient(): AnySupabaseClient {
   return createAdminClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 }
 
@@ -32,7 +35,7 @@ function getAdminClient() {
  * Require vendor auth for page components.
  * Redirects to /vendor/login if no valid session.
  */
-export async function requireVendorAuth(): Promise<VendorSession & { supabase: ReturnType<typeof createAdminClient> }> {
+export async function requireVendorAuth(): Promise<VendorSession & { supabase: AnySupabaseClient }> {
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE_NAME)?.value
 
@@ -65,7 +68,7 @@ export async function requireVendorAuth(): Promise<VendorSession & { supabase: R
 /**
  * API route auth — returns null if invalid (doesn't redirect)
  */
-export async function requireVendorApiAuth(): Promise<(VendorSession & { supabase: ReturnType<typeof createAdminClient> }) | null> {
+export async function requireVendorApiAuth(): Promise<(VendorSession & { supabase: AnySupabaseClient }) | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE_NAME)?.value
 

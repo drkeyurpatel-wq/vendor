@@ -1,12 +1,20 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Phone, ArrowRight, ShieldCheck, RefreshCw, CheckCircle } from 'lucide-react'
 
 type Step = 'phone' | 'otp'
 
 export default function VendorLoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0f2847]" />}>
+      <VendorLoginContent />
+    </Suspense>
+  )
+}
+
+function VendorLoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [step, setStep] = useState<Step>('phone')
