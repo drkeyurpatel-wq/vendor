@@ -155,7 +155,12 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
     try {
       const r = await fetch('/api/sequence?type=vendor'); const d = await r.json()
       if (!r.ok || !d.number) throw new Error(); vendor_code = d.number
-    } catch { const { count } = await supabase.from('vendors').select('*', { count: 'exact', head: true }); vendor_code = `H1V-${String((count ?? 0) + 1).padStart(4, '0')}` }
+    } catch {
+      // Fallback: find highest existing vendor_code and increment
+      const { data: latest } = await supabase.from('vendors').select('vendor_code').order('vendor_code', { ascending: false }).limit(1)
+      const lastNum = latest?.[0]?.vendor_code ? parseInt(latest[0].vendor_code.replace('H1V-', '')) : 0
+      vendor_code = `H1V-${String((lastNum || 0) + 1).padStart(4, '0')}`
+    }
 
     const { data, error } = await supabase.from('vendors').insert({
       vendor_code, legal_name: form.legal_name.trim(), trade_name: form.trade_name.trim() || null,
