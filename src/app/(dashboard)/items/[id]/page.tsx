@@ -1,7 +1,7 @@
 import { requireAuth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { cn, formatCurrency, formatDate } from '@/lib/utils'
+import { cn, formatCurrency, formatRate, formatDate } from '@/lib/utils'
 import {
   ArrowLeft, Package, AlertTriangle, Thermometer, Pill, ShieldAlert,
   Building2, Beaker, Factory, Layers, Tag, FlaskConical
@@ -231,8 +231,8 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
               <Factory size={16} /> Pricing & Tax
             </h2>
             <div className="divide-y divide-gray-50">
-              <DetailRow label="Default Rate" value={item.default_rate ? formatCurrency(item.default_rate) : null} />
-              <DetailRow label="MRP" value={item.mrp ? formatCurrency(item.mrp) : null} />
+              <DetailRow label="Default Rate" value={item.default_rate ? formatRate(item.default_rate) : null} />
+              <DetailRow label="MRP" value={item.mrp ? formatRate(item.mrp) : null} />
               <DetailRow label="HSN Code" value={item.hsn_code} />
               <DetailRow label="GST Slab" value={`${item.gst_percent}%`} />
               <DetailRow label="CGST" value={item.cgst_percent ? `${item.cgst_percent}%` : null} />
@@ -391,7 +391,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
                         </span>
                         {isExpired && <span className="badge bg-red-100 text-red-700 ml-1 text-[10px]">EXPIRED</span>}
                       </td>
-                      <td className="text-sm">{bs.mrp ? formatCurrency(bs.mrp) : '—'}</td>
+                      <td className="text-sm">{bs.mrp ? formatRate(bs.mrp) : '—'}</td>
                       <td className="text-sm">{bs.purchase_rate ? formatCurrency(bs.purchase_rate) : '—'}</td>
                       <td className="text-sm font-bold">{bs.qty_available}</td>
                       <td className="text-sm text-gray-600">{bs.manufacturer || '—'}</td>
