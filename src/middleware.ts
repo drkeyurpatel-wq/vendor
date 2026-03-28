@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Vendor portal paths on main domain (direct /vendor/* access) ──
-  if (pathname.startsWith('/vendor/') || pathname === '/vendor') {
+  if (pathname === '/vendor' || pathname.startsWith('/vendor/')) {
     return NextResponse.next()
   }
 

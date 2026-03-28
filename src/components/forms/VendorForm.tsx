@@ -386,8 +386,8 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
           const tabFieldMap: Record<string, string[]> = {
             basic: ['legal_name'],
             compliance: ['gstin', 'pan'],
-            contact: ['primary_contact_phone', 'primary_contact_email', 'secondary_contact_email', 'secondary_contact_phone', 'pincode'],
-            banking: ['bank_ifsc'],
+            contact: ['primary_contact_name', 'primary_contact_phone', 'primary_contact_email', 'secondary_contact_email', 'secondary_contact_phone', 'pincode'],
+            banking: ['bank_name', 'bank_account_no', 'bank_ifsc'],
           }
           const tabFields = tabFieldMap[tab.id] || []
           const hasError = tabFields.some(f => errors[f as keyof FormState])
@@ -522,7 +522,11 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
                   Primary Contact
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  <div><label htmlFor="primary_contact_name" className="form-label">Name</label><input id="primary_contact_name" className="form-input" value={form.primary_contact_name} onChange={e => update('primary_contact_name', e.target.value)} /></div>
+                  <div>
+                    <label htmlFor="primary_contact_name" className="form-label">Name</label>
+                    <input id="primary_contact_name" className="form-input" value={form.primary_contact_name} onChange={e => update('primary_contact_name', e.target.value)} onBlur={() => touch('primary_contact_name')} aria-invalid={touched.has('primary_contact_name') && !!errors.primary_contact_name} />
+                    <FieldError message={errors.primary_contact_name} show={touched.has('primary_contact_name')} />
+                  </div>
                   <div>
                     <label htmlFor="primary_contact_phone" className="form-label">Phone</label>
                     <input id="primary_contact_phone" className="form-input" value={form.primary_contact_phone} onChange={e => update('primary_contact_phone', e.target.value)} onBlur={() => touch('primary_contact_phone')} placeholder="+91 98765 43210" aria-invalid={touched.has('primary_contact_phone') && !!errors.primary_contact_phone} />
@@ -566,7 +570,11 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
                 Banking Details
               </legend>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div><label htmlFor="bank_name" className="form-label">Bank Name</label><input id="bank_name" className="form-input" value={form.bank_name} onChange={e => update('bank_name', e.target.value)} /></div>
+                <div>
+                  <label htmlFor="bank_name" className="form-label">Bank Name</label>
+                  <input id="bank_name" className="form-input" value={form.bank_name} onChange={e => update('bank_name', e.target.value)} onBlur={() => touch('bank_name')} aria-invalid={touched.has('bank_name') && !!errors.bank_name} />
+                  <FieldError message={errors.bank_name} show={touched.has('bank_name')} />
+                </div>
                 <div>
                   <label htmlFor="bank_account_type" className="form-label">Account Type</label>
                   <select id="bank_account_type" className="form-select" value={form.bank_account_type} onChange={e => update('bank_account_type', e.target.value)}>
@@ -576,7 +584,11 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
                     <option value="od">Overdraft (OD)</option>
                   </select>
                 </div>
-                <div><label htmlFor="bank_account_no" className="form-label">Account Number</label><input id="bank_account_no" className="form-input" value={form.bank_account_no} onChange={e => update('bank_account_no', e.target.value)} /></div>
+                <div>
+                  <label htmlFor="bank_account_no" className="form-label">Account Number</label>
+                  <input id="bank_account_no" className="form-input" value={form.bank_account_no} onChange={e => update('bank_account_no', e.target.value)} onBlur={() => touch('bank_account_no')} aria-invalid={touched.has('bank_account_no') && !!errors.bank_account_no} />
+                  <FieldError message={errors.bank_account_no} show={touched.has('bank_account_no')} />
+                </div>
                 <div>
                   <label htmlFor="bank_ifsc" className="form-label">IFSC Code</label>
                   <input id="bank_ifsc" className="form-input uppercase" value={form.bank_ifsc} onChange={e => update('bank_ifsc', e.target.value)} onBlur={() => touch('bank_ifsc')} maxLength={11} aria-invalid={touched.has('bank_ifsc') && !!errors.bank_ifsc} />
