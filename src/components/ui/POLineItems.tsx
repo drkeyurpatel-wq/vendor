@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Trash2, AlertTriangle, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import toast from 'react-hot-toast'
 import ItemSearch from './ItemSearch'
 
 export interface LineItem {
@@ -154,12 +155,22 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
     hsn_code?: string; manufacturer?: string; purchase_unit?: string; qty_conversion?: number; mrp?: number;
     default_rate?: number; l_rank?: number | null
   }) {
-    // Warn if item is not mapped to this vendor
+    // Warn if item is not mapped to this vendor — offer to map
     if (vendorId && !selected.l_rank) {
       const proceed = window.confirm(
-        `⚠️ ${selected.generic_name} is NOT mapped to this vendor (no L-rank).\n\nThis PO will require higher-level approval.\nContinue adding?`
+        `${selected.generic_name} is not mapped to this vendor.\n\nClick OK to map it automatically and add to PO.\nClick Cancel to skip.`
       )
       if (!proceed) return
+      // Auto-map the item to this vendor
+      try {
+        await fetch('/api/vendor-items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vendor_id: vendorId, item_id: selected.id }),
+        })
+        selected.l_rank = 1 // Mark as mapped for this session
+        toast.success(`${selected.generic_name} mapped to this vendor`)
+      } catch { /* continue anyway */ }
     }
 
     const contractRate = contractRates.get(selected.id) ?? null
@@ -423,9 +434,41 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
       {hasUnmappedItems && (
         <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
           <AlertTriangle size={16} className="text-amber-500 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-amber-700">
+          <div className="text-sm text-amber-700 flex-1">
             <span className="font-semibold">Unmapped items:</span> {items.filter(i => i.is_unmapped).length} item(s) are not mapped to this vendor. Higher-level approval will be required.
           </div>
+          {vendorId && (
+            <button
+              type="button"
+              onClick={async () => {
+                const unmapped = items.filter(i => i.is_unmapped)
+                let mapped = 0
+                for (const item of unmapped) {
+                  try {
+                    const res = await fetch('/api/vendor-items', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        vendor_id: vendorId,
+                        item_id: item.item_id,
+                        last_quoted_rate: item.rate || null,
+                      }),
+                    })
+                    if (res.ok) mapped++
+                  } catch { /* skip */ }
+                }
+                if (mapped > 0) {
+                  // Clear unmapped flags
+                  const updated = items.map(i => i.is_unmapped ? { ...i, is_unmapped: false } : i)
+                  onChange(updated)
+                  toast.success(`${mapped} item(s) mapped to this vendor`)
+                }
+              }}
+              className="text-xs font-semibold px-3 py-1.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors cursor-pointer whitespace-nowrap flex-shrink-0"
+            >
+              Map All Now
+            </button>
+          )}
         </div>
       )}
 

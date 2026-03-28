@@ -7,6 +7,7 @@ import {
   Building2, Beaker, Factory, Layers, Tag, FlaskConical
 } from 'lucide-react'
 import ItemDetailActions from '@/components/ui/ItemDetailActions'
+import AddVendorMapping from '@/components/ui/AddVendorMapping'
 
 export default async function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -259,8 +260,9 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
         {/* Column 2: Vendor Rankings */}
         <div className="space-y-6">
           <div className="card overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100">
+            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
               <h2 className="font-semibold text-navy-600">Approved Vendors (L-Rank)</h2>
+              <AddVendorMapping itemId={id} existingVendorIds={(vendorItems || []).map((vi: any) => vi.vendor_id)} />
             </div>
             {vendorItems && vendorItems.length > 0 ? (
               <div className="overflow-x-auto">
