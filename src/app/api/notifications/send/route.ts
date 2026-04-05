@@ -286,7 +286,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[Notifications] Error processing notification:', error)
     return NextResponse.json(
-      { error: 'Failed to process notification', details: String(error) },
+      { error: 'Failed to process notification' },
       { status: 500 }
     )
   }

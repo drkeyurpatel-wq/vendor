@@ -18,6 +18,16 @@ export async function POST(
       return NextResponse.json({ error: 'At least one item quote is required' }, { status: 400 })
     }
 
+    // Validate financial amounts (zero-error math policy)
+    if (total_amount !== undefined && (typeof total_amount !== 'number' || total_amount < 0 || total_amount > 100_000_000)) {
+      return NextResponse.json({ error: 'Total amount must be a non-negative number up to 10 crore' }, { status: 400 })
+    }
+    for (const item of items) {
+      if (item.unit_rate !== undefined && (typeof item.unit_rate !== 'number' || item.unit_rate < 0)) {
+        return NextResponse.json({ error: 'Unit rate must be a non-negative number' }, { status: 400 })
+      }
+    }
+
     // Verify RFQ is open
     const { data: rfq } = await session.supabase
       .from('rfqs')
@@ -122,6 +132,6 @@ export async function POST(
     return NextResponse.json({ success: true, quote_id: quoteId })
   } catch (err: any) {
     console.error('[RFQ Submit] Error:', err)
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

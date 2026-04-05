@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { setVendorSessionCookie } from '@/lib/vendor-auth'
+import { rateLimit } from '@/lib/rate-limit'
 
 function getAdmin() {
   return createClient(
@@ -10,6 +11,12 @@ function getAdmin() {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limit: max 10 verify attempts per IP per minute (prevents brute-force on 6-digit OTP)
+  const rateLimitResult = await rateLimit(request, 10, 60000)
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ success: false, error: 'Too many attempts. Please wait and try again.' }, { status: 429 })
+  }
+
   try {
     const supabaseAdmin = getAdmin()
     const { phone, otp } = await request.json()

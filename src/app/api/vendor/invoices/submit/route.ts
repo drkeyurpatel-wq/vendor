@@ -13,6 +13,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    // Validate financial amounts (zero-error math policy)
+    if (typeof total_amount !== 'number' || total_amount <= 0 || total_amount > 100_000_000) {
+      return NextResponse.json({ error: 'Total amount must be a positive number up to 10 crore' }, { status: 400 })
+    }
+    if (subtotal !== undefined && (typeof subtotal !== 'number' || subtotal < 0)) {
+      return NextResponse.json({ error: 'Subtotal must be a non-negative number' }, { status: 400 })
+    }
+    if (gst_amount !== undefined && (typeof gst_amount !== 'number' || gst_amount < 0)) {
+      return NextResponse.json({ error: 'GST amount must be a non-negative number' }, { status: 400 })
+    }
+
     // Verify PO belongs to vendor
     const { data: po } = await session.supabase
       .from('purchase_orders')

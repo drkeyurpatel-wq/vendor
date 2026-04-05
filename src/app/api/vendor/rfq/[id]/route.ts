@@ -10,15 +10,28 @@ export async function GET(
 
   const { id } = await params
 
-  // Get RFQ
+  // Get RFQ — only show if status is open/evaluation (vendor-visible)
   const { data: rfq } = await session.supabase
     .from('rfqs')
     .select('*, centre:centres(code, name)')
     .eq('id', id)
+    .in('status', ['open', 'evaluation', 'awarded', 'closed'])
     .single()
 
   if (!rfq) {
     return NextResponse.json({ error: 'RFQ not found' }, { status: 404 })
+  }
+
+  // Verify vendor category matches RFQ (if RFQ has a category filter)
+  if (rfq.category_id) {
+    const { data: vendor } = await session.supabase
+      .from('vendors')
+      .select('category_id')
+      .eq('id', session.vendorId)
+      .single()
+    if (vendor && vendor.category_id !== rfq.category_id) {
+      return NextResponse.json({ error: 'RFQ not found' }, { status: 404 })
+    }
   }
 
   // Get RFQ items

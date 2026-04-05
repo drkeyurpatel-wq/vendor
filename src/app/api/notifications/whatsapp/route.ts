@@ -210,7 +210,6 @@ export async function POST(request: NextRequest) {
       {
         sent: false,
         reason: 'network_error',
-        error: String(error),
       },
       { status: 200 }
     )

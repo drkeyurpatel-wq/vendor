@@ -59,8 +59,9 @@ export async function POST(request: NextRequest) {
       }, { status: 429 })
     }
 
-    // Generate 6-digit OTP
-    const otp = String(Math.floor(100000 + Math.random() * 900000))
+    // Generate 6-digit OTP using cryptographically secure random
+    const { randomInt } = await import('node:crypto')
+    const otp = String(randomInt(100000, 999999))
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
 
     // Store OTP session
@@ -96,6 +97,6 @@ export async function POST(request: NextRequest) {
 
   } catch (err: any) {
     console.error('[Vendor OTP] Error:', err)
-    return NextResponse.json({ success: false, error: err?.message || 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }

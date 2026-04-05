@@ -156,6 +156,8 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
 
 // GET: Check approval status and next required approver
 export const GET = withApiErrorHandler(async (request: NextRequest) => {
+  await requireApiAuthWithProfile()
+
   const poId = request.nextUrl.searchParams.get('po_id')
   if (!poId) return NextResponse.json({ error: 'po_id required' }, { status: 400 })
 
