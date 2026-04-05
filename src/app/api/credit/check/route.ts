@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 import { creditCheckSchema } from '@/lib/validations'
+import { requireApiAuth } from '@/lib/auth'
+import { withApiErrorHandler } from '@/lib/api-error-handler'
 
 /**
  * Credit period enforcement API
@@ -97,7 +99,9 @@ async function checkCredit(vendorId: string) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export const GET = withApiErrorHandler(async (req: NextRequest) => {
+  await requireApiAuth()
+
   const rateLimitResult = await rateLimit(req, 30, 60000)
   if (!rateLimitResult.success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
@@ -119,9 +123,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: result.error }, { status: result.status })
   }
   return NextResponse.json(result)
-}
+})
 
-export async function POST(req: NextRequest) {
+export const POST = withApiErrorHandler(async (req: NextRequest) => {
+  await requireApiAuth()
+
   const rateLimitResult = await rateLimit(req, 30, 60000)
   if (!rateLimitResult.success) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
@@ -144,4 +150,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: result.error }, { status: result.status })
   }
   return NextResponse.json(result)
-}
+})

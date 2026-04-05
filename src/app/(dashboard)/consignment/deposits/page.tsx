@@ -53,7 +53,7 @@ export default async function DepositsListPage() {
                 {deposits!.map((d: any) => {
                   const counts = itemCounts[d.id] || { total: 0, available: 0 }
                   return (
-                    <tr key={d.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => {}}>
+                    <tr key={d.id} className="hover:bg-gray-50">
                       <td><Link href={`/consignment/deposits/${d.id}`} className="font-mono text-xs font-semibold text-teal-600 hover:underline">{d.deposit_number}</Link></td>
                       <td className="text-sm text-gray-900">{d.vendor?.legal_name}</td>
                       <td><span className="badge bg-blue-50 text-blue-700 text-[10px]">{d.centre?.code}</span></td>

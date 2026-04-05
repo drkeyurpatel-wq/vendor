@@ -17,6 +17,13 @@ const ESCALATION_ROLES: Record<string, string> = {
 }
 
 export const POST = withApiErrorHandler(async (request: NextRequest) => {
+  // Auth: only callable from daily cron or with valid bearer token
+  const authHeader = request.headers.get('authorization')
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const supabase = await createClient()
   const now = new Date()
 
