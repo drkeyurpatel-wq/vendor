@@ -968,8 +968,8 @@ export interface RateContract {
   centre_id: string | null
   contract_type: RateContractType
   status: RateContractStatus
-  start_date: string
-  end_date: string
+  valid_from: string
+  valid_to: string
   terms_and_conditions: string | null
   notes: string | null
   termination_reason: string | null
