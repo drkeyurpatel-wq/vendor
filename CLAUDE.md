@@ -59,3 +59,26 @@
 - Skeleton loading, empty states with guidance, errors near field
 - Charts: visible legends, tooltips, axis labels with units
 - Disable button + show spinner on async operations
+
+## ECC v4 Additions (Apr 2026)
+
+13. **Spec-First Flow**: /brainstorm → /write-plan → /execute-plan before coding.
+14. **Error-to-Lesson Pipeline**: Every bug fix → LESSONS.md entry. Read LESSONS.md on session start.
+15. **Progressive Skill Disclosure**: Load P2P skills for procurement, Portal skills for vendor portal.
+16. **Injection Scanning**: All tool I/O scanned for secrets and injection patterns.
+17. **Safe Bash**: Auto-approve reads, prompt for destructive ops.
+18. **Drift Detection**: Weekly schema/security/dead-code checks.
+19. **Multi-Agent Review**: db-reviewer + security-reviewer in parallel on PRs.
+
+## Security Update (Apr 11, 2026)
+
+- RLS enabled on all 6 previously-unprotected tables (vendor_sessions, rfqs, rfq_items, rfq_quotes, rfq_quote_items, vendor_notifications)
+- vendor_sessions locked to service_role only (session_token exposure closed)
+- v_expiry_alerts view converted to security_invoker
+- update_updated_at() search_path hardened
+
+## Deploy Rules
+
+1. `npx next build` before EVERY push. Build fail = DO NOT push.
+2. One fix, one push, one verify. Never batch.
+3. Never declare "✅ Fixed" without verifying on live URL.
