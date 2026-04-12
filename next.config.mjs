@@ -1,5 +1,3 @@
-import { withSentryConfig } from '@sentry/nextjs'
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
@@ -53,17 +51,20 @@ const nextConfig = {
 };
 
 // Only wrap with Sentry build plugin when DSN is available (Vercel production).
-// In CI / local dev without Sentry env vars, skip wrapping to avoid
-// prerender errors from Sentry's auto-generated pages-router pages.
-const sentryEnabled = !!process.env.NEXT_PUBLIC_SENTRY_DSN;
+// The import itself is dynamic — importing @sentry/nextjs statically registers
+// its build plugin as a side effect, causing prerender errors in CI.
+let exportedConfig = nextConfig;
 
-export default sentryEnabled
-  ? withSentryConfig(nextConfig, {
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
-      silent: !process.env.CI,
-      widenClientFileUpload: true,
-      tunnelRoute: '/monitoring',
-      disableLogger: true,
-    })
-  : nextConfig;
+if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  const { withSentryConfig } = await import('@sentry/nextjs');
+  exportedConfig = withSentryConfig(nextConfig, {
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    silent: !process.env.CI,
+    widenClientFileUpload: true,
+    tunnelRoute: '/monitoring',
+    disableLogger: true,
+  });
+}
+
+export default exportedConfig;
