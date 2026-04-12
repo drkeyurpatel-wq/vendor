@@ -377,7 +377,7 @@ function buildMatchingSupabase(scenario: MatchScenario) {
 
   const invoiceItems = items.map(i => ({
     item_id: i.itemId,
-    qty: i.invoiceQty,
+    quantity: i.invoiceQty,
     rate: i.invoiceRate,
   }))
 
@@ -393,7 +393,7 @@ function buildMatchingSupabase(scenario: MatchScenario) {
           data: {
             id: invoiceId,
             po_id: poId,
-            grn: { id: grnId, po_id: poId },
+            grn_id: grnId,
             total_amount: invoiceTotalAmount,
           },
           error: null,
@@ -406,7 +406,7 @@ function buildMatchingSupabase(scenario: MatchScenario) {
 
       if (table === 'grns') {
         chain.then = (resolve: (v: any) => void) => resolve({
-          data: [{ id: grnId }],
+          data: [{ id: grnId, status: 'verified' }],
           error: null,
         })
       }

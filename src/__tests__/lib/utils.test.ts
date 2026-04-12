@@ -22,7 +22,7 @@ import {
 // ──────────────────────────────────────────────────────────
 describe('formatCurrency', () => {
   it('formats zero', () => {
-    expect(formatCurrency(0)).toBe('₹0')
+    expect(formatCurrency(0)).toBe('₹0.00')
   })
 
   it('formats small amounts in INR style', () => {
@@ -41,10 +41,9 @@ describe('formatCurrency', () => {
     expect(result).toContain('1,25,00,000')
   })
 
-  it('rounds to whole number (no decimals)', () => {
+  it('formats with 2 decimal places', () => {
     const result = formatCurrency(1234.56)
-    // maximumFractionDigits: 0 means no decimal places
-    expect(result).not.toContain('.')
+    expect(result).toContain('1,234.56')
   })
 
   it('handles negative amounts', () => {
@@ -59,11 +58,11 @@ describe('formatCurrency', () => {
 // ──────────────────────────────────────────────────────────
 describe('formatLakhs', () => {
   it('shows plain rupees for amounts under 1K', () => {
-    expect(formatLakhs(500)).toBe('₹500')
+    expect(formatLakhs(500)).toBe('₹500.00')
   })
 
   it('shows K for thousands', () => {
-    expect(formatLakhs(5000)).toBe('₹5.0 K')
+    expect(formatLakhs(5000)).toBe('₹5.00 K')
   })
 
   it('shows L for lakhs', () => {
@@ -75,7 +74,7 @@ describe('formatLakhs', () => {
   })
 
   it('boundary: exactly 1000', () => {
-    expect(formatLakhs(1000)).toBe('₹1.0 K')
+    expect(formatLakhs(1000)).toBe('₹1.00 K')
   })
 
   it('boundary: exactly 100000', () => {
