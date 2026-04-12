@@ -78,7 +78,12 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Build Next.js
-        run: npm run build
+        run: |
+          # Remove Sentry config files — their presence activates @sentry/nextjs
+          # webpack plugin which creates pages-router error pages that fail prerendering.
+          # Vercel deploys independently with Sentry DSN; CI doesn't need Sentry.
+          rm -f sentry.client.config.ts sentry.server.config.ts sentry.edge.config.ts
+          npm run build
         env:
           # Build needs these for Supabase client init
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
