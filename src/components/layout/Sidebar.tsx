@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { UserProfile } from '@/types/database'
 import {
@@ -247,8 +248,8 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
               if (item.href) {
                 const active = pathname === item.href
                 return (
+                  <motion.div key={item.href} whileHover={{ x: 2 }} transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
                   <Link
-                    key={item.href}
                     href={item.href}
                     aria-current={active ? 'page' : undefined}
                     title={collapsed ? item.label : undefined}
@@ -263,6 +264,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                     <span className={cn('flex-shrink-0 transition-colors', active ? 'text-teal-500' : '')}>{item.icon}</span>
                     {!collapsed && <span>{item.label}</span>}
                   </Link>
+                  </motion.div>
                 )
               }
 
