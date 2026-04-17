@@ -93,23 +93,26 @@ export default function ConsumptionUploadPage() {
     const batchId = `CONS-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Date.now().toString(36)}`
 
     try {
+      let records: any[] = []
+      let unmatched = 0
+      const source = mode === 'manual' ? 'manual' : 'csv_upload'
+
       if (mode === 'manual') {
-        const records = lines.map(l => ({
-          centre_id: centreId, item_id: l.item_id,
-          consumption_date: consumptionDate, department: l.department,
-          ward: l.ward || null, quantity: l.quantity, unit: l.unit,
-          rate: l.rate || null, total_value: l.quantity * (l.rate || 0),
-          patient_name: l.patient_name || null, ip_number: l.ip_number || null,
-          batch_number: l.batch_number || null, notes: l.notes || null,
-          source: 'manual', uploaded_by: profile?.id, upload_batch_id: batchId,
+        records = lines.map(l => ({
+          item_id: l.item_id,
+          consumption_date: consumptionDate,
+          department: l.department,
+          ward: l.ward || null,
+          quantity: l.quantity,
+          unit: l.unit,
+          rate: l.rate || null,
+          patient_name: l.patient_name || null,
+          ip_number: l.ip_number || null,
+          batch_number: l.batch_number || null,
+          notes: l.notes || null,
         }))
-        const { error } = await supabase.from('consumption_records').insert(records)
-        if (error) { toast.error(`Save failed: ${error.message}`); setLoading(false); return }
-        toast.success(`${records.length} consumption records saved (Batch: ${batchId})`)
       } else {
-        // CSV mode — match items by item_code or generic_name
-        const records: any[] = []
-        let unmatched = 0
+        // CSV mode — resolve items client-side, then send to API
         for (const row of csvPreview) {
           const code = row.item_code || row.code || ''
           const name = row.item_name || row.generic_name || row.name || ''
@@ -128,24 +131,58 @@ export default function ConsumptionUploadPage() {
           if (!itemId) { unmatched++; continue }
 
           records.push({
-            centre_id: centreId, item_id: itemId,
+            item_id: itemId,
             consumption_date: row.date || consumptionDate,
             department: row.department || 'Pharmacy',
-            ward: row.ward || null, quantity: qty,
-            unit: row.unit || 'Nos', rate: parseFloat(row.rate || '0') || null,
-            total_value: qty * (parseFloat(row.rate || '0') || 0),
-            patient_name: row.patient_name || null, ip_number: row.ip_number || null,
+            ward: row.ward || null,
+            quantity: qty,
+            unit: row.unit || 'Nos',
+            rate: parseFloat(row.rate || '0') || null,
+            patient_name: row.patient_name || null,
+            ip_number: row.ip_number || null,
             batch_number: row.batch_number || row.batch || null,
-            source: 'csv_upload', uploaded_by: profile?.id, upload_batch_id: batchId,
           })
         }
-
-        if (records.length > 0) {
-          const { error } = await supabase.from('consumption_records').insert(records)
-          if (error) { toast.error(`Save failed: ${error.message}`); setLoading(false); return }
-        }
-        toast.success(`${records.length} records saved${unmatched > 0 ? ` (${unmatched} unmatched items skipped)` : ''} — Batch: ${batchId}`)
       }
+
+      if (records.length === 0) {
+        toast.error(unmatched > 0 ? `All ${unmatched} items unmatched — nothing to save` : 'No valid records')
+        setLoading(false)
+        return
+      }
+
+      // Call server API — inserts consumption_records + deducts stock + writes ledger
+      const res = await fetch('/api/consumption/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          centre_id: centreId,
+          consumption_date: consumptionDate,
+          upload_batch_id: batchId,
+          source,
+          records,
+        }),
+      })
+
+      const result = await res.json()
+
+      if (!res.ok) {
+        toast.error(result.error || 'Upload failed')
+        setLoading(false)
+        return
+      }
+
+      // Show result summary
+      const parts: string[] = [`${result.records_saved} records saved`]
+      if (result.stock_deducted > 0) parts.push(`${result.stock_deducted} stock deducted`)
+      if (result.stock_failed > 0) parts.push(`${result.stock_failed} stock errors`)
+      if (unmatched > 0) parts.push(`${unmatched} unmatched skipped`)
+      toast.success(parts.join(' · ') + ` — Batch: ${batchId}`)
+
+      if (result.stock_failed > 0) {
+        toast(`${result.stock_failed} item(s) could not be deducted from stock — check if stock records exist`, { icon: '⚠️', duration: 6000 })
+      }
+
       router.push('/items/consumption')
     } catch (err: any) {
       toast.error(`Upload failed: ${err?.message || 'Unknown error'}`)
