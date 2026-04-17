@@ -58,6 +58,7 @@ const NAV: NavItem[] = [
     children: [
       { label: 'Purchase Orders', href: '/purchase-orders' },
       { label: 'New PO', href: '/purchase-orders/new' },
+      { label: 'Indents', href: '/purchase-orders/indents' },
     ]
   },
   {
@@ -83,7 +84,10 @@ const NAV: NavItem[] = [
     label: 'Inventory', icon: <Warehouse size={18} />,
     children: [
       { label: 'Stock Levels', href: '/items/stock' },
+      { label: 'Transfers', href: '/inventory/transfers' },
+      { label: 'Reorder Engine', href: '/inventory/reorder' },
       { label: 'Expiry Alerts', href: '/inventory/expiry-alerts' },
+      { label: 'Forecasting', href: '/inventory/forecasting' },
     ]
   },
   {
@@ -99,6 +103,7 @@ const NAV: NavItem[] = [
     label: 'Reports', icon: <BarChart2 size={18} />,
     children: [
       { label: 'Overview', href: '/reports' },
+      { label: 'Analytics', href: '/analytics' },
       { label: 'Vendor Overdue', href: '/reports/vendor-overdue' },
       { label: 'GST Summary', href: '/reports/gst-summary' },
       { label: 'Centre Spend', href: '/reports/centre-wise-spend' },
@@ -114,9 +119,14 @@ const NAV: NavItem[] = [
       { label: 'Centres', href: '/settings/centres' },
       { label: 'Users', href: '/settings/users' },
       { label: 'Approval Matrix', href: '/settings/approvals' },
+      { label: 'Delegations', href: '/settings/delegations' },
       { label: 'Rate Contracts', href: '/settings/rate-contracts' },
+      { label: 'Data Import', href: '/settings/data-import' },
+      { label: 'Tally Sync', href: '/settings/tally' },
+      { label: 'Document Alerts', href: '/settings/document-alerts' },
       { label: 'Audit Log', href: '/settings/audit-log' },
       { label: 'Audit Trail', href: '/settings/audit-trail' },
+      { label: 'API Docs', href: '/settings/api-docs' },
     ]
   },
 ]
