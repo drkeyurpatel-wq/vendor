@@ -131,8 +131,8 @@ export const GET = withApiErrorHandler(async (request: NextRequest) => {
       const name = it?.generic_name
         ? `${it.generic_name}${it.brand_name ? ' (' + it.brand_name + ')' : ''}`
         : 'Item'
-      const estRate = (item.estimated_rate as number) || 0
-      const qty = (item.required_qty as number) || (item.quantity as number) || 0
+      const estRate = (item.last_purchase_rate as number) || 0
+      const qty = (item.requested_qty as number) || 0
       return [
         String(idx + 1),
         (it?.item_code as string) || '',
@@ -176,8 +176,8 @@ export const GET = withApiErrorHandler(async (request: NextRequest) => {
 
   // ── Estimated Total ──
   const totalEst = items.reduce((sum: number, item: Record<string, unknown>) => {
-    const rate = (item.estimated_rate as number) || 0
-    const qty = (item.required_qty as number) || (item.quantity as number) || 0
+    const rate = (item.last_purchase_rate as number) || 0
+    const qty = (item.requested_qty as number) || 0
     return sum + rate * qty
   }, 0)
 
