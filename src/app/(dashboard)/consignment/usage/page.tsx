@@ -25,7 +25,7 @@ export default function ConsignmentUsageListPage() {
     setLoading(true)
     const { data } = await supabase
       .from('consignment_usage')
-      .select('*, stock:consignment_stock(vendor_rate, batch_number, serial_number, item:items(item_code, generic_name)), deposit:consignment_deposits(deposit_number, vendor:vendors(legal_name)), centre:centres(code)')
+      .select('*, stock:consignment_stock(vendor_rate, batch_number, serial_number, lot_number, item_description, size_spec, item:items(item_code, generic_name)), deposit:consignment_deposits(deposit_number, vendor:vendors(legal_name)), centre:centres(code)')
       .order('created_at', { ascending: false }).limit(200)
     setUsage(data || [])
     setLoading(false)
@@ -112,8 +112,8 @@ export default function ConsignmentUsageListPage() {
                         {u.surgeon_name && <div className="text-xs text-gray-500">Dr. {u.surgeon_name}</div>}
                       </td>
                       <td>
-                        <div className="text-sm">{u.stock?.item?.generic_name}</div>
-                        <div className="text-xs text-gray-500 font-mono">{u.stock?.item?.item_code} | SN: {u.stock?.serial_number || '—'}</div>
+                        <div className="text-sm">{u.stock?.item?.generic_name || u.stock?.item_description || 'Unknown'}</div>
+                        <div className="text-xs text-gray-500 font-mono">{u.stock?.item?.item_code || u.stock?.lot_number || ''} | SN: {u.stock?.serial_number || '—'}{u.stock?.size_spec ? ` | ${u.stock.size_spec}` : ''}</div>
                       </td>
                       <td className="text-sm text-gray-600">{u.deposit?.vendor?.legal_name}</td>
                       <td><span className="badge bg-blue-50 text-blue-700 text-xs">{u.centre?.code}</span></td>

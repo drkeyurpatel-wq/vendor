@@ -16,7 +16,7 @@ export default async function ConsignmentDashboard() {
   const [{ data: deposits }, { data: stock }, { data: usage }, { count: pendingCount }] = await Promise.all([
     supabase.from('consignment_deposits').select('*, vendor:vendors(legal_name, vendor_code), centre:centres(code)').order('created_at', { ascending: false }).limit(10),
     supabase.from('consignment_stock').select('*, item:items(item_code, generic_name), deposit:consignment_deposits(vendor_id, vendor:vendors(legal_name))').eq('status', 'available').order('created_at', { ascending: false }).limit(20),
-    supabase.from('consignment_usage').select('*, stock:consignment_stock(item:items(generic_name, item_code))').order('created_at', { ascending: false }).limit(10),
+    supabase.from('consignment_usage').select('*, stock:consignment_stock(item_description, item:items(generic_name, item_code))').order('created_at', { ascending: false }).limit(10),
     supabase.from('consignment_usage').select('*', { count: 'exact', head: true }).eq('conversion_status', 'pending'),
   ])
 
@@ -84,8 +84,8 @@ export default async function ConsignmentDashboard() {
                 return (
                   <div key={s.id} className="px-5 py-3 flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{s.item?.generic_name}</div>
-                      <div className="text-xs text-gray-500">{s.item?.item_code} | {s.batch_number || 'No batch'} | {s.serial_number || ''}</div>
+                      <div className="text-sm font-medium text-gray-900">{s.item?.generic_name || s.item_description || 'Unknown'}</div>
+                      <div className="text-xs text-gray-500">{s.item?.item_code || s.lot_number || 'No code'} | {s.batch_number || 'No batch'} | {s.serial_number || ''}{s.size_spec ? ` | ${s.size_spec}` : ''}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-bold text-navy-600">{avail} avail</div>
@@ -112,7 +112,7 @@ export default async function ConsignmentDashboard() {
                 <div key={u.id} className="px-5 py-3 flex items-center justify-between">
                   <div>
                     <div className="text-sm font-medium text-gray-900">{u.patient_name}</div>
-                    <div className="text-xs text-gray-500">{u.stock?.item?.generic_name} | {u.surgeon_name || ''} | {formatDate(u.usage_date || u.created_at)}</div>
+                    <div className="text-xs text-gray-500">{u.stock?.item?.generic_name || u.stock?.item_description || 'Unknown item'} | {u.surgeon_name || ''} | {formatDate(u.usage_date || u.created_at)}</div>
                   </div>
                   <span className={cn('badge text-xs', STATUS_COLORS[u.conversion_status] || STATUS_COLORS.pending)}>
                     {u.conversion_status === 'converted' ? '✓ Converted' : u.conversion_status === 'billed' ? '✓ Billed' : '⏳ Pending'}

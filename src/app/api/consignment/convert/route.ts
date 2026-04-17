@@ -100,11 +100,15 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     conversion_status: 'converted', po_id: po.id, grn_id: grn.id, invoice_id: inv?.id,
   }).eq('id', usage_id)
 
-  await supabase.from('consignment_stock').update({
-    qty_used: (usage.stock?.qty_used || 0) + qty,
-    qty_available: Math.max(0, (usage.stock?.qty_available || usage.stock?.qty_deposited || 1) - qty),
-    status: (usage.stock?.qty_used || 0) + qty >= (usage.stock?.qty_deposited || 1) ? 'used' : 'available',
-  }).eq('id', usage.stock_id)
+  // Stock qty_used already deducted at usage recording time — just update status
+  const { data: currentStock } = await supabase.from('consignment_stock')
+    .select('qty_deposited, qty_used, qty_returned').eq('id', usage.stock_id).single()
+  if (currentStock) {
+    const allUsed = (currentStock.qty_used + currentStock.qty_returned) >= currentStock.qty_deposited
+    await supabase.from('consignment_stock').update({
+      status: allUsed ? 'used' : 'available',
+    }).eq('id', usage.stock_id)
+  }
 
   const { data: remain } = await supabase.from('consignment_stock')
     .select('qty_deposited, qty_used, qty_returned').eq('deposit_id', usage.deposit_id)

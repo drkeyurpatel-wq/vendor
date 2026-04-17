@@ -44,8 +44,9 @@ export default async function ConsignmentStockPage() {
                     <tr key={s.id} className={cn('hover:bg-gray-50', avail <= 0 && 'opacity-50')}>
                       <td className="text-xs text-gray-500">{idx + 1}</td>
                       <td>
-                        <Link href={`/items/${s.item_id}`} className="text-sm font-medium text-gray-900 hover:text-teal-600">{s.item?.generic_name}</Link>
-                        <div className="text-xs text-gray-500 font-mono">{s.item?.item_code} | {s.item?.manufacturer || ''}</div>
+                        <Link href={s.item_id ? `/items/${s.item_id}` : '#'} className="text-sm font-medium text-gray-900 hover:text-teal-600">{s.item?.generic_name || s.item_description || 'Unknown'}</Link>
+                        <div className="text-xs text-gray-500 font-mono">{s.item?.item_code || s.lot_number || ''} {s.brand ? `| ${s.brand}` : ''} {s.item?.manufacturer ? `| ${s.item.manufacturer}` : ''}</div>
+                        {s.size_spec && <div className="text-xs text-teal-600">{s.size_spec}</div>}
                       </td>
                       <td className="text-sm text-gray-600">{s.deposit?.vendor?.legal_name}</td>
                       <td><span className="badge bg-blue-50 text-blue-700 text-xs">{s.deposit?.centre?.code}</span></td>

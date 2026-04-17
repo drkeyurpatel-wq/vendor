@@ -83,10 +83,11 @@ export default function NewConsignmentDepositPage() {
 
     const stockRows = lines.filter(l => l.itemId && l.vendorRate).map(l => ({
       deposit_id: deposit.id, item_id: l.itemId,
+      item_description: items.find(i => i.id === l.itemId)?.generic_name || 'Unknown item',
+      category: 'other' as const,
       batch_number: l.batchNumber || null, serial_number: l.serialNumber || null,
       expiry_date: l.expiryDate || null, vendor_rate: parseFloat(l.vendorRate),
       mrp: l.mrp ? parseFloat(l.mrp) : null, qty_deposited: parseInt(l.qty) || 1,
-      qty_available: parseInt(l.qty) || 1,
       qty_used: 0, qty_returned: 0, status: 'available',
     }))
 
