@@ -85,11 +85,27 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
             .eq('item_id', li.item_id).eq('centre_id', centreId).single()
 
           if (existing) {
+            const newStockBalance = (existing.current_stock || 0) + stockQty
             await supabase.from('item_centre_stock').update({
-              current_stock: (existing.current_stock || 0) + stockQty,
+              current_stock: newStockBalance,
               last_grn_date: new Date().toISOString().split('T')[0],
               last_grn_rate: li.rate || 0,
             }).eq('id', existing.id)
+
+            // Write stock ledger for audit trail
+            try {
+              const userId = (await supabase.auth.getUser()).data.user?.id
+              await supabase.from('stock_ledger').insert({
+                centre_id: centreId,
+                item_id: li.item_id,
+                transaction_type: 'grn',
+                quantity: stockQty,
+                balance_after: newStockBalance,
+                reference_id: grnId,
+                reference_number: grnNumber,
+                created_by: userId,
+              })
+            } catch { /* non-critical */ }
           } else {
             await supabase.from('item_centre_stock').insert({
               item_id: li.item_id, centre_id: centreId,
@@ -97,6 +113,21 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
               last_grn_date: new Date().toISOString().split('T')[0],
               last_grn_rate: li.rate || 0,
             })
+
+            // Write stock ledger for new stock record
+            try {
+              const userId = (await supabase.auth.getUser()).data.user?.id
+              await supabase.from('stock_ledger').insert({
+                centre_id: centreId,
+                item_id: li.item_id,
+                transaction_type: 'grn',
+                quantity: stockQty,
+                balance_after: stockQty,
+                reference_id: grnId,
+                reference_number: grnNumber,
+                created_by: userId,
+              })
+            } catch { /* non-critical */ }
           }
         }
       }
@@ -153,7 +184,6 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
                   ordered_qty: remainingQty,
                   received_qty: 0,
                   pending_qty: remainingQty,
-                  cancelled_qty: 0,
                   free_qty: 0,
                   unit: i.unit || 'nos',
                   conversion_factor: 1,
@@ -168,8 +198,7 @@ export default function GRNStatusActions({ grnId, grnNumber, currentStatus, qual
                   cgst_amount: gstAmt / 2,
                   sgst_amount: gstAmt / 2,
                   igst_amount: 0,
-                  line_total: lineTotal + gstAmt,
-                  
+                  total_amount: lineTotal + gstAmt,
                 }
               })
 

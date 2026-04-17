@@ -16,11 +16,50 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
   if (!usage) return NextResponse.json({ error: 'Usage not found' }, { status: 404 })
   if (usage.conversion_status === 'converted') return NextResponse.json({ error: 'Already converted' }, { status: 400 })
 
-  const item = usage.stock?.item
+  let item = usage.stock?.item
   const vendorId = usage.deposit?.vendor_id
   const centreId = usage.deposit?.centre_id || usage.centre_id
   const qty = usage.qty_used || 1
   const rate = usage.stock?.vendor_rate || 0
+
+  // If consignment item has no item_id (cardiac stents, guide wires not in items table),
+  // auto-create the item so PO/GRN/Invoice have a valid item reference
+  if (!item && usage.stock?.item_description) {
+    const desc = usage.stock.item_description
+    // Check if it already exists by description match
+    const { data: existing } = await supabase.from('items')
+      .select('id, item_code, generic_name, unit, hsn_code, gst_percent')
+      .ilike('generic_name', desc).limit(1)
+
+    if (existing?.[0]) {
+      item = existing[0]
+    } else {
+      // Auto-create: generate item_code from description
+      const { count } = await supabase.from('items').select('*', { count: 'exact', head: true })
+      const itemCode = `CONS-${String((count ?? 0) + 1).padStart(5, '0')}`
+      const { data: newItem, error: itemErr } = await supabase.from('items').insert({
+        item_code: itemCode,
+        generic_name: desc,
+        unit: 'Pc',
+        gst_percent: 12,
+        hsn_code: '90189099',
+        is_active: true,
+      }).select('id, item_code, generic_name, unit, hsn_code, gst_percent').single()
+
+      if (itemErr || !newItem) {
+        return NextResponse.json({ error: `Cannot create item for "${desc}": ${itemErr?.message}` }, { status: 500 })
+      }
+      item = newItem
+
+      // Link the consignment_stock to this new item
+      await supabase.from('consignment_stock').update({ item_id: newItem.id }).eq('id', usage.stock_id)
+    }
+  }
+
+  if (!item) {
+    return NextResponse.json({ error: 'No item linked to this consignment stock. Add item_description or link an item.' }, { status: 400 })
+  }
+
   const gstPct = item?.gst_percent || 12
   const taxable = qty * rate
   const cgst = Math.round(taxable * gstPct / 200 * 100) / 100
