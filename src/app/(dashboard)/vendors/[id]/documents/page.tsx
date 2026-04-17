@@ -9,15 +9,16 @@ import toast from 'react-hot-toast'
 import { formatDate } from '@/lib/utils'
 
 const DOCUMENT_TYPES = [
-  'GSTIN Certificate',
-  'PAN Card',
-  'Drug License',
-  'FSSAI Certificate',
-  'Cancelled Cheque',
-  'Other',
+  { value: 'gstin_certificate', label: 'GSTIN Certificate' },
+  { value: 'pan_card', label: 'PAN Card' },
+  { value: 'drug_license', label: 'Drug License' },
+  { value: 'fssai_certificate', label: 'FSSAI Certificate' },
+  { value: 'cancelled_cheque', label: 'Cancelled Cheque' },
+  { value: 'address_proof', label: 'Address Proof' },
+  { value: 'other', label: 'Other' },
 ] as const
 
-type DocumentType = typeof DOCUMENT_TYPES[number]
+type DocumentType = typeof DOCUMENT_TYPES[number]['value']
 
 interface VendorDocument {
   id: string
@@ -37,7 +38,7 @@ export default function VendorDocumentsPage() {
   const [documents, setDocuments] = useState<VendorDocument[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
-  const [documentType, setDocumentType] = useState<DocumentType>('GSTIN Certificate')
+  const [documentType, setDocumentType] = useState<DocumentType>('gstin_certificate')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [vendorName, setVendorName] = useState<string>('')
 
@@ -116,7 +117,7 @@ export default function VendorDocumentsPage() {
 
       toast.success('Document uploaded successfully')
       setSelectedFile(null)
-      setDocumentType('GSTIN Certificate')
+      setDocumentType('gstin_certificate')
 
       // Reset the file input
       const fileInput = document.getElementById('file-input') as HTMLInputElement
@@ -204,7 +205,7 @@ export default function VendorDocumentsPage() {
                 onChange={e => setDocumentType(e.target.value as DocumentType)}
               >
                 {DOCUMENT_TYPES.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type.value} value={type.value}>{type.label}</option>
                 ))}
               </select>
             </div>
@@ -272,7 +273,7 @@ export default function VendorDocumentsPage() {
                   <tr key={doc.id}>
                     <td>
                       <span className="badge bg-blue-50 text-blue-700">
-                        {doc.document_type}
+                        {DOCUMENT_TYPES.find(t => t.value === doc.document_type)?.label || doc.document_type.replace(/_/g, ' ')}
                       </span>
                     </td>
                     <td>
