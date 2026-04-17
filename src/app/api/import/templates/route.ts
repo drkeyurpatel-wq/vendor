@@ -114,24 +114,26 @@ const TEMPLATES: Record<string, { name: string; headers: string[]; sampleRows: s
   opening_stock: {
     name: 'Opening_Stock_Template',
     headers: [
-      'item_generic_name', 'centre_code',
+      'item_code', 'item_generic_name', 'centre_code',
       'current_stock', 'reorder_level', 'max_level',
       'last_grn_rate', 'avg_daily_consumption'
     ],
     sampleRows: [
-      ['Paracetamol 500mg', 'SHI', '5000', '500', '10000', '45.50', '25'],
-      ['Paracetamol 500mg', 'VAS', '3000', '300', '8000', '45.50', '15'],
-      ['Surgical Gloves (Medium)', 'SHI', '200', '50', '500', '350.00', '5']
+      ['DOL0006', 'Dolowin SP Tablet', 'SHI', '5000', '500', '10000', '45.50', '25'],
+      ['ITM0038', 'Admenta 5 Tablet Memantine (5mg)', 'GAN', '3000', '300', '8000', '85.72', '15'],
+      ['', 'Surgical Gloves (Medium)', 'SHI', '200', '50', '500', '350.00', '5']
     ],
     instructions: [
-      'item_generic_name: Required. Exact generic_name of item (must already exist in system)',
+      'item_code: Item code (e.g., DOL0006). Either item_code or item_generic_name is required',
+      'item_generic_name: Exact generic name of item. Used as fallback if item_code is empty',
       'centre_code: Required. One of: SHI, VAS, MOD, UDA, GAN',
       'current_stock: Required. Current stock quantity on hand',
       'reorder_level: Stock level at which reorder should be triggered',
       'max_level: Maximum stock level to maintain',
       'last_grn_rate: Last purchase rate per unit',
       'avg_daily_consumption: Average daily consumption units',
-      'NOTE: Import items FIRST before importing opening stock'
+      'NOTE: Import items FIRST before importing opening stock',
+      'TIP: item_code is the most reliable match. Use it when available.'
     ]
   },
   vendor_outstanding: {

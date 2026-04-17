@@ -414,18 +414,21 @@ async function importOpeningStock(
   const { data: centres } = await supabase.from('centres').select('id, code')
   const centreMap = new Map(centres?.map(c => [c.code, c.id]) || [])
   const { data: items } = await supabase.from('items').select('id, item_code, generic_name').is('deleted_at', null)
+  const itemByCode = new Map(items?.map(i => [i.item_code?.toLowerCase(), i]) || [])
+  const itemByName = new Map(items?.map(i => [i.generic_name?.toLowerCase(), i]) || [])
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]
     const rowNum = i + 2
 
     try {
+      const itemCode = clean(row.item_code)
       const itemName = clean(row.item_generic_name)
       const centreCode = clean(row.centre_code).toUpperCase()
       const currentStock = cleanNumber(row.current_stock)
 
-      if (!itemName) {
-        result.errors.push({ row: rowNum, field: 'item_generic_name', message: 'Item name is required' })
+      if (!itemCode && !itemName) {
+        result.errors.push({ row: rowNum, field: 'item_code/item_generic_name', message: 'Either item_code or item_generic_name is required' })
         result.failed++
         continue
       }
@@ -447,9 +450,11 @@ async function importOpeningStock(
         continue
       }
 
-      const item = items?.find(it => it.generic_name?.toLowerCase() === itemName.toLowerCase())
+      // Match by item_code first (most reliable), then by generic_name
+      const item = (itemCode ? itemByCode.get(itemCode.toLowerCase()) : null)
+        || (itemName ? itemByName.get(itemName.toLowerCase()) : null)
       if (!item) {
-        result.errors.push({ row: rowNum, field: 'item_generic_name', message: `Item not found: ${itemName}` })
+        result.errors.push({ row: rowNum, field: 'item_code', message: `Item not found: ${itemCode || itemName}` })
         result.failed++
         continue
       }
