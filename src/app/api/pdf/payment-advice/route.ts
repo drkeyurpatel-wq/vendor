@@ -113,7 +113,6 @@ export const GET = withApiErrorHandler(async (request: NextRequest) => {
       )
     `)
     .eq('batch_id', id)
-    .order('created_at')
 
   const items = batchItems || []
 

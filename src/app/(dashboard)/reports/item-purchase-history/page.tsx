@@ -22,7 +22,6 @@ export default async function ItemPurchaseHistory({
   const { data: poItems } = await supabase
     .from('purchase_order_items')
     .select('ordered_qty, rate, total_amount, item:items(id, item_code, generic_name, unit), po:purchase_orders(po_date, status, deleted_at, centre:centres(code))')
-    .order('created_at', { ascending: false })
     .limit(5000)
 
   // Filter to valid POs and date range in JS (reliable)
