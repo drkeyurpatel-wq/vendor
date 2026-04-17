@@ -133,7 +133,7 @@ export default async function DebitNoteDetailPage({ params }: { params: Promise<
                     <td><span className="text-sm font-medium">{item.item?.generic_name || item.description}</span><br /><span className="text-xs text-gray-500 font-mono">{item.item?.item_code}</span></td>
                     <td className="text-sm text-right">{item.quantity} {item.item?.unit}</td>
                     <td className="text-sm text-right font-mono">{formatCurrency(item.rate)}</td>
-                    <td className="text-sm text-right font-semibold">{formatCurrency(item.amount || (item.quantity * item.rate))}</td>
+                    <td className="text-sm text-right font-semibold">{formatCurrency(item.total_amount || (item.quantity * item.rate))}</td>
                   </tr>
                 ))}
               </tbody>

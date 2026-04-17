@@ -151,11 +151,13 @@ export default function NewStockTransferForm({ centres, userCentreId }: { centre
       return
     }
 
-    // Insert transfer items if table exists
+    // Insert transfer items
     const transferItems = lines.map(l => ({
       transfer_id: data.id,
       item_id: l.item_id,
-      quantity: l.transfer_qty,
+      requested_qty: l.transfer_qty,
+      dispatched_qty: 0,
+      received_qty: 0,
     }))
 
     await supabase.from('stock_transfer_items').insert(transferItems)
