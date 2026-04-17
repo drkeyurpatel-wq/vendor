@@ -213,6 +213,7 @@ export async function POST(request: NextRequest) {
       const today = new Date().toISOString().split('T')[0]
 
       // Create PO
+      const gstAmount = draft.estimated_total * 0.12
       const { data: newPO, error: poError } = await supabase
         .from('purchase_orders')
         .insert({
@@ -224,7 +225,8 @@ export async function POST(request: NextRequest) {
           priority: 'normal',
           supply_type: 'intra_state',
           subtotal: draft.estimated_total,
-          total_amount: draft.estimated_total,
+          gst_amount: gstAmount,
+          total_amount: draft.estimated_total + gstAmount,
           notes: `Auto-generated reorder PO — ${draft.items.length} items below reorder level`,
           created_by: user?.id || null,
         })
@@ -234,16 +236,22 @@ export async function POST(request: NextRequest) {
       if (poError || !newPO) continue
 
       // Create PO items
-      const poItems = draft.items.map((item, idx) => ({
-        purchase_order_id: newPO.id,
+      const poItems = draft.items.map((item) => ({
+        po_id: newPO.id,
         item_id: item.item_id,
-        quantity: item.reorder_qty,
+        ordered_qty: item.reorder_qty,
+        pending_qty: item.reorder_qty,
         rate: item.l1_rate || 0,
-        total_amount: (item.l1_rate || 0) * item.reorder_qty,
-        serial_no: idx + 1,
+        gst_percent: 12,
+        gst_amount: (item.l1_rate || 0) * item.reorder_qty * 0.12,
+        total_amount: (item.l1_rate || 0) * item.reorder_qty * 1.12,
+        unit: item.unit,
       }))
 
-      await supabase.from('purchase_order_items').insert(poItems)
+      const { error: poiError } = await supabase.from('purchase_order_items').insert(poItems)
+      if (poiError) {
+        console.error(`[reorder] PO items insert failed for ${poNumber}:`, poiError.message)
+      }
 
       // Audit log
       try {

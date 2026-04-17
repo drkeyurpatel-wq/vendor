@@ -346,15 +346,15 @@ export const POST = withApiErrorHandler(async () => {
         results.push(`Demo PO error: ${poError.message}`)
       } else {
         // Insert PO line items
-        const poLineItems = lineItems.map((l, idx) => ({
+        const poLineItems = lineItems.map((l) => ({
           po_id: po.id,
           item_id: l.item_id,
-          quantity: l.quantity,
-          unit_rate: l.unit_rate,
+          ordered_qty: l.quantity,
+          pending_qty: l.quantity,
+          rate: l.unit_rate,
           gst_percent: l.gst_percent,
           gst_amount: l.quantity * l.unit_rate * (l.gst_percent / 100),
           total_amount: l.quantity * l.unit_rate * (1 + l.gst_percent / 100),
-          line_number: idx + 1,
         }))
 
         const { error: poiError } = await supabase.from('purchase_order_items').insert(poLineItems)
