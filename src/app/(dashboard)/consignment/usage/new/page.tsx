@@ -76,6 +76,8 @@ export default function RecordUsagePage() {
       patient_name: patientName.trim(),
       patient_uhid: patientUHID.trim() || null,
       surgeon_name: surgeonName.trim() || null,
+      procedure_name: caseType || null,
+      procedure_date: usageDate,
       ot_number: otNumber.trim() || null,
       case_type: caseType || null,
       usage_date: usageDate,

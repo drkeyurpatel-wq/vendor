@@ -14,7 +14,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     .eq('id', usage_id).single()
 
   if (!usage) return NextResponse.json({ error: 'Usage not found' }, { status: 404 })
-  if (usage.conversion_status === 'converted') return NextResponse.json({ error: 'Already converted' }, { status: 400 })
+  if (usage.conversion_status === 'completed') return NextResponse.json({ error: 'Already converted' }, { status: 400 })
 
   let item = usage.stock?.item
   const vendorId = usage.deposit?.vendor_id
@@ -126,7 +126,9 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const { data: inv } = await supabase.from('invoices').insert({
     invoice_ref: invRef, po_id: po.id, grn_id: grn.id,
     vendor_id: vendorId, centre_id: centreId,
+    vendor_invoice_no: usage.deposit?.challan_number || invRef,
     vendor_invoice_date: usage.usage_date || format(now, 'yyyy-MM-dd'),
+    subtotal: taxable,
     total_amount: total, gst_amount: cgst + sgst,
     payment_status: 'unpaid', match_status: 'matched',
     due_date: format(new Date(now.getTime() + 30 * 86400000), 'yyyy-MM-dd'),
@@ -136,7 +138,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
 
   // 4. Update usage + stock + deposit
   await supabase.from('consignment_usage').update({
-    conversion_status: 'converted', po_id: po.id, grn_id: grn.id, invoice_id: inv?.id,
+    conversion_status: 'completed', po_id: po.id, grn_id: grn.id, invoice_id: inv?.id,
   }).eq('id', usage_id)
 
   // Stock qty_used already deducted at usage recording time — just update status

@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
-  converted: 'bg-green-100 text-green-700',
+  completed: 'bg-green-100 text-green-700',
   billed: 'bg-blue-100 text-blue-700',
 }
 
@@ -134,7 +134,7 @@ export default function ConsignmentUsageListPage() {
                             Convert
                           </button>
                         )}
-                        {u.conversion_status === 'converted' && <CheckCircle2 size={16} className="text-green-500" />}
+                        {u.conversion_status === 'completed' && <CheckCircle2 size={16} className="text-green-500" />}
                       </td>
                     </tr>
                   )

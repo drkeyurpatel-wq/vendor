@@ -7,7 +7,7 @@ import { Package, Plus, ArrowRight, AlertTriangle, CheckCircle2, Clock, Truck } 
 export const dynamic = 'force-dynamic'
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-800', converted: 'bg-green-100 text-green-700', billed: 'bg-blue-100 text-blue-700',
+  pending: 'bg-yellow-100 text-yellow-800', completed: 'bg-green-100 text-green-700', billed: 'bg-blue-100 text-blue-700',
   active: 'bg-blue-100 text-blue-700', partially_used: 'bg-orange-100 text-orange-800', fully_used: 'bg-green-100 text-green-700', returned: 'bg-gray-100 text-gray-600',
 }
 
@@ -115,7 +115,7 @@ export default async function ConsignmentDashboard() {
                     <div className="text-xs text-gray-500">{u.stock?.item?.generic_name || u.stock?.item_description || 'Unknown item'} | {u.surgeon_name || ''} | {formatDate(u.usage_date || u.created_at)}</div>
                   </div>
                   <span className={cn('badge text-xs', STATUS_COLORS[u.conversion_status] || STATUS_COLORS.pending)}>
-                    {u.conversion_status === 'converted' ? '✓ Converted' : u.conversion_status === 'billed' ? '✓ Billed' : '⏳ Pending'}
+                    {u.conversion_status === 'completed' ? '✓ Converted' : u.conversion_status === 'billed' ? '✓ Billed' : '⏳ Pending'}
                   </span>
                 </div>
               ))}

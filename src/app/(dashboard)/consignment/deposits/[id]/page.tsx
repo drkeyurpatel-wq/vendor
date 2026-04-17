@@ -174,8 +174,8 @@ export default async function DepositDetailPage({
                     <td className="text-sm">{formatDate(u.usage_date || u.created_at)}</td>
                     <td className="text-sm text-center">{u.qty_used}</td>
                     <td><span className={cn('badge text-xs',
-                      u.conversion_status === 'converted' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-800'
-                    )}>{u.conversion_status === 'converted' ? 'Converted' : 'Pending'}</span></td>
+                      u.conversion_status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-800'
+                    )}>{u.conversion_status === 'completed' ? 'Converted' : 'Pending'}</span></td>
                     <td className="text-xs space-x-2">
                       {u.po_id && <Link href={`/purchase-orders/${u.po_id}`} className="text-teal-600 hover:underline">PO</Link>}
                       {u.grn_id && <Link href={`/grn/${u.grn_id}`} className="text-teal-600 hover:underline">GRN</Link>}
