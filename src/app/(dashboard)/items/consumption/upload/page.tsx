@@ -183,6 +183,14 @@ export default function ConsumptionUploadPage() {
         toast(`${result.stock_failed} item(s) could not be deducted from stock — check if stock records exist`, { icon: '⚠️', duration: 6000 })
       }
 
+      // Auto-reorder notification
+      if (result.auto_pos_created > 0) {
+        const poNames = result.auto_pos?.map((p: any) => p.po_number).join(', ') || ''
+        toast(`Auto-reorder: ${result.auto_pos_created} draft PO(s) created — ${poNames}. Review in Purchase Orders.`, { icon: '🔄', duration: 8000 })
+      } else if (result.reorder_triggered > 0) {
+        toast(`${result.reorder_triggered} item(s) hit reorder level but no L1 vendor mapped — set up vendor-item mapping to enable auto-PO`, { icon: '⚠️', duration: 6000 })
+      }
+
       router.push('/items/consumption')
     } catch (err: any) {
       toast.error(`Upload failed: ${err?.message || 'Unknown error'}`)

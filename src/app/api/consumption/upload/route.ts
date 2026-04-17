@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireApiAuthWithProfile } from '@/lib/auth'
 import { withApiErrorHandler } from '@/lib/api-error-handler'
 import { batchDeductStock } from '@/lib/stock-deduction'
+import { autoReorderForItems } from '@/lib/auto-reorder'
 
 /**
  * POST /api/consumption/upload
@@ -91,7 +92,22 @@ export const POST = withApiErrorHandler(async (req: NextRequest) => {
 
   const stockResult = await batchDeductStock(supabase, stockLines, user.id)
 
-  // 3. Log activity
+  // 3. Auto-reorder: if any items crossed below reorder level, generate draft POs
+  let reorderResult = { created: 0, pos: [] as any[], skipped: 0 }
+  if (stockResult.reorderTriggered.length > 0) {
+    reorderResult = await autoReorderForItems(
+      supabase,
+      stockResult.reorderTriggered.map(r => ({
+        itemId: r.itemId,
+        centreId: r.centreId,
+        newStock: r.newStock,
+        reorderLevel: r.reorderLevel,
+      })),
+      user.id
+    )
+  }
+
+  // 4. Log activity
   await supabase.from('activity_log').insert({
     user_id: user.id,
     action: 'consumption_upload',
@@ -104,6 +120,8 @@ export const POST = withApiErrorHandler(async (req: NextRequest) => {
       records_saved: records.length,
       stock_deducted: stockResult.processed,
       stock_failed: stockResult.failed,
+      reorder_triggered: stockResult.reorderTriggered.length,
+      auto_pos_created: reorderResult.created,
       errors: stockResult.errors.length > 0 ? stockResult.errors : undefined,
     },
   })
@@ -115,5 +133,8 @@ export const POST = withApiErrorHandler(async (req: NextRequest) => {
     stock_failed: stockResult.failed,
     stock_errors: stockResult.errors,
     batch_id: upload_batch_id,
+    reorder_triggered: stockResult.reorderTriggered.length,
+    auto_pos_created: reorderResult.created,
+    auto_pos: reorderResult.pos,
   })
 })

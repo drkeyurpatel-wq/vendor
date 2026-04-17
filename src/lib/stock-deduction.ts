@@ -19,7 +19,7 @@ export async function deductStock(
     notes?: string
     referenceNumber?: string
   }
-): Promise<{ success: boolean; newStock?: number; error?: string }> {
+): Promise<{ success: boolean; newStock?: number; reorderTriggered?: boolean; reorderLevel?: number; error?: string }> {
   const { itemId, centreId, quantity, userId, notes, referenceNumber } = params
 
   if (quantity <= 0) {
@@ -39,6 +39,8 @@ export async function deductStock(
   }
 
   const newStock = Math.max(0, stock.current_stock - quantity)
+  // Crossed below reorder level with this deduction?
+  const reorderTriggered = stock.reorder_level > 0 && newStock <= stock.reorder_level && stock.current_stock > stock.reorder_level
 
   // 2. Update stock balance
   const { error: updateErr } = await supabase
@@ -71,12 +73,12 @@ export async function deductStock(
     console.error(`[stock-deduction] Ledger write failed for item ${itemId}:`, ledgerErr.message)
   }
 
-  return { success: true, newStock }
+  return { success: true, newStock, reorderTriggered, reorderLevel: stock.reorder_level }
 }
 
 /**
  * Batch deduct stock for multiple consumption lines.
- * Returns per-line results + summary counts.
+ * Returns per-line results + summary counts + items that hit reorder level.
  */
 export async function batchDeductStock(
   supabase: SupabaseClient,
@@ -92,10 +94,12 @@ export async function batchDeductStock(
   processed: number
   failed: number
   errors: Array<{ index: number; itemId: string; error: string }>
+  reorderTriggered: Array<{ itemId: string; centreId: string; newStock: number; reorderLevel: number }>
 }> {
   let processed = 0
   let failed = 0
   const errors: Array<{ index: number; itemId: string; error: string }> = []
+  const reorderTriggered: Array<{ itemId: string; centreId: string; newStock: number; reorderLevel: number }> = []
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
@@ -110,11 +114,19 @@ export async function batchDeductStock(
 
     if (result.success) {
       processed++
+      if (result.reorderTriggered) {
+        reorderTriggered.push({
+          itemId: line.itemId,
+          centreId: line.centreId,
+          newStock: result.newStock ?? 0,
+          reorderLevel: result.reorderLevel ?? 0,
+        })
+      }
     } else {
       failed++
       errors.push({ index: i, itemId: line.itemId, error: result.error || 'Unknown error' })
     }
   }
 
-  return { processed, failed, errors }
+  return { processed, failed, errors, reorderTriggered }
 }
