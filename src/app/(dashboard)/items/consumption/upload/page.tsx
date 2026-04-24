@@ -155,27 +155,43 @@ export default function ConsumptionUploadPage() {
           notes: l.notes || null,
         }))
       } else {
-        // CSV mode — resolve items client-side, then send to API
+        // CSV mode — batch-fetch ALL items once, match locally (NOT 380 individual queries)
+        toast('Matching items...', { icon: '🔍' })
+        const { data: allItems } = await supabase
+          .from('items')
+          .select('id, item_code, generic_name')
+          .eq('is_active', true)
+          .limit(15000)
+
+        // Build lookup maps: exact name match (case-insensitive) + item_code
+        const nameMap = new Map<string, string>() // lowercase name → id
+        const codeMap = new Map<string, string>() // item_code → id
+        ;(allItems ?? []).forEach((item: any) => {
+          if (item.generic_name) nameMap.set(item.generic_name.toLowerCase().trim(), item.id)
+          if (item.item_code) codeMap.set(item.item_code.toLowerCase().trim(), item.id)
+        })
+
         for (const row of csvPreview) {
-          const code = row.item_code || row.code || ''
-          const name = row['item name'] || row.item_name || row.generic_name || row.name || ''
+          const code = (row.item_code || row.code || '').trim()
+          const name = (row['item name'] || row.item_name || row.generic_name || row.name || '').trim()
           const qty = parseFloat(row['issue qty'] || row.quantity || row.qty || '0')
           if (qty <= 0) continue
 
-          let itemId = null
-          if (code) {
-            const { data } = await supabase.from('items').select('id').eq('item_code', code).limit(1)
-            if (data?.[0]) itemId = data[0].id
-          }
+          // Match: 1. item_code exact → 2. generic_name exact (case-insensitive)
+          let itemId = code ? codeMap.get(code.toLowerCase()) || null : null
           if (!itemId && name) {
-            const { data } = await supabase.from('items').select('id').ilike('generic_name', `%${name}%`).limit(1)
-            if (data?.[0]) itemId = data[0].id
+            itemId = nameMap.get(name.toLowerCase()) || null
+          }
+          // 3. Fuzzy: try without trailing dosage info
+          if (!itemId && name) {
+            const simpleName = name.replace(/\s*\(.*$/, '').toLowerCase().trim()
+            itemId = nameMap.get(simpleName) || null
           }
           if (!itemId) { unmatched++; continue }
 
           records.push({
             item_id: itemId,
-            consumption_date: row.date || consumptionDate,
+            consumption_date: row['transaction date'] || row.date || consumptionDate,
             department: row.department || 'Pharmacy',
             ward: row.ward || null,
             quantity: qty,
