@@ -4,6 +4,9 @@ import { withApiErrorHandler } from '@/lib/api-error-handler'
 import { batchDeductStock } from '@/lib/stock-deduction'
 import { autoReorderForItems } from '@/lib/auto-reorder'
 
+// 380+ items × stock deduction + ledger + reorder = needs more than 10s default
+export const maxDuration = 60
+
 /**
  * POST /api/consumption/upload
  *
