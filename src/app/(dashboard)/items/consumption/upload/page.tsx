@@ -189,9 +189,19 @@ export default function ConsumptionUploadPage() {
           }
           if (!itemId) { unmatched++; continue }
 
+          // Parse eClinicalWorks date (DD/MM/YYYY) → YYYY-MM-DD
+          const rawDate = row['transaction date'] || row.date || ''
+          let parsedDate = consumptionDate
+          if (rawDate && rawDate.includes('/')) {
+            const parts = rawDate.split('/')
+            if (parts.length === 3) parsedDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
+          } else if (rawDate && rawDate.includes('-')) {
+            parsedDate = rawDate
+          }
+
           records.push({
             item_id: itemId,
-            consumption_date: row['transaction date'] || row.date || consumptionDate,
+            consumption_date: parsedDate,
             department: row.department || 'Pharmacy',
             ward: row.ward || null,
             quantity: qty,
