@@ -99,6 +99,7 @@ export const PO_STATUS_COLORS = {
   sent_to_vendor: 'bg-purple-100 text-purple-800',
   partially_received: 'bg-orange-100 text-orange-800',
   fully_received: 'bg-green-100 text-green-800',
+  short_closed: 'bg-indigo-100 text-indigo-800',
   cancelled: 'bg-red-100 text-red-800',
   closed: 'bg-gray-100 text-gray-600',
 }

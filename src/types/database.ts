@@ -32,7 +32,7 @@ export type VEDClass = 'V' | 'E' | 'D'
 export type FSNClass = 'F' | 'S' | 'N'
 export type GSTSlab = '0' | '5' | '12' | '18' | '28'
 
-export type POStatus = 'draft' | 'pending_approval' | 'approved' | 'sent_to_vendor' | 'partially_received' | 'fully_received' | 'cancelled' | 'closed'
+export type POStatus = 'draft' | 'pending_approval' | 'approved' | 'sent_to_vendor' | 'partially_received' | 'fully_received' | 'short_closed' | 'cancelled' | 'closed'
 export type POPriority = 'low' | 'normal' | 'urgent' | 'emergency'
 export type GRNStatus = 'draft' | 'submitted' | 'verified' | 'discrepancy'
 export type QCStatus = 'pending' | 'under_qc' | 'approved' | 'rejected' | 'partial_approved'

@@ -194,6 +194,7 @@ export default async function GroupAdminDashboard({ profile }: { profile: any })
             { status: 'sent_to_vendor', label: 'Sent to Vendor', count: statusMap.get('sent_to_vendor') || 0 },
             { status: 'partially_received', label: 'Partially Received', count: statusMap.get('partially_received') || 0 },
             { status: 'fully_received', label: 'Fully Received', count: statusMap.get('fully_received') || 0 },
+            { status: 'short_closed', label: 'Short Closed', count: statusMap.get('short_closed') || 0 },
           ].filter(d => d.count > 0)
         })()}
       />

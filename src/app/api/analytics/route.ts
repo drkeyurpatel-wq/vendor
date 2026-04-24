@@ -142,7 +142,7 @@ export const GET = withApiErrorHandler(async (req: NextRequest) => {
   let priceQuery = supabase
     .from('purchase_order_items')
     .select('item_id, rate, po:purchase_orders!inner(po_number, po_date, vendor:vendors(legal_name), centre_id, status)')
-    .in('po.status', ['approved', 'sent_to_vendor', 'partially_received', 'fully_received', 'closed'])
+    .in('po.status', ['approved', 'sent_to_vendor', 'partially_received', 'fully_received', 'short_closed', 'closed'])
     .order('po.po_date', { ascending: true })
 
   if (centreId) priceQuery = priceQuery.eq('po.centre_id', centreId)
@@ -514,7 +514,7 @@ async function detectAnomalies(supabase: any, centreId: string | null) {
   const { data: categorySpend } = await supabase
     .from('purchase_orders')
     .select('vendor_id, total_amount, vendor:vendors(legal_name, category:vendor_categories(name))')
-    .in('status', ['approved', 'sent_to_vendor', 'fully_received'])
+    .in('status', ['approved', 'sent_to_vendor', 'fully_received', 'short_closed'])
     .gte('po_date', new Date(Date.now() - 365 * 86400000).toISOString().split('T')[0])
     .limit(2000)
 

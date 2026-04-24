@@ -44,7 +44,7 @@ export default function ItemSearch({ onSelect, excludeIds = [], placeholder = 'S
       setLoading(true)
       const { data } = await supabase
         .from('items')
-        .select('id, item_code, generic_name, brand_name, unit, gst_percent, default_rate, mrp, hsn_code, manufacturer, purchase_unit, category:item_categories(name)')
+        .select('id, item_code, generic_name, brand_name, unit, gst_percent, default_rate, mrp, hsn_code, manufacturer, purchase_unit, conversion_factor, category:item_categories(name)')
         .eq('is_active', true)
         .or(`generic_name.ilike.%${query}%,item_code.ilike.%${query}%,brand_name.ilike.%${query}%`)
         .order('generic_name')
@@ -85,7 +85,7 @@ export default function ItemSearch({ onSelect, excludeIds = [], placeholder = 'S
     setLoading(true)
     const { data } = await supabase
       .from('items')
-      .select('id, item_code, generic_name, brand_name, unit, gst_percent, default_rate, mrp, hsn_code, manufacturer, purchase_unit, category:item_categories(name)')
+      .select('id, item_code, generic_name, brand_name, unit, gst_percent, default_rate, mrp, hsn_code, manufacturer, purchase_unit, conversion_factor, category:item_categories(name)')
       .eq('is_active', true)
       .or(`item_code.eq.${code},item_code.ilike.${code}`)
       .limit(1)

@@ -9,7 +9,7 @@ export async function GET() {
     .from('purchase_orders')
     .select('id, po_number, po_date, total_amount, centre:centres(code)')
     .eq('vendor_id', session.vendorId)
-    .in('status', ['approved', 'sent_to_vendor', 'partially_received', 'fully_received'])
+    .in('status', ['approved', 'sent_to_vendor', 'partially_received', 'fully_received', 'short_closed'])
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .limit(100)

@@ -14,9 +14,10 @@ function ApprovalTimeline({ approvals, poStatus }: { approvals: any[]; poStatus:
     { key: 'sent', label: 'Sent to Vendor', icon: <Send size={14} /> },
     { key: 'received', label: 'Received', icon: <Truck size={14} /> },
   ]
-  const statusOrder = ['draft', 'pending_approval', 'approved', 'sent_to_vendor', 'partially_received', 'fully_received']
+  const statusOrder = ['draft', 'pending_approval', 'approved', 'sent_to_vendor', 'partially_received', 'fully_received', 'short_closed']
   const currentIdx = statusOrder.indexOf(poStatus)
   const isCancelled = poStatus === 'cancelled'
+  const isShortClosed = poStatus === 'short_closed'
 
   return (
     <div className="card p-6 mb-6">
@@ -112,25 +113,19 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
     <div>
       <Link href="/purchase-orders" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4"><ArrowLeft size={14} /> Back to Purchase Orders</Link>
 
-      {/* Backorder banner — this PO was created from a short delivery */}
-      {po.notes?.startsWith('[BACKORDER:') && (() => {
-        const parentId = po.notes.match(/\[BACKORDER:([^\]]+)\]/)?.[1]
-        return parentId ? (
-          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-2">
-              <Package size={16} className="text-blue-600" />
-              <div>
-                <span className="text-sm font-semibold text-blue-800">Backorder PO — created from short delivery</span>
-                <p className="text-xs text-blue-600 mt-0.5">This PO was auto-generated for items not received in a previous GRN</p>
-              </div>
-            </div>
-            <Link href={`/purchase-orders/${parentId}`}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-              View parent PO
-            </Link>
+      {/* Short-closed banner */}
+      {po.status === 'short_closed' && (
+        <div className="mb-4 bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-center gap-2">
+          <Package size={16} className="text-indigo-600 flex-shrink-0" />
+          <div>
+            <span className="text-sm font-semibold text-indigo-800">Short Closed</span>
+            <p className="text-xs text-indigo-600 mt-0.5">
+              This PO was closed before full delivery. Invoice can be raised against actual received quantities.
+              {po.short_close_reason && <> Reason: <span className="font-medium">{po.short_close_reason}</span></>}
+            </p>
           </div>
-        ) : null
-      })()}
+        </div>
+      )}
 
       {/* Header */}
       <div className="card p-6 mb-6">

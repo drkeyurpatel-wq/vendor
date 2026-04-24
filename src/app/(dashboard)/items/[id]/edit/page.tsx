@@ -15,7 +15,7 @@ const GST_SLABS = ['0', '5', '12', '18', '28']
 
 const EDITABLE_FIELDS = [
   'generic_name', 'brand_name', 'manufacturer', 'marketed_by', 'category_id', 'department',
-  'unit', 'purchase_unit', 'issue_unit', 'strength', 'dosage_form', 'route_of_administration',
+  'unit', 'purchase_unit', 'issue_unit', 'conversion_factor', 'strength', 'dosage_form', 'route_of_administration',
   'therapeutic_class', 'specification', 'combination_of_drugs',
   'hsn_code', 'gst_percent', 'gst_slab', 'default_rate', 'mrp',
   'reorder_level', 'min_stock', 'max_stock', 'safety_stock', 'lead_time_days',
@@ -75,6 +75,7 @@ export default function EditItemPage() {
         unit: form.unit || 'Nos',
         purchase_unit: form.purchase_unit || null,
         issue_unit: form.issue_unit || null,
+        conversion_factor: parseFloat(form.conversion_factor) || 1,
         strength: form.strength?.trim() || null,
         dosage_form: form.dosage_form || null,
         therapeutic_class: form.therapeutic_class?.trim() || null,
@@ -161,10 +162,19 @@ export default function EditItemPage() {
                 {DEPARTMENTS.map(d => <option key={d}>{d}</option>)}
               </select>
             </div>
-            <div><label className="form-label">Unit</label>
+            <div><label className="form-label">Base Unit (dispensing)</label>
               <select className="form-select" value={form.unit || 'Nos'} onChange={e => update('unit', e.target.value)}>
                 {UNITS.map(u => <option key={u}>{u}</option>)}
               </select>
+            </div>
+            <div><label className="form-label">Purchase Unit</label>
+              <select className="form-select" value={form.purchase_unit || form.unit || 'Nos'} onChange={e => update('purchase_unit', e.target.value)}>
+                {['Strip', 'Box', 'Bottle', 'Vial', 'Ampoule', 'Tube', 'Packet', 'Bag', 'Can', 'Roll', ...UNITS].filter((v, i, a) => a.indexOf(v) === i).map(u => <option key={u}>{u}</option>)}
+              </select>
+            </div>
+            <div><label className="form-label">Conversion Factor</label>
+              <input type="number" min="1" step="1" className="form-input" value={form.conversion_factor || 1} onChange={e => update('conversion_factor', e.target.value)} placeholder="e.g. 10 (1 strip = 10 tablets)" />
+              <span className="text-[10px] text-gray-500 mt-0.5 block">1 {form.purchase_unit || 'purchase unit'} = {form.conversion_factor || 1} {form.unit || 'base unit'}</span>
             </div>
             <div><label className="form-label">Strength</label><input className="form-input" value={form.strength || ''} onChange={e => update('strength', e.target.value)} /></div>
           </div>

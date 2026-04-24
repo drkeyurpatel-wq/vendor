@@ -68,18 +68,61 @@ export default function ConsumptionUploadPage() {
     const reader = new FileReader()
     reader.onload = (ev) => {
       const text = ev.target?.result as string
-      const rows = text.split('\n').map(r => r.split(',').map(c => c.trim().replace(/^"|"$/g, '')))
-      const headers = rows[0]?.map(h => h.toLowerCase())
-      if (!headers) return
 
-      const parsed = rows.slice(1).filter(r => r.length >= 3 && r[0]).map(r => {
+      // ── Proper CSV parser: handles quoted fields with commas inside ──
+      function parseCSVLine(line: string): string[] {
+        const fields: string[] = []
+        let current = ''
+        let inQuotes = false
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i]
+          if (inQuotes) {
+            if (ch === '"' && line[i + 1] === '"') { current += '"'; i++; continue }
+            if (ch === '"') { inQuotes = false; continue }
+            current += ch
+          } else {
+            if (ch === '"') { inQuotes = true; continue }
+            if (ch === ',') { fields.push(current.trim()); current = ''; continue }
+            current += ch
+          }
+        }
+        fields.push(current.trim())
+        return fields
+      }
+
+      const rawLines = text.replace(/\r/g, '').split('\n').filter(l => l.trim())
+
+      // ── Auto-detect header row: find the line containing known eClinicalWorks column names ──
+      const KNOWN_HEADERS = ['sr. no', 'item name', 'closing balance', 'opening balance', 'issue qty']
+      let headerIdx = -1
+      for (let i = 0; i < Math.min(rawLines.length, 10); i++) {
+        const lower = rawLines[i].toLowerCase()
+        const matchCount = KNOWN_HEADERS.filter(h => lower.includes(h)).length
+        if (matchCount >= 3) { headerIdx = i; break }
+      }
+      if (headerIdx === -1) {
+        // Fallback: treat first row as header
+        headerIdx = 0
+        toast.error('Could not detect header row — check column mapping')
+      }
+
+      const headers = parseCSVLine(rawLines[headerIdx]).map(h => h.toLowerCase().trim())
+
+      const parsed = rawLines.slice(headerIdx + 1).filter(l => l.trim()).map(line => {
+        const fields = parseCSVLine(line)
         const obj: any = {}
-        headers.forEach((h, i) => { obj[h] = r[i] || '' })
+        headers.forEach((h, i) => { obj[h] = (fields[i] || '').replace(/&amp;/g, '&') })
         return obj
+      }).filter(row => {
+        // Filter out empty rows — must have at least sr. no or item name
+        const sr = row['sr. no'] || row['sr.no'] || ''
+        const name = row['item name'] || ''
+        return sr || name
       })
+
       setCsvPreview(parsed)
       setMode('csv')
-      toast.success(`${parsed.length} rows parsed from CSV`)
+      toast.success(`${parsed.length} rows parsed from CSV (header at row ${headerIdx + 1})`)
     }
     reader.readAsText(file)
   }
@@ -115,8 +158,8 @@ export default function ConsumptionUploadPage() {
         // CSV mode — resolve items client-side, then send to API
         for (const row of csvPreview) {
           const code = row.item_code || row.code || ''
-          const name = row.item_name || row.generic_name || row.name || ''
-          const qty = parseFloat(row.quantity || row.qty || '0')
+          const name = row['item name'] || row.item_name || row.generic_name || row.name || ''
+          const qty = parseFloat(row['issue qty'] || row.quantity || row.qty || '0')
           if (qty <= 0) continue
 
           let itemId = null

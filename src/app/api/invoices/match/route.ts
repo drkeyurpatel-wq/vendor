@@ -59,6 +59,15 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     })
   }
 
+  // ── Fetch PO status to determine match logic ──
+  const { data: poData } = await supabase
+    .from('purchase_orders')
+    .select('status')
+    .eq('id', poId)
+    .single()
+
+  const isShortClosed = poData?.status === 'short_closed'
+
   // ── Fetch PO line items ──
   const { data: poItems } = await supabase
     .from('purchase_order_items')
@@ -108,12 +117,15 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
   } catch { /* table doesn't exist */ }
 
   // ── Build match items using business-rules.ts ──
+  // For short_closed POs: match invoice qty against sum(GRN accepted qty), not original PO ordered qty
+  // For fully_received POs: match against PO ordered qty (standard 3-way match)
   const matchItems: MatchLineItem[] = poItems.map((po: any) => {
     const grnAccepted = grnQtyMap.get(po.item_id) || 0
     const invItem = invoiceItemsMap.get(po.item_id)
+    const baselineQty = isShortClosed ? grnAccepted : (po.ordered_qty || 0)
     return {
       item_id: po.item_id,
-      po_qty: po.ordered_qty || 0,
+      po_qty: baselineQty,
       po_rate: po.rate || 0,
       grn_accepted_qty: grnAccepted,
       // If no invoice line items table, use GRN qty and PO rate as invoice values

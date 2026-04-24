@@ -421,6 +421,11 @@ export default function GRNForm() {
       setLoading(false)
       return
     }
+    if (poRecheck?.status === 'short_closed') {
+      toast.error('This PO has been short-closed. Cannot create another GRN.')
+      setLoading(false)
+      return
+    }
     if (poRecheck?.status === 'cancelled') {
       toast.error('This PO has been cancelled. Cannot create GRN.')
       setLoading(false)

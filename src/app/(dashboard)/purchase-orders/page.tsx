@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { Plus } from 'lucide-react'
 import POListClient from './POListClient'
 
-const STATUSES = ['pending_approval', 'approved', 'sent_to_vendor', 'partially_received', 'fully_received', 'cancelled']
+const STATUSES = ['pending_approval', 'approved', 'sent_to_vendor', 'partially_received', 'fully_received', 'short_closed', 'cancelled']
 
 export const dynamic = 'force-dynamic'
 

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Send, XCircle, Copy, Lock, Truck, Printer, RotateCcw } from 'lucide-react'
+import { Send, XCircle, Copy, Lock, Truck, Printer, RotateCcw, PackageX } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
 import { fireNotification } from '@/lib/notifications'
@@ -19,18 +19,20 @@ interface Props {
   centreId: string
 }
 
-type DialogType = 'send_vendor' | 'cancel' | 'close' | 'reopen' | null
+type DialogType = 'send_vendor' | 'cancel' | 'close' | 'reopen' | 'short_close' | null
 
 export default function POStatusActions({ poId, poNumber, currentStatus, vendorEmail, vendorPhone, userRole, centreId }: Props) {
   const router = useRouter()
   const supabase = createClient()
   const [dialog, setDialog] = useState<DialogType>(null)
   const [comment, setComment] = useState('')
+  const [shortCloseReason, setShortCloseReason] = useState('')
 
   const canManage = ['group_admin', 'group_cao', 'unit_cao', 'unit_purchase_manager'].includes(userRole)
-  const canCancel = ['group_admin', 'group_cao', 'unit_cao'].includes(userRole) && !['cancelled', 'closed', 'fully_received'].includes(currentStatus)
+  const canCancel = ['group_admin', 'group_cao', 'unit_cao'].includes(userRole) && !['cancelled', 'closed', 'fully_received', 'short_closed'].includes(currentStatus)
   const canSendToVendor = currentStatus === 'approved' && canManage
   const canClose = currentStatus === 'fully_received' && canManage
+  const canShortClose = currentStatus === 'partially_received' && ['group_admin', 'group_cao', 'unit_cao'].includes(userRole)
   const canReopen = currentStatus === 'cancelled' && ['group_admin'].includes(userRole)
 
   async function updateStatus(newStatus: string) {
@@ -38,6 +40,7 @@ export default function POStatusActions({ poId, poNumber, currentStatus, vendorE
       status: newStatus,
       ...(newStatus === 'cancelled' ? { cancelled_at: new Date().toISOString(), cancellation_reason: comment } : {}),
       ...(newStatus === 'closed' ? { closed_at: new Date().toISOString() } : {}),
+      ...(newStatus === 'short_closed' ? { short_closed_at: new Date().toISOString(), short_close_reason: shortCloseReason + (comment ? ` — ${comment}` : '') } : {}),
       updated_at: new Date().toISOString(),
     }).eq('id', poId)
 
@@ -118,6 +121,12 @@ export default function POStatusActions({ poId, poNumber, currentStatus, vendorE
           </button>
         )}
 
+        {canShortClose && (
+          <button onClick={() => setDialog('short_close')} className="text-sm px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors font-medium">
+            <PackageX size={14} className="inline mr-1" /> Short Close
+          </button>
+        )}
+
         {canReopen && (
           <button onClick={() => setDialog('reopen')} className="text-sm px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors font-medium">
             <RotateCcw size={14} className="inline mr-1" /> Reopen
@@ -192,6 +201,50 @@ export default function POStatusActions({ poId, poNumber, currentStatus, vendorE
         showCommentBox comment={comment} onCommentChange={setComment}
         onConfirm={() => updateStatus('closed')}
       />
+
+      {/* Short Close */}
+      {dialog === 'short_close' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => { setDialog(null); setShortCloseReason(''); setComment('') }}>
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Short Close PO</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Close PO {poNumber} at current received quantities. The vendor will not be expected to deliver remaining items. Invoice can be raised against actual received qty.
+            </p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Reason (required)</label>
+            <select
+              value={shortCloseReason}
+              onChange={e => setShortCloseReason(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="">Select reason...</option>
+              <option value="Vendor unable to supply">Vendor unable to supply</option>
+              <option value="No longer required">No longer required</option>
+              <option value="Quality issue">Quality issue</option>
+              <option value="Alternate vendor sourced">Alternate vendor sourced</option>
+              <option value="Budget constraints">Budget constraints</option>
+              <option value="Other">Other</option>
+            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Additional notes {shortCloseReason === 'Other' ? '(required)' : '(optional)'}</label>
+            <textarea
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              rows={2}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Additional context..."
+            />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => { setDialog(null); setShortCloseReason(''); setComment('') }} className="btn-secondary text-sm">Cancel</button>
+              <button
+                onClick={() => updateStatus('short_closed')}
+                disabled={!shortCloseReason || (shortCloseReason === 'Other' && !comment.trim())}
+                className="text-sm px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Short Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Reopen */}
       <ConfirmDialog

@@ -220,6 +220,9 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
               {item.level2_unit && <DetailRow label="Level 2" value={`${item.level2_unit} (${item.level2_qty_per_unit} per L1)`} />}
               {item.level3_unit && <DetailRow label="Level 3" value={`${item.level3_unit} (${item.level3_qty_per_unit} per L2)`} />}
               <DetailRow label="Purchase Unit" value={item.purchase_unit} />
+              {item.conversion_factor && item.conversion_factor > 1 && (
+                <DetailRow label="Conversion" value={`1 ${item.purchase_unit || 'purchase unit'} = ${item.conversion_factor} ${item.unit || 'base unit'}`} />
+              )}
               <DetailRow label="Receipt Unit" value={item.receipt_unit} />
               <DetailRow label="Issue Unit" value={item.issue_unit} />
               <DetailRow label="Conversion Factor" value={item.qty_conversion !== 1 ? item.qty_conversion : null} />

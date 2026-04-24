@@ -152,7 +152,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
 
   async function addItem(selected: {
     id: string; item_code: string; generic_name: string; unit: string; gst_percent: number;
-    hsn_code?: string; manufacturer?: string; purchase_unit?: string; qty_conversion?: number; mrp?: number;
+    hsn_code?: string; manufacturer?: string; purchase_unit?: string; conversion_factor?: number; qty_conversion?: number; mrp?: number;
     default_rate?: number; l_rank?: number | null
   }) {
     // Warn if item is not mapped to this vendor — offer to map
@@ -174,7 +174,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
     }
 
     const contractRate = contractRates.get(selected.id) ?? null
-    const conversionFactor = selected.qty_conversion || 1
+    const conversionFactor = selected.conversion_factor || selected.qty_conversion || 1
     const purchaseUnit = selected.purchase_unit || selected.unit
 
     // Fetch last 3 PO rates for this vendor + item (for price fence)

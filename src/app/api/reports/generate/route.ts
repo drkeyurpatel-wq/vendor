@@ -59,7 +59,7 @@ async function generateSpendAnalysis(supabase: any, format: string, filters: any
   let query = supabase
     .from('purchase_orders')
     .select('po_number, po_date, total_amount, status, vendor:vendors(legal_name, vendor_code), centre:centres(code, name)')
-    .in('status', ['approved', 'sent_to_vendor', 'partially_received', 'fully_received'])
+    .in('status', ['approved', 'sent_to_vendor', 'partially_received', 'fully_received', 'short_closed'])
     .is('deleted_at', null)
     .order('po_date', { ascending: false })
     .limit(1000)

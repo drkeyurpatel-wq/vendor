@@ -77,41 +77,12 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
     .limit(1)
     .single()
 
-  // Check for backorder PO created from this GRN's short delivery
-  const { data: backorderPO } = grn.po_id ? await supabase
-    .from('purchase_orders')
-    .select('id, po_number, status, total_amount')
-    .like('notes', `[BACKORDER:${grn.po_id}]%`)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single() : { data: null }
-
   return (
     <div>
       {/* Back link */}
       <Link href="/grn" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4">
         <ArrowLeft size={14} /> Back to GRNs
       </Link>
-
-      {/* Backorder PO banner */}
-      {backorderPO && (
-        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-2">
-            <AlertTriangle size={16} className="text-amber-600" />
-            <div>
-              <span className="text-sm font-semibold text-amber-800">Backorder PO created for short-delivered items</span>
-              <p className="text-xs text-amber-600 mt-0.5">
-                {formatCurrency(backorderPO.total_amount)} · Status: {backorderPO.status?.replace(/_/g, ' ')}
-              </p>
-            </div>
-          </div>
-          <Link href={`/purchase-orders/${backorderPO.id}`}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors">
-            View {backorderPO.po_number}
-          </Link>
-        </div>
-      )}
 
       {/* Header card */}
       <div className="card p-6 mb-6">
@@ -179,7 +150,7 @@ export default async function GRNDetailPage({ params }: { params: Promise<{ id: 
           grnId={grn.id} grnNumber={grn.grn_number} currentStatus={grn.status}
           qualityStatus={grn.quality_status} poId={grn.po_id} vendorId={grn.vendor_id}
           centreId={grn.centre_id} userRole={role}
-          lineItems={items.map((i: any) => ({ item_id: i.item_id, received_qty: i.received_qty || 0, accepted_qty: i.accepted_qty || 0, rate: i.rate }))}
+          lineItems={items.map((i: any) => ({ item_id: i.item_id, received_qty: i.received_qty || 0, accepted_qty: i.accepted_qty || 0, rate: i.rate, conversion_factor: i.conversion_factor || 1 }))}
         />
       </div>
 
