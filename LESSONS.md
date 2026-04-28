@@ -77,3 +77,8 @@
 - **Root Cause**: Reorder API inserted PO items with only 7 fields. Missing `pending_qty`, `received_qty`, `net_rate`, `gst_amount`, and all GST breakdown fields. Could cause failures in GRN verify and 3-way match.
 - **Fix**: Added complete field set matching PO create pattern with proper GST computation.
 - **Prevention**: Any code that creates `purchase_order_items` must include the full field set. The downstream P2P chain (GRN→Invoice→3-way match) depends on these fields.
+
+### L014 — Payment batch creation crashed on CHECK constraint (Apr 2026)
+- **Root Cause**: Code inserted `status: 'pending_approval'` but DB CHECK only allowed `draft/proposed/approved/processed/cancelled`. Payment mode `dd` and `cash` also not in CHECK. Every batch creation attempt would fail.
+- **Fix**: Expanded both CHECK constraints via migration. No code changes needed.
+- **Prevention**: When adding a new table with CHECK constraints, verify the UI status values match the DB enum. Run at least one E2E test before declaring a feature ready.
