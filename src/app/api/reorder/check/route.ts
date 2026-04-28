@@ -137,16 +137,31 @@ export async function POST(request: NextRequest) {
       if (poError || !po) { errors.push(`${group.centre_code}/${group.vendor_code}: ${poError?.message}`); continue }
 
       // Create PO items
-      const poItems = group.items.map((item, idx) => ({
-        po_id: po.id,
-        item_id: item.item_id,
-        ordered_qty: item.order_qty,
-        unit: item.unit,
-        rate: item.rate,
-        gst_percent: gstPercent,
-        total_amount: item.line_total,
-        line_number: idx + 1,
-      }))
+      const poItems = group.items.map((item, idx) => {
+        const gstAmount = Math.round(item.order_qty * item.rate * (gstPercent / 100) * 100) / 100
+        return {
+          po_id: po.id,
+          item_id: item.item_id,
+          ordered_qty: item.order_qty,
+          pending_qty: item.order_qty,
+          received_qty: 0,
+          cancelled_qty: 0,
+          free_qty: 0,
+          unit: item.unit,
+          rate: item.rate,
+          net_rate: item.rate,
+          gst_percent: gstPercent,
+          gst_amount: gstAmount,
+          cgst_percent: gstPercent / 2,
+          sgst_percent: gstPercent / 2,
+          igst_percent: 0,
+          cgst_amount: Math.round(gstAmount / 2 * 100) / 100,
+          sgst_amount: Math.round(gstAmount / 2 * 100) / 100,
+          igst_amount: 0,
+          total_amount: item.line_total,
+          line_number: idx + 1,
+        }
+      })
 
       const { error: itemsError } = await supabase.from('purchase_order_items').insert(poItems)
       if (itemsError) { errors.push(`${poNumber} items: ${itemsError.message}`) }
