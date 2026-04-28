@@ -124,9 +124,27 @@ export default function POListClient({ pos, userRole }: { pos: PO[]; userRole: s
 
       if (original.items?.length > 0) {
         const newItems = original.items.map((item: any) => ({
-          po_id: newPO.id, item_id: item.item_id, quantity: item.quantity,
-          unit_rate: item.unit_rate, discount_pct: item.discount_pct, gst_pct: item.gst_pct,
-          net_rate: item.net_rate, line_total: item.line_total, specifications: item.specifications,
+          po_id: newPO.id, item_id: item.item_id,
+          ordered_qty: item.ordered_qty, pending_qty: item.ordered_qty,
+          received_qty: 0, cancelled_qty: 0,
+          free_qty: item.free_qty || 0,
+          unit: item.unit, purchase_unit: item.purchase_unit || item.unit,
+          conversion_factor: item.conversion_factor || 1,
+          base_qty: item.base_qty || item.ordered_qty,
+          rate: item.rate, net_rate: item.net_rate || item.rate,
+          mrp: item.mrp || null,
+          hsn_code: item.hsn_code || null, manufacturer: item.manufacturer || null,
+          trade_discount_percent: item.trade_discount_percent || 0,
+          trade_discount_amount: item.trade_discount_amount || 0,
+          cash_discount_percent: item.cash_discount_percent || 0,
+          special_discount_percent: item.special_discount_percent || 0,
+          gst_percent: item.gst_percent, gst_amount: item.gst_amount,
+          cgst_percent: item.cgst_percent || 0, sgst_percent: item.sgst_percent || 0,
+          igst_percent: item.igst_percent || 0,
+          cgst_amount: item.cgst_amount || 0, sgst_amount: item.sgst_amount || 0,
+          igst_amount: item.igst_amount || 0,
+          total_amount: item.total_amount,
+          delivery_date: item.delivery_date || null,
         }))
         await supabase.from('purchase_order_items').insert(newItems)
       }
