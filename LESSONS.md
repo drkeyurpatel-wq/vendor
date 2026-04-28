@@ -62,3 +62,18 @@
 
 ---
 # Add new lessons below this line. Increment L-number. Follow the format above.
+
+### L011 — PO Duplicate used wrong column names (Apr 2026)
+- **Root Cause**: handleDuplicate was written against an old schema. Used `quantity`, `unit_rate`, `discount_pct`, `gst_pct`, `line_total`, `specifications` — none exist in `purchase_order_items`. Every duplicated PO had broken/empty line items.
+- **Fix**: Aligned insert with PO create page's column names: `ordered_qty`, `rate`, `gst_percent`, `total_amount`, plus all GST breakdown and discount fields.
+- **Prevention**: When building CRUD operations for the same table, always reference the CREATE page's insert pattern. Never assume column names from memory — check the working insert first.
+
+### L012 — PO Edit silently destroyed line item data (Apr 2026)
+- **Root Cause**: Edit save hardcoded `conversion_factor=1`, `free_qty=0`, `net_rate=rate`, zeroed all discounts, assumed 50/50 CGST/SGST, and dropped `purchase_unit`, `base_qty`, `mrp`, `hsn_code`, `manufacturer`, `delivery_date`.
+- **Fix**: Preserved all fields from LineItem state. Added IGST-aware GST split logic.
+- **Prevention**: Edit pages must preserve ALL fields from the entity being edited. Compare edit insert vs create insert line-by-line before shipping.
+
+### L013 — Auto-reorder PO items missing downstream fields (Apr 2026)
+- **Root Cause**: Reorder API inserted PO items with only 7 fields. Missing `pending_qty`, `received_qty`, `net_rate`, `gst_amount`, and all GST breakdown fields. Could cause failures in GRN verify and 3-way match.
+- **Fix**: Added complete field set matching PO create pattern with proper GST computation.
+- **Prevention**: Any code that creates `purchase_order_items` must include the full field set. The downstream P2P chain (GRN→Invoice→3-way match) depends on these fields.
