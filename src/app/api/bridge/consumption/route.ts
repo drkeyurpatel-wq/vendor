@@ -72,24 +72,26 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     }
 
     const qtyToDeduct = line.qty || 1
-    if (stock.current_stock < qtyToDeduct) {
+    // current_stock is nullable — a NULL balance means "no stock", not "unlimited".
+    const availableStock = stock.current_stock ?? 0
+    if (availableStock < qtyToDeduct) {
       failed.push({
-        item_code: line.item_code, reason: `Insufficient stock: ${stock.current_stock} available, ${qtyToDeduct} requested`,
-        current_stock: stock.current_stock,
+        item_code: line.item_code, reason: `Insufficient stock: ${availableStock} available, ${qtyToDeduct} requested`,
+        current_stock: availableStock,
       })
       // Still deduct what's available
-      if (stock.current_stock > 0) {
+      if (availableStock > 0) {
         await supabase.from('item_centre_stock').update({
           current_stock: 0,
         }).eq('id', stock.id)
-        deducted.push({ item_code: line.item_code, qty_deducted: stock.current_stock, partial: true })
+        deducted.push({ item_code: line.item_code, qty_deducted: availableStock, partial: true })
       }
       continue
     }
 
     // Deduct stock
     await supabase.from('item_centre_stock').update({
-      current_stock: stock.current_stock - qtyToDeduct,
+      current_stock: availableStock - qtyToDeduct,
     }).eq('id', stock.id)
 
     deducted.push({ item_code: line.item_code, name: vpmsItem.generic_name, qty_deducted: qtyToDeduct })
@@ -103,9 +105,10 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
         .eq('batch_number', line.batch_number)
         .single()
 
-      if (batchStock && batchStock.qty_available >= qtyToDeduct) {
+      const batchAvailable = batchStock?.qty_available ?? 0
+      if (batchStock && batchAvailable >= qtyToDeduct) {
         await supabase.from('batch_stock').update({
-          qty_available: batchStock.qty_available - qtyToDeduct,
+          qty_available: batchAvailable - qtyToDeduct,
         }).eq('id', batchStock.id)
       }
     }

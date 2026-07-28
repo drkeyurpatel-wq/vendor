@@ -26,8 +26,8 @@ interface VendorDocument {
   document_type: string
   file_name: string
   file_path: string
-  is_verified: boolean
-  created_at: string
+  is_verified: boolean | null
+  created_at: string | null
 }
 
 export default function VendorDocumentsPage() {
@@ -280,7 +280,7 @@ export default function VendorDocumentsPage() {
                       <span className="text-sm text-gray-900">{doc.file_name}</span>
                     </td>
                     <td className="text-sm text-gray-600">
-                      {formatDate(doc.created_at)}
+                      {doc.created_at ? formatDate(doc.created_at) : '—'}
                     </td>
                     <td>
                       {doc.is_verified ? (

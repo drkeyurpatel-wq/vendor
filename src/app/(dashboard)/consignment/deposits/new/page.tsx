@@ -125,7 +125,7 @@ export default function NewConsignmentDepositPage() {
 
     const { data: deposit, error } = await supabase.from('consignment_deposits').insert({
       deposit_number: depNumber, vendor_id: vendorId, centre_id: centreId,
-      challan_number: challanNumber || null, challan_date: challanDate || null,
+      challan_number: challanNumber || null, challan_date: challanDate || undefined,
       received_by: user?.id, location: location || null,
       notes: notes || null, status: 'active',
     }).select().single()

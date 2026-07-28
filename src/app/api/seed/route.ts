@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireApiAuthWithProfile } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import { withApiErrorHandler } from '@/lib/api-error-handler'
+import type { TablesInsert } from '@/types/supabase'
 
 // ─── Master Data: Centres ───────────────────────────────────
 const CENTRES = [
@@ -237,7 +238,7 @@ export const POST = withApiErrorHandler(async () => {
       bank_account_no: null,
       bank_ifsc: null,
     }
-    const { error } = await supabase.from('vendors').insert(payload)
+    const { error } = await supabase.from('vendors').insert(payload as TablesInsert<'vendors'>)
     if (error) results.push(`Vendor ${v.vendor_code} error: ${error.message}`)
     else vendorsAdded++
   }
@@ -351,6 +352,7 @@ export const POST = withApiErrorHandler(async () => {
           item_id: l.item_id,
           ordered_qty: l.quantity,
           pending_qty: l.quantity,
+          unit: 'NOS',
           rate: l.unit_rate,
           gst_percent: l.gst_percent,
           gst_amount: l.quantity * l.unit_rate * (l.gst_percent / 100),

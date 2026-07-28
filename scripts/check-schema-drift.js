@@ -1,120 +1,67 @@
 #!/usr/bin/env node
-
 /**
- * H1 VPMS — Schema Drift Checker
- * 
- * Compares SQL migration files against src/types/database.ts
- * to catch columns that exist in the database but are missing
- * from TypeScript interfaces.
- * 
- * Usage: node scripts/check-schema-drift.js
- * 
- * Run after adding any SQL migration to verify types stay in sync.
- * Add to CI: exits with code 1 if drift is found.
+ * H1 VPMS — Schema Drift Gate
+ *
+ * Verifies that src/types/supabase.ts is exactly what the generator produces
+ * from the committed schema snapshot. If someone hand-edits the generated
+ * types, or refreshes the snapshot without regenerating, this fails.
+ *
+ * This is the guard that replaces the old hand-written type file. That file
+ * drifted from the database and declared ~90 columns that did not exist,
+ * which is how invoice line items, purchase indents, rate contracts and
+ * payment batches all ended up silently failing to write in production.
+ *
+ * Usage:  npm run check:drift
+ *
+ * To pick up a real schema change:
+ *   1. Refresh schema.tsv / schema-fks.tsv from the live database
+ *   2. npm run gen:types
+ *   3. Commit the snapshot AND the regenerated types together
  */
-
+const { execFileSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 
-const SQL_DIR = path.join(__dirname, '..', 'sql')
-const TYPES_FILE = path.join(__dirname, '..', 'src', 'types', 'database.ts')
+const ROOT = path.join(__dirname, '..')
+const GENERATED = path.join(ROOT, 'src', 'types', 'supabase.ts')
 
-// Map SQL table names to TypeScript interface names
-const TABLE_TO_INTERFACE = {
-  items: 'Item',
-  vendors: 'Vendor',
-  purchase_orders: 'PurchaseOrder',
-  purchase_order_items: 'PurchaseOrderItem',
-  grns: 'GRN',
-  grn_items: 'GRNItem',
-  invoices: 'Invoice',
-  invoice_items: 'InvoiceItem',
-  centres: 'Centre',
-  user_profiles: 'UserProfile',
-  item_centre_stock: 'ItemCentreStock',
-  payment_batches: 'PaymentBatch',
-  purchase_indents: 'PurchaseIndent',
-  rate_contracts: 'RateContract',
-  rate_contract_items: 'RateContractItem',
-  vendor_performance: 'VendorPerformance',
-  activity_log: 'ActivityLog',
-  stock_transfers: 'StockTransfer',
-  stock_transfer_items: 'StockTransferItem',
-  debit_notes: 'DebitNote',
-  credit_notes: 'CreditNote',
-}
-
-// ─── Extract columns from SQL migrations ─────────────────────
-
-function extractSQLColumns(tableName) {
-  const columns = new Set()
-  const sqlFiles = fs.readdirSync(SQL_DIR).filter(f => f.endsWith('.sql'))
-  
-  for (const file of sqlFiles) {
-    const content = fs.readFileSync(path.join(SQL_DIR, file), 'utf-8')
-    const regex = new RegExp(
-      `ALTER TABLE ${tableName} ADD COLUMN(?:\\s+IF NOT EXISTS)?\\s+(\\w+)`,
-      'gi'
-    )
-    let match
-    while ((match = regex.exec(content)) !== null) {
-      columns.add(match[1].toLowerCase())
-    }
-  }
-  return columns
-}
-
-// ─── Extract fields from TypeScript interface ────────────────
-
-function extractTypeFields(interfaceName) {
-  const content = fs.readFileSync(TYPES_FILE, 'utf-8')
-  const fields = new Set()
-  
-  // Find the interface block
-  const regex = new RegExp(`export interface ${interfaceName}\\s*\\{([^}]+)\\}`, 's')
-  const match = content.match(regex)
-  if (!match) return fields
-  
-  const body = match[1]
-  // Match field names (handles optional ?)
-  const fieldRegex = /^\s+(\w+)\??:/gm
-  let fieldMatch
-  while ((fieldMatch = fieldRegex.exec(body)) !== null) {
-    fields.add(fieldMatch[1].toLowerCase())
-  }
-  return fields
-}
-
-// ─── Main ────────────────────────────────────────────────────
-
-let totalDrift = 0
-const driftReport = []
-
-for (const [table, iface] of Object.entries(TABLE_TO_INTERFACE)) {
-  const sqlCols = extractSQLColumns(table)
-  if (sqlCols.size === 0) continue
-  
-  const typeFields = extractTypeFields(iface)
-  if (typeFields.size === 0) {
-    console.warn(`⚠️  Interface ${iface} not found in types/database.ts`)
-    continue
-  }
-  
-  const missing = [...sqlCols].filter(col => !typeFields.has(col))
-  
-  if (missing.length > 0) {
-    totalDrift += missing.length
-    driftReport.push({ table, interface: iface, missing })
-    console.log(`❌ ${iface} (${table}): ${missing.length} missing`)
-    missing.forEach(col => console.log(`   - ${col}`))
-  }
-}
-
-if (totalDrift === 0) {
-  console.log('✅ No schema drift detected — types match all SQL migrations')
-  process.exit(0)
-} else {
-  console.log(`\n❌ DRIFT DETECTED: ${totalDrift} columns across ${driftReport.length} tables`)
-  console.log('   Fix: add missing fields to src/types/database.ts')
+function fail(msg) {
+  console.error(`\n\u2717 SCHEMA DRIFT: ${msg}\n`)
   process.exit(1)
 }
+
+if (!fs.existsSync(GENERATED)) fail('src/types/supabase.ts is missing. Run: npm run gen:types')
+
+const before = fs.readFileSync(GENERATED, 'utf8')
+try {
+  execFileSync('node', [path.join(__dirname, 'gen-db-types.js')], { stdio: 'pipe', cwd: ROOT })
+} catch (err) {
+  fail(`type generator failed to run:\n${err.stderr || err.message}`)
+}
+const after = fs.readFileSync(GENERATED, 'utf8')
+
+if (before !== after) {
+  fs.writeFileSync(GENERATED, before) // don't leave a dirty tree
+  fail(
+    'src/types/supabase.ts does not match the schema snapshot.\n' +
+      '  Types were hand-edited, or the snapshot changed without regenerating.\n' +
+      '  Run `npm run gen:types` and commit the result.'
+  )
+}
+
+// Guard against the old failure mode returning.
+const domainTypes = path.join(ROOT, 'src', 'types', 'database.ts')
+if (fs.existsSync(domainTypes)) {
+  const src = fs.readFileSync(domainTypes, 'utf8')
+  const handWritten = [...src.matchAll(/^export interface (\w+) \{/gm)].map((m) => m[1])
+  if (handWritten.length > 0) {
+    fail(
+      `src/types/database.ts hand-declares table interfaces: ${handWritten.join(', ')}.\n` +
+        "  Table shapes must be aliases onto ./supabase.ts (Tables<'table_name'>).\n" +
+        '  Hand-written table types are what caused the original schema drift.'
+    )
+  }
+}
+
+const tableCount = (after.match(/\n {6}\w+: \{\n {8}Row: \{/g) || []).length
+console.log(`\u2713 Schema in sync \u2014 ${tableCount} tables, generated types match snapshot`)

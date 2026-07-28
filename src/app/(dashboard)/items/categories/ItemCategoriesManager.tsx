@@ -13,7 +13,7 @@ interface ItemCategory {
   name: string
   code: string
   parent_id: string | null
-  is_active: boolean
+  is_active: boolean | null
 }
 
 interface Props {
@@ -67,7 +67,7 @@ export default function ItemCategoriesManager({ initialCategories, itemCountMap 
 
   const openEdit = (cat: ItemCategory) => {
     setEditingId(cat.id)
-    setForm({ name: cat.name, code: cat.code, parent_id: cat.parent_id || '', is_active: cat.is_active })
+    setForm({ name: cat.name, code: cat.code, parent_id: cat.parent_id || '', is_active: cat.is_active ?? true })
     setErrors({})
     setShowForm(true)
   }

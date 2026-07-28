@@ -13,6 +13,7 @@ interface POOption {
   po_number: string
   po_date: string
   total_amount: number
+  centre_id: string
   centre: { code: string } | null
 }
 
@@ -26,6 +27,7 @@ export default function VendorInvoiceUploadPage() {
   const [submitting, setSubmitting] = useState(false)
   const [step, setStep] = useState(0)
   const [vendorId, setVendorId] = useState<string | null>(null)
+  const [creditDays, setCreditDays] = useState<number>(30)
   const [vendorName, setVendorName] = useState('')
   const [isVendor, setIsVendor] = useState(true)
 
@@ -70,8 +72,8 @@ export default function VendorInvoiceUploadPage() {
 
       const { data: vendor } = await supabase
         .from('vendors')
-        .select('id, legal_name, vendor_code')
-        .eq('primary_contact_email', user.email)
+        .select('id, legal_name, vendor_code, credit_period_days')
+        .eq('primary_contact_email', user.email ?? '')
         .single()
 
       if (!vendor) {
@@ -81,12 +83,13 @@ export default function VendorInvoiceUploadPage() {
       }
 
       setVendorId(vendor.id)
+      setCreditDays(vendor.credit_period_days ?? 30)
       setVendorName(`${vendor.legal_name} (${vendor.vendor_code})`)
 
       // Fetch POs eligible for invoice upload
       const { data: vendorPOs } = await supabase
         .from('purchase_orders')
-        .select('id, po_number, po_date, total_amount, centre:centres(code)')
+        .select('id, po_number, po_date, total_amount, centre_id, centre:centres(code)')
         .eq('vendor_id', vendor.id)
         .in('status', ['approved', 'sent_to_vendor', 'partially_received', 'fully_received'])
         .is('deleted_at', null)
@@ -133,18 +136,37 @@ export default function VendorInvoiceUploadPage() {
 
     setSubmitting(true)
     try {
+      // invoice_ref, centre_id and due_date are all NOT NULL. This insert
+      // previously omitted every one of them, so no vendor-submitted invoice
+      // was ever accepted.
+      const { count: invCount } = await supabase
+        .from('invoices')
+        .select('*', { count: 'exact', head: true })
+      const now = new Date()
+      const yyMM = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, '0')}`
+      const centreCode = selectedPO.centre?.code || 'XXX'
+      const invoiceRef = `H1-${centreCode}-INV-${yyMM}-${String((invCount ?? 0) + 1).padStart(4, '0')}`
+
+      const due = new Date(invoiceDate)
+      due.setDate(due.getDate() + creditDays)
+      const dueDate = due.toISOString().split('T')[0]
+
       // Create invoice record
       const { data: invoice, error: invError } = await supabase
         .from('invoices')
         .insert({
+          invoice_ref: invoiceRef,
+          centre_id: selectedPO.centre_id,
+          due_date: dueDate,
+          credit_period_days: creditDays,
           vendor_id: vendorId,
           po_id: selectedPO.id,
           vendor_invoice_no: vendorInvoiceNo,
           vendor_invoice_date: invoiceDate,
           subtotal: parseFloat(subtotal) || 0,
-          cgst_amount_split: parseFloat(cgst) || 0,
-          sgst_amount_split: parseFloat(sgst) || 0,
-          igst_amount_split: parseFloat(igst) || 0,
+          cgst_amount: parseFloat(cgst) || 0,
+          sgst_amount: parseFloat(sgst) || 0,
+          igst_amount: parseFloat(igst) || 0,
           gst_amount: (parseFloat(cgst) || 0) + (parseFloat(sgst) || 0) + (parseFloat(igst) || 0),
           total_amount: parseFloat(totalAmount),
           eway_bill_no: ewayBill || null,

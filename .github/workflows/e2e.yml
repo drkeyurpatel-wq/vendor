@@ -34,6 +34,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      # Fails if the generated DB types drift from the schema snapshot, or if
+      # anyone reintroduces hand-written table interfaces. This is the guard
+      # against the class of silent production write failures fixed in #schema-truth.
+      - run: npm run check:drift
       - run: npx tsc --noEmit
 
   # ── Step 2: Unit tests ──────────────────────────────────────

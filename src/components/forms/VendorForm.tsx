@@ -37,7 +37,7 @@ const defaultForm = {
   minimum_order_value: '', trade_discount_percent: '0', cash_discount_percent: '0', cash_discount_days: '',
   delivery_terms: '',
   tds_applicable: false, tds_section: '', tds_rate: '',
-  lower_tds_certificate: false, lower_tds_rate: '', lower_tds_valid_till: '',
+  has_lower_tds: false, lower_tds_certificate: '', lower_tds_rate: '', lower_tds_valid_till: '',
   tally_ledger_name: '', tally_group: '',
 }
 type FormState = typeof defaultForm
@@ -197,9 +197,9 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
         cash_discount_days: form.cash_discount_days ? parseInt(form.cash_discount_days) : null, delivery_terms: form.delivery_terms.trim() || null,
         tds_applicable: form.tds_applicable, tds_section: form.tds_applicable ? form.tds_section || null : null,
         tds_rate: form.tds_applicable && form.tds_rate ? parseFloat(form.tds_rate) : null,
-        lower_tds_certificate: form.lower_tds_certificate,
-        lower_tds_rate: form.lower_tds_certificate && form.lower_tds_rate ? parseFloat(form.lower_tds_rate) : null,
-        lower_tds_valid_till: form.lower_tds_certificate ? form.lower_tds_valid_till || null : null,
+        lower_tds_certificate: form.has_lower_tds ? form.lower_tds_certificate.trim() || null : null,
+        lower_tds_rate: form.has_lower_tds && form.lower_tds_rate ? parseFloat(form.lower_tds_rate) : null,
+        lower_tds_valid_till: form.has_lower_tds ? form.lower_tds_valid_till || null : null,
         tally_ledger_name: form.tally_ledger_name.trim() || null, tally_group: form.tally_group.trim() || null,
         approved_centres: selectedCentres.length > 0 && selectedCentres.length < centres.length ? selectedCentres : null,
         status: 'pending', onboarding_status: quickMode ? 'quick_draft' : 'complete',
@@ -338,8 +338,8 @@ export default function VendorForm({ mode = 'create', initialData }: { mode?: 'c
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div><label className="form-label">Section</label><select className="form-select" value={form.tds_section} onChange={e => update('tds_section', e.target.value)}><option value="">Select</option>{TDS_SECTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}</select></div>
                 <div><label className="form-label">Rate (%)</label><input type="number" className="form-input" {...fp('tds_rate')} step="0.01" min="0" max="30" /></div>
-                <div className="flex items-end"><label className="flex items-center gap-2 cursor-pointer pb-2"><input type="checkbox" checked={form.lower_tds_certificate as boolean} onChange={e => update('lower_tds_certificate', e.target.checked)} className="w-4 h-4 accent-teal-500" /><span className="text-sm">Lower TDS Cert</span></label></div>
-                {form.lower_tds_certificate && (<><div><label className="form-label">Lower Rate (%)</label><input type="number" className="form-input" {...fp('lower_tds_rate')} step="0.01" /></div><div><label className="form-label">Valid Till</label><input type="date" className="form-input" {...fp('lower_tds_valid_till')} /></div></>)}
+                <div className="flex items-end"><label className="flex items-center gap-2 cursor-pointer pb-2"><input type="checkbox" checked={form.has_lower_tds as boolean} onChange={e => update('has_lower_tds', e.target.checked)} className="w-4 h-4 accent-teal-500" /><span className="text-sm">Lower TDS Cert</span></label></div>
+                {form.has_lower_tds && (<><div><label className="form-label">Certificate No.</label><input className="form-input" {...fp('lower_tds_certificate')} placeholder="Certificate reference" /></div><div><label className="form-label">Lower Rate (%)</label><input type="number" className="form-input" {...fp('lower_tds_rate')} step="0.01" /></div><div><label className="form-label">Valid Till</label><input type="date" className="form-input" {...fp('lower_tds_valid_till')} /></div></>)}
               </div>
             )}
           </div>

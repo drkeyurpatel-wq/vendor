@@ -90,10 +90,15 @@ export default function PaymentScheduleActions({ payment, userRole }: { payment:
       }
 
       // Add invoice to batch
-      await supabase.from('payment_batch_items').insert({
+      if (!payment.vendor_id) {
+        toast.error('Cannot schedule: invoice has no vendor')
+        return
+      }
+      const { error: pbiErr } = await supabase.from('payment_batch_items').insert({
         batch_id: batch!.id, invoice_id: payment.id,
         amount: payment.total_amount, vendor_id: payment.vendor_id,
       })
+      if (pbiErr) { toast.error(pbiErr.message); return }
 
       // Update batch total
       const { data: items } = await supabase.from('payment_batch_items').select('amount').eq('batch_id', batch!.id)

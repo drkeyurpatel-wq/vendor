@@ -7,7 +7,7 @@ import { ArrowLeft, UserCheck, Plus, Loader2, Trash2, Calendar } from 'lucide-re
 import toast from 'react-hot-toast'
 import { cn } from '@/lib/utils'
 
-interface Delegation { id: string; delegator_id: string; delegate_id: string; start_date: string; end_date: string; reason: string | null; is_active: boolean; delegator?: any; delegate?: any }
+interface Delegation { id: string; delegator_id: string; delegate_id: string; start_date: string; end_date: string; reason: string | null; is_active: boolean | null; delegator?: any; delegate?: any }
 
 export default function DelegationsPage() {
   const supabase = createClient()

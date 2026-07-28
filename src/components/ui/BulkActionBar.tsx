@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, XCircle, Send, CreditCard, Loader2, X, Download } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
+import { dynamicTable } from '@/lib/supabase/dynamic'
 
 interface BulkAction {
   key: string
@@ -54,7 +55,7 @@ export default function BulkActionBar({ selectedIds, entityType, tableName, acti
     // Process in batches of 20 to avoid rate limits
     for (let i = 0; i < selectedIds.length; i += 20) {
       const batch = selectedIds.slice(i, i + 20)
-      const { error } = await supabase.from(tableName).update(updates).in('id', batch)
+      const { error } = await dynamicTable(supabase, tableName).update(updates).in('id', batch)
       if (error) { failCount += batch.length }
       else { successCount += batch.length }
     }

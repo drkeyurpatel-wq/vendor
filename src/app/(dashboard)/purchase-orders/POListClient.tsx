@@ -126,7 +126,7 @@ export default function POListClient({ pos, userRole }: { pos: PO[]; userRole: s
         const newItems = original.items.map((item: any) => ({
           po_id: newPO.id, item_id: item.item_id,
           ordered_qty: item.ordered_qty, pending_qty: item.ordered_qty,
-          received_qty: 0, cancelled_qty: 0,
+          received_qty: 0,
           free_qty: item.free_qty || 0,
           unit: item.unit, purchase_unit: item.purchase_unit || item.unit,
           conversion_factor: item.conversion_factor || 1,

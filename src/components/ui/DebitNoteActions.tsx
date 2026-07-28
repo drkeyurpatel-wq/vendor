@@ -7,6 +7,7 @@ import { CheckCircle2, Send, XCircle, CreditCard, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
 import { fireNotification } from '@/lib/notifications'
+import type { TablesUpdate } from '@/types/supabase'
 
 interface Props {
   debitNoteId: string
@@ -30,7 +31,7 @@ export default function DebitNoteActions({ debitNoteId, dnNumber, status, amount
   async function handleAction(action: string) {
     setLoading(true)
     try {
-      let updates: Record<string, any> = { updated_at: new Date().toISOString() }
+      let updates: TablesUpdate<'debit_notes'> = { updated_at: new Date().toISOString() }
 
       switch (action) {
         case 'approve':

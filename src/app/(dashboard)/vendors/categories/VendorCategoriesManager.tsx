@@ -13,7 +13,7 @@ interface VendorCategory {
   name: string
   code: string
   description: string | null
-  is_active: boolean
+  is_active: boolean | null
 }
 
 interface Props {
@@ -58,7 +58,7 @@ export default function VendorCategoriesManager({ initialCategories, vendorCount
 
   const openEdit = (cat: VendorCategory) => {
     setEditingId(cat.id)
-    setForm({ name: cat.name, code: cat.code, description: cat.description || '', is_active: cat.is_active })
+    setForm({ name: cat.name, code: cat.code, description: cat.description || '', is_active: cat.is_active ?? true })
     setErrors({})
     setShowForm(true)
   }

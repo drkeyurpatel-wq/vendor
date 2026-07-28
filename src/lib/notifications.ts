@@ -1,33 +1,36 @@
-import { createClient } from '@/lib/supabase/client'
-
 /**
- * Fire a notification into the notifications table (client-side).
- * The RealtimeNotificationBell picks it up via Supabase Realtime.
- * Non-blocking — never throws.
+ * Client-side notification dispatch.
  *
- * Columns: user_id, title, message, type, priority, entity_type, entity_id, is_read, created_by
- * NO 'action' or 'details' columns exist.
+ * This delegates to /api/notifications/trigger, which resolves the correct
+ * recipients by role and centre and writes one row per recipient.
+ *
+ * It deliberately does NOT insert into `notifications` directly: that table
+ * requires a non-null `user_id` (the recipient), which the client cannot
+ * resolve without reading other users' profiles. Writing directly here is
+ * what caused every notification insert to be rejected silently.
+ *
+ * Non-blocking — never throws.
  */
 export async function fireNotification(params: {
   action: string
   entity_type: string
   entity_id?: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
+  /** Optional explicit recipients; otherwise resolved by role on the server. */
+  recipient_ids?: string[]
+  /** Centre to scope recipients to. */
+  centre_id?: string
 }) {
   try {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    await supabase.from('notifications').insert({
-      type: params.action,
-      title: params.action.replace(/_/g, ' '),
-      message: params.details ? JSON.stringify(params.details) : null,
-      entity_type: params.entity_type,
-      entity_id: params.entity_id || null,
-      is_read: false,
-      created_by: user?.id || null,
-      priority: 'normal',
+    const res = await fetch('/api/notifications/trigger', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
     })
-  } catch {
-    // Silent — notifications are non-critical
+    if (!res.ok && process.env.NODE_ENV !== 'production') {
+      console.warn('fireNotification failed', res.status, await res.text())
+    }
+  } catch (err) {
+    if (process.env.NODE_ENV !== 'production') console.warn('fireNotification error', err)
   }
 }

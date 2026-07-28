@@ -49,7 +49,16 @@ export const GET = withApiErrorHandler(async (request: NextRequest) => {
     .limit(Math.min(limit, 1000))
 
   if (since) query = query.gte('updated_at', since)
-  if (category) query = query.eq('category_code', category)
+  if (category) {
+    // items has no category_code column — resolve the category id first.
+    const { data: cat } = await supabase
+      .from('item_categories')
+      .select('id')
+      .eq('code', category)
+      .maybeSingle()
+    if (!cat) return bridgeError('items_pull', `Unknown category code: ${category}`, 400)
+    query = query.eq('category_id', cat.id)
+  }
 
   const { data: items, error } = await query
   if (error) return bridgeError('items_pull', error.message, 500)

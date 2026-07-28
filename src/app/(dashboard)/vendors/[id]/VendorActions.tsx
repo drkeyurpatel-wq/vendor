@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Loader2, ShieldCheck, ShieldBan, ShieldAlert, Power } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { UserRole, VendorStatus } from '@/types/database'
+import type { TablesUpdate } from '@/types/supabase'
 
 interface Props {
   vendorId: string
@@ -34,10 +35,10 @@ export default function VendorActions({ vendorId, currentStatus, userRole }: Pro
   async function updateStatus(newStatus: VendorStatus, extra?: Record<string, unknown>) {
     setLoading(true)
     try {
-      const updatePayload: Record<string, unknown> = {
+      const updatePayload: TablesUpdate<'vendors'> = {
         status: newStatus,
         updated_at: new Date().toISOString(),
-        ...extra,
+        ...(extra as TablesUpdate<'vendors'>),
       }
 
       const { error } = await supabase

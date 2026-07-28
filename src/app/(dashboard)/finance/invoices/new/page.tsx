@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, FileText } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { isInterState, splitGst, lineTaxableAmount } from '@/lib/gst'
 import FieldError from '@/components/ui/FieldError'
 import InvoiceOCRUpload from '@/components/ui/InvoiceOCRUpload'
 import { format } from 'date-fns'
@@ -21,8 +22,8 @@ interface GRNOption {
   cgst_amount: number | null
   sgst_amount: number | null
   igst_amount: number | null
-  vendor: { legal_name: string; credit_period_days: number } | { legal_name: string; credit_period_days: number }[] | null
-  centre: { code: string; name: string } | { code: string; name: string }[] | null
+  vendor: { legal_name: string; credit_period_days: number | null; state: string | null } | { legal_name: string; credit_period_days: number | null; state: string | null }[] | null
+  centre: { code: string; name: string; state: string | null } | { code: string; name: string; state: string | null }[] | null
 }
 
 export default function NewInvoicePage() {
@@ -66,7 +67,7 @@ export default function NewInvoicePage() {
 
       let query = supabase
         .from('grns')
-        .select('id, grn_number, grn_date, po_id, vendor_id, centre_id, total_amount, cgst_amount, sgst_amount, igst_amount, vendor:vendors(legal_name, credit_period_days), centre:centres(code, name)')
+        .select('id, grn_number, grn_date, po_id, vendor_id, centre_id, total_amount, cgst_amount, sgst_amount, igst_amount, vendor:vendors(legal_name, credit_period_days, state), centre:centres(code, name, state)')
         .in('status', ['verified'])
         .is('deleted_at', null)
         .order('grn_date', { ascending: false })
@@ -249,27 +250,52 @@ export default function NewInvoicePage() {
       return
     }
 
-    // Auto-populate invoice line items from GRN items (enables proper 3-way matching)
-    try {
-      const { data: grnItems } = await supabase.from('grn_items')
-        .select('item_id, accepted_qty, rate, gst_percent, total_amount, hsn_code')
-        .eq('grn_id', selectedGRN.id)
-        .gt('accepted_qty', 0)
+    // Auto-populate invoice line items from GRN items (enables proper 3-way matching).
+    // Failures here are surfaced, not swallowed: without line items the 3-way
+    // match silently degrades to header totals only.
+    const { data: grnItems, error: grnItemsError } = await supabase.from('grn_items')
+      .select('item_id, accepted_qty, rate, gst_percent, hsn_code, trade_discount_amount, trade_discount_percent')
+      .eq('grn_id', selectedGRN.id)
+      .gt('accepted_qty', 0)
 
-      if (grnItems && grnItems.length > 0) {
-        const invoiceLineItems = grnItems.map((gi: any) => ({
+    if (grnItemsError) {
+      toast.error(`Invoice saved, but line items could not be read: ${grnItemsError.message}`)
+    } else if (grnItems && grnItems.length > 0) {
+      const vendorState = (selectedGRN.vendor as any)?.state ?? null
+      const centreState = (selectedGRN.centre as any)?.state ?? null
+      const interState = isInterState(vendorState, centreState)
+
+      const invoiceLineItems = grnItems.map((gi) => {
+        const quantity = Number(gi.accepted_qty) || 0
+        const rate = Number(gi.rate) || 0
+        const taxable = lineTaxableAmount({
+          quantity,
+          rate,
+          tradeDiscountAmount: gi.trade_discount_amount,
+          tradeDiscountPercent: gi.trade_discount_percent,
+        })
+        // invoice_items stores the component taxes only; there is no
+        // combined gst_amount column on this table.
+        const { gst_amount: _gst, ...split } = splitGst(
+          taxable,
+          Number(gi.gst_percent) || 0,
+          interState
+        )
+        void _gst
+        return {
           invoice_id: invoice.id,
           item_id: gi.item_id,
-          quantity: gi.accepted_qty,
-          rate: gi.rate,
-          gst_percent: gi.gst_percent || 0,
-          total_amount: gi.total_amount || (gi.accepted_qty * gi.rate),
-          hsn_code: gi.hsn_code || null,
-        }))
-        await supabase.from('invoice_items').insert(invoiceLineItems)
+          quantity,
+          rate,
+          hsn_code: gi.hsn_code ?? null,
+          ...split,
+        }
+      })
+
+      const { error: lineError } = await supabase.from('invoice_items').insert(invoiceLineItems)
+      if (lineError) {
+        toast.error(`Invoice saved, but line items failed: ${lineError.message}`)
       }
-    } catch {
-      // Non-critical — 3-way match will use totals as fallback
     }
 
     // Trigger 3-way matching

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireApiAuth } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
+import { dynamicTable } from '@/lib/supabase/dynamic'
 
 /**
  * Atomic sequence generator using DB sequences.
@@ -70,7 +71,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get the highest existing code and extract the numeric part
-    const { data: latest } = await supabase.from(table).select(col).order(col, { ascending: false }).limit(1)
+    const { data: latest } = await dynamicTable(supabase, table).select(col).order(col, { ascending: false }).limit(1)
     const row = latest?.[0] as Record<string, unknown> | undefined
     const lastCode = row?.[col] as string | undefined
     const numMatch = lastCode?.match(/(\d+)$/)

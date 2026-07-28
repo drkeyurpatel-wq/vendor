@@ -534,8 +534,10 @@ export default function GRNForm() {
       try {
         const { count: indentCount } = await supabase.from('purchase_indents').select('*', { count: 'exact', head: true })
         const indentNum = `H1-SH-${new Date().getFullYear().toString().slice(2)}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String((indentCount ?? 0) + 1).padStart(3, '0')}`
+        const { data: { user: indentUser } } = await supabase.auth.getUser()
         const { data: indent } = await supabase.from('purchase_indents').insert({
           indent_number: indentNum, centre_id: centreId,
+          requested_by: indentUser!.id,
           status: 'approved', priority: 'urgent',
           notes: `Auto: short delivery on GRN ${grnNumber} (PO ${selectedPO.po_number}). ${shortItems.length} item(s) short.`,
         }).select().single()

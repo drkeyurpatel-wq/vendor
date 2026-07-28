@@ -15,12 +15,14 @@
     "e2e:ui": "playwright test --ui",
     "e2e:headed": "playwright test --headed",
     "e2e:debug": "playwright test --debug",
-    "e2e:report": "playwright show-report"
+    "e2e:report": "playwright show-report",
+    "gen:types": "node scripts/gen-db-types.js",
+    "verify": "npm run check:drift && npx tsc --noEmit && npm run test"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.43.0",
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.49.4",
+    "@supabase/ssr": "0.12.3",
+    "@supabase/supabase-js": "2.99.1",
     "@tanstack/react-table": "^8.21.3",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.4",

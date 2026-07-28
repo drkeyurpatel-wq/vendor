@@ -7,6 +7,7 @@ import { MoreVertical, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
 import { fireNotification } from '@/lib/notifications'
+import { dynamicTable } from '@/lib/supabase/dynamic'
 
 // ─── Types ────────────────────────────────────────────────
 
@@ -134,8 +135,7 @@ export default function RowActions({
           if (comment) updates.cancellation_reason = comment
         }
 
-        const { error } = await supabase
-          .from(tableName)
+        const { error } = await dynamicTable(supabase, tableName)
           .update(updates)
           .eq('id', entityId)
 

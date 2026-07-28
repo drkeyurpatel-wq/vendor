@@ -7,6 +7,7 @@ import { CheckCircle2, XCircle, Send, ShoppingCart, Loader2 } from 'lucide-react
 import toast from 'react-hot-toast'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { fireNotification } from '@/lib/notifications'
+import type { TablesUpdate } from '@/types/supabase'
 
 interface Props {
   indentId: string
@@ -32,7 +33,7 @@ export default function IndentActions({ indentId, indentNumber, currentStatus, c
 
   async function updateStatus(newStatus: string) {
     setLoading(true)
-    const updates: Record<string, any> = { status: newStatus, updated_at: new Date().toISOString() }
+    const updates: TablesUpdate<'purchase_indents'> = { status: newStatus, updated_at: new Date().toISOString() }
     if (newStatus === 'approved') {
       const { data: { user } } = await supabase.auth.getUser()
       updates.approved_by = user?.id

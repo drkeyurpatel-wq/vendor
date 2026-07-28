@@ -143,7 +143,7 @@ export default function NewPOPage() {
         .limit(10)
 
       if (existingPOs && existingPOs.length > 0) {
-        const poNums = existingPOs.map(po => `${po.po_number} (${po.status.replace(/_/g, ' ')})`).join(', ')
+        const poNums = existingPOs.map(po => `${po.po_number} (${(po.status ?? 'unknown').replace(/_/g, ' ')})`).join(', ')
         const proceed = window.confirm(
           `Note: ${existingPOs.length} open PO(s) exist for this vendor:\n${poNums}\n\nContinue creating new PO?`
         )

@@ -57,8 +57,9 @@ export default function ExpiryAlertActions({ alert, userRole }: { alert: ExpiryA
           .eq('centre_id', alert.centre_id)
           .single()
 
+        const stockBefore = stockRow?.current_stock ?? 0
         if (stockRow) {
-          const newStock = Math.max(0, stockRow.current_stock - qty)
+          const newStock = Math.max(0, stockBefore - qty)
           await supabase.from('item_centre_stock')
             .update({ current_stock: newStock, updated_at: new Date().toISOString() })
             .eq('id', stockRow.id)
@@ -67,7 +68,7 @@ export default function ExpiryAlertActions({ alert, userRole }: { alert: ExpiryA
         await supabase.from('stock_ledger').insert({
           item_id: alert.item_id, centre_id: alert.centre_id,
           transaction_type: 'expired_disposal', quantity: qty,
-          balance_after: stockRow ? Math.max(0, stockRow.current_stock - qty) : 0,
+          balance_after: Math.max(0, stockBefore - qty),
           notes: note || `Disposed ${qty} expired units from batch ${alert.batch_number}`,
         })
         toast.success(`${qty} units disposed`)

@@ -11,7 +11,7 @@ interface ItemResult {
   generic_name: string
   brand_name: string | null
   unit: string
-  gst_percent: number
+  gst_percent: number | null
   category?: { name: string } | { name: string }[] | null
 }
 

@@ -112,16 +112,32 @@ export async function GET(request: NextRequest) {
 
     if (dueSoon && dueSoon.length > 0) {
       // Create notifications for upcoming payments
-      const notifications = dueSoon.map((inv: any) => ({
-        type: 'payment_due_reminder',
-        title: 'Payment Due Soon',
-        message: `Invoice ${inv.invoice_ref} — ₹${inv.total_amount?.toLocaleString()} due ${inv.due_date} (${inv.vendor?.legal_name || 'Unknown'})`,
-        entity_type: 'invoice',
-        entity_id: inv.id,
-        is_read: false,
-        priority: 'normal',
-      }))
-      await supabase.from('notifications').insert(notifications)
+      // notifications.user_id is NOT NULL — resolve finance/CAO recipients and
+      // write one row per recipient rather than a row with no owner.
+      const { data: recipients } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .in('role', ['finance_staff', 'unit_cao', 'group_cao', 'group_admin'])
+        .eq('is_active', true)
+        .limit(50)
+
+      const notifications = (recipients ?? []).flatMap((r) =>
+        dueSoon.map((inv: any) => ({
+          user_id: r.id,
+          type: 'payment_due_reminder',
+          title: 'Payment Due Soon',
+          message: `Invoice ${inv.invoice_ref} — ₹${inv.total_amount?.toLocaleString()} due ${inv.due_date} (${inv.vendor?.legal_name || 'Unknown'})`,
+          entity_type: 'invoice',
+          entity_id: inv.id,
+          is_read: false,
+          priority: 'normal',
+        }))
+      )
+
+      if (notifications.length > 0) {
+        const { error: notifyErr } = await supabase.from('notifications').insert(notifications)
+        if (notifyErr) results.payment_reminder_error = notifyErr.message
+      }
       results.payment_reminders = { sent: dueSoon.length, total_amount: dueSoon.reduce((s: number, i: any) => s + (i.total_amount || 0), 0) }
     } else {
       results.payment_reminders = { sent: 0, message: 'No payments due in next 3 days' }

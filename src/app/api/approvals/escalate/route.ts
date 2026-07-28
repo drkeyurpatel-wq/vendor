@@ -38,7 +38,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
   let escalated = 0
 
   for (const po of pendingPOs) {
-    const lastUpdate = new Date(po.updated_at || po.created_at)
+    const lastUpdate = new Date(po.updated_at ?? po.created_at ?? Date.now())
     const hoursWaiting = (now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60)
 
     if (hoursWaiting < 24) continue // Still within SLA

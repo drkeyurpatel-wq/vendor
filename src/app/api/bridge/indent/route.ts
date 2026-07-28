@@ -61,6 +61,10 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
   const { data: indent, error: indErr } = await supabase.from('purchase_indents').insert({
     indent_number: indentNum,
     centre_id: centre.id,
+    // No VPMS user raises an HMIS indent — record the ward/department instead.
+    requested_by: null,
+    requested_by_external: requested_by || department || 'HMIS',
+    source: 'hmis_bridge',
     status: priority === 'emergency' ? 'approved' : 'pending_approval',
     priority: priority || 'routine',
 

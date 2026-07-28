@@ -151,7 +151,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
   useEffect(() => { fetchContractRates() }, [fetchContractRates])
 
   async function addItem(selected: {
-    id: string; item_code: string; generic_name: string; unit: string; gst_percent: number;
+    id: string; item_code: string; generic_name: string; unit: string; gst_percent: number | null;
     hsn_code?: string; manufacturer?: string; purchase_unit?: string; conversion_factor?: number; qty_conversion?: number; mrp?: number;
     default_rate?: number; l_rank?: number | null
   }) {
@@ -223,7 +223,7 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
       trade_discount_amount: 0,
       cash_discount_percent: 0,
       special_discount_percent: 0,
-      gst_percent: selected.gst_percent,
+      gst_percent: selected.gst_percent ?? 0,
       cgst_percent: 0,
       sgst_percent: 0,
       igst_percent: 0,

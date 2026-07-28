@@ -79,7 +79,7 @@ export default function CentresManager({ initialCentres, userRole }: Props) {
       state: centre.state || '',
       phone: centre.phone || '',
       email: centre.email || '',
-      is_active: centre.is_active,
+      is_active: centre.is_active ?? true,
     })
     setErrors({})
     setShowForm(true)

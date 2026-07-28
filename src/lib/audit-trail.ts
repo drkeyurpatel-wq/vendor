@@ -15,6 +15,9 @@ export async function trackChanges(params: {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     const userId = params.changed_by || user?.id
+    // changed_by is NOT NULL — an audit row with no actor is worse than none,
+    // and would reject the whole batch anyway.
+    if (!userId) return
 
     const rows = Object.entries(params.changes)
       .filter(([_, v]) => String(v.old ?? '') !== String(v.new ?? ''))
@@ -24,14 +27,17 @@ export async function trackChanges(params: {
         field_name: field,
         old_value: v.old != null ? String(v.old) : null,
         new_value: v.new != null ? String(v.new) : null,
-        changed_by: userId,
+        changed_by: userId!,
       }))
 
     if (rows.length > 0) {
-      await supabase.from('audit_trail').insert(rows)
+      const { error } = await supabase.from('audit_trail').insert(rows)
+      if (error && process.env.NODE_ENV !== 'production') {
+        console.warn('audit_trail insert failed', error.message)
+      }
     }
-  } catch {
-    // Silent — audit is non-critical
+  } catch (err) {
+    if (process.env.NODE_ENV !== 'production') console.warn('audit-trail error', err)
   }
 }
 

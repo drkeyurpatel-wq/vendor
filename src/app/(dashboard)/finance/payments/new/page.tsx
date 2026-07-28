@@ -149,13 +149,29 @@ export default function NewPaymentPage() {
 
     if (error || !batch) { toast.error(error?.message || 'Failed'); setLoading(false); return }
 
+    // vendor_id is NOT NULL — a line whose invoice cannot be resolved must not
+    // be written with a missing vendor, which would reject the whole batch.
+    const unresolved = selectedLines.filter(l => !invoices.find(i => i.id === l.invoiceId)?.vendor_id)
+    if (unresolved.length > 0) {
+      toast.error(`Cannot build batch: ${unresolved.length} selected invoice(s) have no vendor.`)
+      setLoading(false)
+      return
+    }
+
     const batchItems = selectedLines.map(l => ({
-      batch_id: batch.id, invoice_id: l.invoiceId, vendor_id: invoices.find(i => i.id === l.invoiceId)?.vendor_id,
+      batch_id: batch.id,
+      invoice_id: l.invoiceId,
+      vendor_id: invoices.find(i => i.id === l.invoiceId)!.vendor_id,
       amount: l.outstanding, tds_percent: l.tdsPercent, tds_amount: l.tdsAmount,
       debit_note_adj: l.debitNoteAdj, advance_adj: l.advanceAdj,
       net_payable: l.netPayable, payment_mode: paymentMode, status: 'pending',
     }))
-    await supabase.from('payment_batch_items').insert(batchItems)
+    const { error: batchItemsErr } = await supabase.from('payment_batch_items').insert(batchItems)
+    if (batchItemsErr) {
+      toast.error(`Payment batch created but lines failed: ${batchItemsErr.message}`)
+      setLoading(false)
+      return
+    }
 
     // Update invoice payment_batch_id
     for (const l of selectedLines) {

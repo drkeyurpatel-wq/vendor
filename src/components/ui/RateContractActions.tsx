@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, XCircle, RefreshCcw, Calendar, Loader2, Copy, Edit } from 'lucide-react'
 import toast from 'react-hot-toast'
 import ConfirmDialog from './ConfirmDialog'
+import type { TablesUpdate } from '@/types/supabase'
 
 interface Props {
   contractId: string
@@ -32,7 +33,7 @@ export default function RateContractActions({ contractId, contractNumber, status
   async function handleAction(action: string) {
     setLoading(true)
     try {
-      let updates: Record<string, any> = { updated_at: new Date().toISOString() }
+      let updates: TablesUpdate<'rate_contracts'> = { updated_at: new Date().toISOString() }
 
       switch (action) {
         case 'activate':
@@ -63,7 +64,17 @@ export default function RateContractActions({ contractId, contractNumber, status
           else if (original.contract_type === 'quarterly') newEnd.setMonth(newEnd.getMonth() + 3)
           else newEnd.setMonth(newEnd.getMonth() + 1)
 
+          // contract_number is NOT NULL — mirror the numbering used on the
+          // create-contract page so renewals stay in the same series.
+          const { count: rcCount } = await supabase
+            .from('rate_contracts')
+            .select('*', { count: 'exact', head: true })
+          const now = new Date()
+          const yyMM = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, '0')}`
+          const renewalNumber = `H1-RC-${yyMM}-${String((rcCount ?? 0) + 1).padStart(3, '0')}`
+
           const { data: newContract, error: createErr } = await supabase.from('rate_contracts').insert({
+            contract_number: renewalNumber,
             vendor_id: original.vendor_id, centre_id: original.centre_id,
             contract_type: original.contract_type, status: 'draft',
             valid_from: newStart, valid_to: newEnd.toISOString().split('T')[0],
@@ -73,12 +84,16 @@ export default function RateContractActions({ contractId, contractNumber, status
 
           // Copy items
           if (original.items?.length) {
-            const newItems = original.items.map((item: any) => ({
-              contract_id: newContract.id, item_id: item.item_id,
-              rate: item.rate, l_rank: item.l_rank,
-              min_qty: item.min_qty, max_qty: item.max_qty,
+            const newItems = original.items.map((item) => ({
+              contract_id: newContract.id,
+              item_id: item.item_id,
+              rate: item.rate,
+              unit: item.unit,
+              gst_percent: item.gst_percent,
+              l_rank: item.l_rank,
             }))
-            await supabase.from('rate_contract_items').insert(newItems)
+            const { error: itemsErr } = await supabase.from('rate_contract_items').insert(newItems)
+            if (itemsErr) throw itemsErr
           }
 
           toast.success('Renewal contract created as draft')

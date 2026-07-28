@@ -147,11 +147,18 @@ export default function StockListClient({ stocks, userRole }: { stocks: StockIte
     if (updateErr) { toast.error(updateErr.message); return }
 
     // Log to stock ledger
-    await supabase.from('stock_ledger').insert({
+    const { error: ledgerErr } = await supabase.from('stock_ledger').insert({
       item_id: itemId, centre_id: centreId,
       transaction_type: type === 'add' ? 'adjustment_in' : 'adjustment_out',
+      quantity: Math.abs(delta),
+      balance_after: newQty,
       notes: reason,
-    }).then(() => {}, () => {})
+    })
+    if (ledgerErr) {
+      // The stock figure moved but the ledger did not — flag it rather than
+      // leaving an untraceable adjustment behind.
+      toast.error(`Stock updated but ledger entry failed: ${ledgerErr.message}`)
+    }
 
     toast.success(`Stock ${type === 'add' ? 'added' : 'removed'}: ${qty} → new balance ${newQty}`)
     router.refresh()
