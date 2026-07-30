@@ -17,7 +17,8 @@
     "e2e:debug": "playwright test --debug",
     "e2e:report": "playwright show-report",
     "gen:types": "node scripts/gen-db-types.js",
-    "verify": "npm run check:drift && npx tsc --noEmit && npm run test"
+    "verify": "npm run check:drift && npm run check:enums && npx tsc --noEmit && npm run test",
+    "check:enums": "node scripts/check-enum-drift.js"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.43.0",

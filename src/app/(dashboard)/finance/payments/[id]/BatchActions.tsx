@@ -46,14 +46,14 @@ export default function BatchActions({ batchId, batchNumber, status, totalAmount
 
     // Update batch
     await supabase.from('payment_batches').update({
-      status: 'paid', paid_by: user?.id, paid_at: new Date().toISOString(),
+      status: 'processed', paid_by: user?.id, paid_at: new Date().toISOString(),
       payment_date: new Date().toISOString().split('T')[0],
     }).eq('id', batchId)
 
     // Update all batch items with UTR
     await supabase.from('payment_batch_items').update({
       utr_number: utrNumber.trim(), reference_number: utrNumber.trim(),
-      status: 'completed', payment_date: new Date().toISOString().split('T')[0],
+      status: 'processed', payment_date: new Date().toISOString().split('T')[0],
     }).eq('batch_id', batchId)
 
     // Update each invoice's paid_amount and payment_status
@@ -94,7 +94,7 @@ export default function BatchActions({ batchId, batchNumber, status, totalAmount
     if (!rejectReason.trim()) { toast.error('Enter rejection reason'); return }
     setLoading('reject')
     await supabase.from('payment_batches').update({
-      status: 'rejected', notes: rejectReason.trim(),
+      status: 'cancelled', notes: rejectReason.trim(),
     }).eq('id', batchId)
 
     // Unlink invoices

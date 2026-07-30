@@ -38,6 +38,10 @@ jobs:
       # anyone reintroduces hand-written table interfaces. This is the guard
       # against the class of silent production write failures fixed in #schema-truth.
       - run: npm run check:drift
+      # Column names are now type-safe, but a text column with a CHECK
+      # constraint is still just `string` to TypeScript. This catches status
+      # values the database would reject at runtime.
+      - run: npm run check:enums
       - run: npx tsc --noEmit
 
   # ── Step 2: Unit tests ──────────────────────────────────────

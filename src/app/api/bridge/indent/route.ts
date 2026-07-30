@@ -65,7 +65,7 @@ export const POST = withApiErrorHandler(async (request: NextRequest) => {
     requested_by: null,
     requested_by_external: requested_by || department || 'HMIS',
     source: 'hmis_bridge',
-    status: priority === 'emergency' ? 'approved' : 'pending_approval',
+    status: priority === 'emergency' ? 'approved' : 'submitted',
     priority: priority || 'routine',
 
     notes: `HMIS indent from ${requested_by || department || 'ward'}${reason ? '. Reason: ' + reason : ''}`,
