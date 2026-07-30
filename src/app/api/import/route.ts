@@ -476,8 +476,11 @@ async function importOpeningStock(
         continue
       }
 
-      // Write opening balance to stock ledger
-      await supabase.from('stock_ledger').insert({
+      // Write opening balance to stock ledger. This was previously unchecked
+      // and the row counted as a success regardless — meaning stock could be
+      // set with no corresponding ledger entry, which is an audit gap the
+      // importer would never report.
+      const { error: ledgerError } = await supabase.from('stock_ledger').insert({
         centre_id: centreId,
         item_id: item.id,
         transaction_type: 'opening',
@@ -487,6 +490,15 @@ async function importOpeningStock(
         notes: 'Opening stock imported from bulk upload',
         created_by: userId,
       })
+
+      if (ledgerError) {
+        result.errors.push({
+          row: rowNum,
+          message: `Stock set but opening ledger entry failed: ${ledgerError.message}`,
+        })
+        result.failed++
+        continue
+      }
 
       result.success++
     } catch (err) {
