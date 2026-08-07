@@ -1,15 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { type Locale, defaultLocale, locales } from '@/i18n/config'
+import { useCallback, useContext } from 'react'
+import { type Locale, defaultLocale } from '@/i18n/config'
+import { LocaleContext } from '@/components/ui/LocaleProvider'
 
 import en from '@/messages/en.json'
 import hi from '@/messages/hi.json'
 import gu from '@/messages/gu.json'
 
 const messages: Record<Locale, Record<string, unknown>> = { en, hi, gu }
-
-const STORAGE_KEY = 'h1vpms-locale'
 
 /**
  * Get a nested value from an object using dot notation.
@@ -30,46 +29,29 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string {
 /**
  * Client-side translation hook for VPMS.
  *
- * Usage:
+ * Locale state lives in LocaleProvider, so a change made anywhere updates every
+ * consumer at once. Outside a provider the hook degrades to the default locale
+ * rather than throwing, which keeps isolated components and tests renderable.
+ *
  *   const { t, locale, setLocale } = useTranslation()
  *   t('common.save')    // => "Save" (en) | "सहेजें" (hi) | "સાચવો" (gu)
- *   t('po.title')       // => "Purchase Orders"
- *   setLocale('hi')     // switches to Hindi
+ *   setLocale('hi')     // switches the whole app to Hindi
  */
 export function useTranslation() {
-  const [locale, setLocaleState] = useState<Locale>(defaultLocale)
-  const [isLoaded, setIsLoaded] = useState(false)
-
-  // Read saved locale from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved && locales.includes(saved as Locale)) {
-        setLocaleState(saved as Locale)
-      }
-    } catch {
-      // localStorage unavailable (SSR or privacy mode)
-    }
-    setIsLoaded(true)
-  }, [])
-
-  const setLocale = useCallback((newLocale: Locale) => {
-    setLocaleState(newLocale)
-    try {
-      localStorage.setItem(STORAGE_KEY, newLocale)
-    } catch {
-      // localStorage unavailable
-    }
-    // Dispatch a custom event so other components (e.g., LanguageSwitcher) can react
-    window.dispatchEvent(new CustomEvent('locale-change', { detail: newLocale }))
-  }, [])
+  const ctx = useContext(LocaleContext)
+  const locale = ctx?.locale ?? defaultLocale
 
   const t = useCallback(
-    (key: string): string => {
-      return getNestedValue(messages[locale], key)
-    },
+    (key: string): string => getNestedValue(messages[locale], key),
     [locale]
   )
 
-  return { t, locale, setLocale, isLoaded }
+  const setLocale = useCallback(
+    (next: Locale) => {
+      ctx?.setLocale(next)
+    },
+    [ctx]
+  )
+
+  return { t, locale, setLocale, isLoaded: ctx?.isLoaded ?? false }
 }

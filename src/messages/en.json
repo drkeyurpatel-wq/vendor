@@ -30,7 +30,10 @@
     "pending": "Pending",
     "viewDetails": "View Details",
     "createdAt": "Created At",
-    "updatedAt": "Updated At"
+    "updatedAt": "Updated At",
+    "searchPlaceholder": "Search vendors, items, POs...",
+    "signOut": "Sign out",
+    "language": "Language"
   },
   "nav": {
     "dashboard": "Dashboard",

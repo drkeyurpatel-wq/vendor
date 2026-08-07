@@ -30,7 +30,10 @@
     "pending": "બાકી",
     "viewDetails": "વિગતો જુઓ",
     "createdAt": "બનાવ્યાની તારીખ",
-    "updatedAt": "અપડેટ તારીખ"
+    "updatedAt": "અપડેટ તારીખ",
+    "searchPlaceholder": "વિક્રેતા, આઇટમ, પીઓ શોધો...",
+    "signOut": "સાઇન આઉટ",
+    "language": "ભાષા"
   },
   "nav": {
     "dashboard": "ડેશબોર્ડ",

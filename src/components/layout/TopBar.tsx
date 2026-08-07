@@ -5,6 +5,8 @@ import { Menu, Search, LogOut, Settings, User, ChevronDown, Building2 } from 'lu
 import { UserProfile } from '@/types/database'
 import { formatDate } from '@/lib/utils'
 import RealtimeNotificationBell from '@/components/ui/RealtimeNotificationBell'
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
+import { useTranslation } from '@/hooks/useTranslation'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -20,6 +22,7 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
   const menuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const supabase = createClient()
+  const { t } = useTranslation()
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -58,7 +61,7 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
 
       <button onClick={triggerCommandPalette} className="flex-1 max-w-md h-9 flex items-center gap-2.5 px-3 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:border-gray-300 transition-all cursor-text">
         <Search size={15} className="text-gray-500 flex-shrink-0" />
-        <span className="flex-1 text-left">Search vendors, items, POs...</span>
+        <span className="flex-1 text-left">{t('common.searchPlaceholder')}</span>
         <kbd className="hidden sm:flex items-center gap-0.5 h-5 px-1.5 text-[10px] font-medium text-gray-500 bg-white border border-gray-200 rounded shadow-sm">
           <span className="text-[11px]">&#x2318;</span>K
         </kbd>
@@ -68,6 +71,8 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50/80 rounded-lg border border-gray-100">
           <span className="text-[12px] font-medium text-gray-500">{formatDate(new Date())}</span>
         </div>
+
+        <LanguageSwitcher />
 
         <RealtimeNotificationBell userId={user.id} />
 
@@ -114,16 +119,16 @@ export default function TopBar({ user, title, onMenuClick }: TopBarProps) {
 
               <div className="py-1">
                 <Link href="/settings/users" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                  <Settings size={15} className="text-gray-500" /> Settings
+                  <Settings size={15} className="text-gray-500" /> {t('nav.settings')}
                 </Link>
                 <Link href="/settings/audit-log" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                  <User size={15} className="text-gray-500" /> Audit Log
+                  <User size={15} className="text-gray-500" /> {t('nav.auditLog')}
                 </Link>
               </div>
 
               <div className="border-t border-gray-100 pt-1">
                 <button onClick={handleLogout} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors w-full text-left">
-                  <LogOut size={15} /> Sign out
+                  <LogOut size={15} /> {t('common.signOut')}
                 </button>
               </div>
             </div>

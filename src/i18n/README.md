@@ -4,7 +4,9 @@ The VPMS app supports three languages: **English**, **Hindi** (हिन्द�
 
 ## Architecture
 
-This is a **client-side i18n** system. Translation files live in `src/messages/` and are imported statically. Locale preference is stored in `localStorage` under the key `h1vpms-locale`.
+Translation files live in `src/messages/` and are imported statically. Locale preference is stored in a **cookie** (`h1vpms-locale`) rather than `localStorage`, so both client *and* server components can read it — a `localStorage` value is invisible to the server, which would leave server-rendered page bodies in English while the client-rendered navigation switched language. A pre-existing `localStorage` preference is migrated to the cookie automatically on first load.
+
+Locale state lives in a single `LocaleProvider` context mounted in `DashboardShell`. Every `useTranslation()` consumer reads from it, so changing the language anywhere re-renders the whole app at once.
 
 ### Key Files
 
@@ -15,8 +17,10 @@ This is a **client-side i18n** system. Translation files live in `src/messages/`
 | `src/messages/gu.json` | Gujarati translations |
 | `src/i18n/config.ts` | Locale list, default locale, display names |
 | `src/i18n/request.ts` | next-intl server config (for future SSR usage) |
+| `src/i18n/server.ts` | `getLocale()` / `getTranslations()` for server components |
+| `src/components/ui/LocaleProvider.tsx` | Shared locale context (mounted in `DashboardShell`) |
 | `src/hooks/useTranslation.ts` | Client-side `useTranslation()` hook |
-| `src/components/ui/LanguageSwitcher.tsx` | Language dropdown component |
+| `src/components/ui/LanguageSwitcher.tsx` | Language dropdown (mounted in `TopBar`) |
 
 ---
 
@@ -77,21 +81,23 @@ const { t } = useTranslation()
 
 ---
 
-## Adding the Language Switcher to TopBar
+## Language Switcher
 
-In `src/components/layout/TopBar.tsx`, add the LanguageSwitcher next to the notification bell:
+Already mounted in `src/components/layout/TopBar.tsx`, to the left of the
+notification bell. No further wiring is needed.
+
+## Navigation labels
+
+`Sidebar` nav entries carry an optional `labelKey` alongside `label`:
 
 ```tsx
-import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
-
-// Inside the TopBar JSX, in the right-side actions div:
-<div className="flex items-center gap-3 ml-auto">
-  <span className="text-sm text-gray-500 hidden md:block">{formatDate(new Date())}</span>
-  <LanguageSwitcher />                          {/* <-- ADD THIS */}
-  <RealtimeNotificationBell userId={user.id} />
-  {/* ... user avatar ... */}
-</div>
+{ label: 'Vendors', labelKey: 'nav.vendors', icon: <Users size={18} /> }
 ```
+
+The sidebar resolves `labelKey` and **falls back to the English `label`** when
+the key has no translation, so a partially translated menu stays readable
+instead of showing raw key paths. To translate a menu entry that is still
+English, add its key to all three JSON files and set `labelKey` on the entry.
 
 ---
 
@@ -152,9 +158,26 @@ useEffect(() => {
 
 ## Server Components
 
-For server components, translations are not yet automatically wired. Options:
+Server components read the same cookie via `src/i18n/server.ts`:
 
-1. **Pass translations as props** from a client wrapper
-2. **Use `next-intl`'s server APIs** — the `src/i18n/request.ts` file is configured for this. To enable, add `NextIntlClientProvider` to your layout and configure `next.config.mjs` per the [next-intl docs](https://next-intl-docs.vercel.app/).
+```tsx
+import { getTranslations } from '@/i18n/server'
 
-For now, the recommended approach is to convert pages that need translation to client components (`'use client'`) and use the `useTranslation()` hook.
+export default async function VendorsPage() {
+  const t = await getTranslations()
+  return <h1 className="page-title">{t('vendors.title')}</h1>
+}
+```
+
+`getLocale()` is also exported when you only need the active locale. The
+dashboard layout already calls it and passes the result to `LocaleProvider` as
+`initialLocale`, so the first paint is in the user's language with no flash of
+English.
+
+## Current coverage
+
+Wired: the language switcher, top bar, sidebar navigation groups, and the nav
+children that have verified translations. Page bodies are still English —
+extend coverage by adding keys to all three JSON files and calling `t()` (client)
+or `await getTranslations()` (server). Because `t()` returns the key path when a
+translation is missing, always add a key to **all three** files at once.

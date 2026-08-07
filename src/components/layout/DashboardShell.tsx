@@ -5,6 +5,9 @@ import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import OfflineIndicator from '@/components/ui/OfflineIndicator'
 import CommandPalette from '@/components/ui/CommandPalette'
+import { ConfirmProvider } from '@/components/ui/ConfirmProvider'
+import { LocaleProvider } from '@/components/ui/LocaleProvider'
+import type { Locale } from '@/i18n/config'
 import MobileBottomNav from './MobileBottomNav'
 import { UserProfile } from '@/types/database'
 import { registerServiceWorker, syncOfflineQueue } from '@/lib/service-worker'
@@ -14,9 +17,10 @@ import { Toaster } from 'react-hot-toast'
 interface DashboardShellProps {
   user: UserProfile
   children: React.ReactNode
+  initialLocale?: Locale
 }
 
-export default function DashboardShell({ user, children }: DashboardShellProps) {
+export default function DashboardShell({ user, children, initialLocale }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [hasHydrated, setHasHydrated] = useState(false)
@@ -47,42 +51,46 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
   }, [isOnline])
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F4F7FA]">
-      {/* Skip to main content */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-navy-600 focus:text-white focus:rounded-xl focus:text-sm focus:font-medium focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-white"
-      >
-        Skip to main content
-      </a>
+    <LocaleProvider initialLocale={initialLocale}>
+      <ConfirmProvider>
+        <div className="flex h-screen overflow-hidden bg-[#F4F7FA]">
+          {/* Skip to main content */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-navy-600 focus:text-white focus:rounded-xl focus:text-sm focus:font-medium focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-white"
+          >
+            Skip to main content
+          </a>
 
-      <Sidebar
-        user={user}
-        collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed(!collapsed)}
-        mobileOpen={mobileOpen}
-        onMobileClose={() => setMobileOpen(false)}
-      />
+          <Sidebar
+            user={user}
+            collapsed={collapsed}
+            onToggleCollapse={() => setCollapsed(!collapsed)}
+            mobileOpen={mobileOpen}
+            onMobileClose={() => setMobileOpen(false)}
+          />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <OfflineIndicator />
-        <TopBar user={user} onMenuClick={() => setMobileOpen(true)} />
-        <main
-          id="main-content"
-          role="main"
-          className="flex-1 overflow-y-auto p-4 lg:p-7 pb-20 md:pb-4"
-          tabIndex={-1}
-        >
-          <div className="animate-fade-in">
-            {children}
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <OfflineIndicator />
+            <TopBar user={user} onMenuClick={() => setMobileOpen(true)} />
+            <main
+              id="main-content"
+              role="main"
+              className="flex-1 overflow-y-auto p-4 lg:p-7 pb-20 md:pb-4"
+              tabIndex={-1}
+            >
+              <div className="animate-fade-in">
+                {children}
+              </div>
+            </main>
           </div>
-        </main>
-      </div>
 
-      {/* Command Palette — available everywhere */}
-      <CommandPalette />
-      <MobileBottomNav />
-      <Toaster position="top-right" toastOptions={{ duration: 4000, style: { fontSize: '14px' } }} />
-    </div>
+          {/* Command Palette — available everywhere */}
+          <CommandPalette />
+          <MobileBottomNav />
+          <Toaster position="top-right" toastOptions={{ duration: 4000, style: { fontSize: '14px' } }} />
+        </div>
+      </ConfirmProvider>
+    </LocaleProvider>
   )
 }
