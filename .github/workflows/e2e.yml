@@ -162,13 +162,26 @@ jobs:
 
               if (failed > 0) {
                 summary += '### Failed Tests\n\n';
-                for (const suite of results.suites || []) {
-                  for (const spec of suite.specs || []) {
-                    for (const test of spec.tests || []) {
-                      if (test.status === 'unexpected') {
-                        summary += `- ❌ \`${spec.title}\` → ${test.results?.[0]?.error?.message?.slice(0, 100) || 'Unknown error'}\n`;
-                      }
-                    }
+                // Specs nest arbitrarily deep, so walk the tree rather than
+                // only reading the top level -- a failure inside a nested
+                // describe was previously invisible here.
+                const walk = (node, out) => {
+                  for (const spec of node.specs || []) out.push(spec);
+                  for (const child of node.suites || []) walk(child, out);
+                  return out;
+                };
+                const allSpecs = walk({ suites: results.suites || [] }, []);
+                for (const spec of allSpecs) {
+                  for (const test of spec.tests || []) {
+                    if (test.status !== 'unexpected') continue;
+                    // 100 characters truncated every message before it reached
+                    // the useful part. These messages carry the browser errors
+                    // and failed requests that explain the failure, so give
+                    // them room and keep the line breaks readable.
+                    const raw = test.results?.[0]?.error?.message || 'Unknown error';
+                    const message = raw.replace(/\u001b\[[0-9;]*m/g, '').trim().slice(0, 1500);
+                    summary += `<details><summary>❌ <code>${spec.title}</code></summary>\n\n`;
+                    summary += '```\n' + message + '\n```\n\n</details>\n\n';
                   }
                 }
               }
