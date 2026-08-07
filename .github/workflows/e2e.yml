@@ -112,7 +112,12 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Run E2E tests
-        run: npx playwright test --reporter=github,html,json
+        # No --reporter flag: it replaces the whole reporter array from
+        # playwright.config.ts, including the json reporter's
+        # outputFile: 'e2e-results.json'. Without that file the summary step
+        # below can only report "Could not parse test results". The config
+        # already selects github + html + json when CI is set.
+        run: npx playwright test
         env:
           CI: true
 
