@@ -9,6 +9,7 @@ import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { formatCurrency } from '@/lib/utils'
 import BarcodeScanButton from '@/components/ui/BarcodeScanButton'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 const CATEGORIES = [
   { value: 'cardiac_stent', label: 'Cardiac Stent' },
@@ -43,6 +44,7 @@ const emptyLine = (): StockLine => ({
 export default function NewConsignmentDepositPage() {
   const router = useRouter()
   const supabase = createClient()
+  const confirm = useConfirm()
   const [loading, setLoading] = useState(false)
   const [vendors, setVendors] = useState<any[]>([])
   const [centres, setCentres] = useState<any[]>([])
@@ -112,8 +114,14 @@ export default function NewConsignmentDepositPage() {
 
     // Warn about lines without rate
     const noRateCount = lines.filter(l => (l.itemId || l.customDescription) && (!l.vendorRate || parseFloat(l.vendorRate) <= 0)).length
-    if (noRateCount > 0 && !confirm(`${noRateCount} item(s) have no vendor rate and will be skipped. Continue?`)) {
-      return
+    if (noRateCount > 0) {
+      const proceed = await confirm({
+        title: 'Some items have no vendor rate',
+        description: `${noRateCount} item${noRateCount === 1 ? '' : 's'} without a vendor rate will be left out of this deposit. Continue?`,
+        confirmLabel: 'Continue',
+        confirmVariant: 'warning',
+      })
+      if (!proceed) return
     }
 
     setLoading(true)

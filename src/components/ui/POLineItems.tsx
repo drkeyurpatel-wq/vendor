@@ -6,6 +6,7 @@ import { formatCurrency } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import ItemSearch from './ItemSearch'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 export interface LineItem {
   item_id: string
@@ -125,6 +126,7 @@ function calcLine(item: LineItem, supplyType: string): LineItem {
 export default function POLineItems({ items, onChange, vendorId, supplyType = 'intra_state' }: Props) {
   const excludeIds = items.map(i => i.item_id)
   const supabase = createClient()
+  const confirm = useConfirm()
   const [contractRates, setContractRates] = useState<Map<string, number>>(new Map())
   const [showDiscounts, setShowDiscounts] = useState(false)
 
@@ -157,9 +159,12 @@ export default function POLineItems({ items, onChange, vendorId, supplyType = 'i
   }) {
     // Warn if item is not mapped to this vendor — offer to map
     if (vendorId && !selected.l_rank) {
-      const proceed = window.confirm(
-        `${selected.generic_name} is not mapped to this vendor.\n\nClick OK to map it automatically and add to PO.\nClick Cancel to skip.`
-      )
+      const proceed = await confirm({
+        title: 'Item not mapped to this vendor',
+        description: `${selected.generic_name} is not on this vendor's item list. Map it to the vendor and add it to the PO?`,
+        confirmLabel: 'Map and add',
+        confirmVariant: 'primary',
+      })
       if (!proceed) return
       // Auto-map the item to this vendor
       try {

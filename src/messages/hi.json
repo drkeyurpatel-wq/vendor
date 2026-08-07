@@ -30,7 +30,10 @@
     "pending": "लंबित",
     "viewDetails": "विवरण देखें",
     "createdAt": "बनाया गया",
-    "updatedAt": "अपडेट किया गया"
+    "updatedAt": "अपडेट किया गया",
+    "searchPlaceholder": "विक्रेता, आइटम, पीओ खोजें...",
+    "signOut": "साइन आउट",
+    "language": "भाषा"
   },
   "nav": {
     "dashboard": "डैशबोर्ड",

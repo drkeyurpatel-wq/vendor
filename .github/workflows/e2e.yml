@@ -11,6 +11,12 @@ concurrency:
   group: e2e-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
+# The e2e job posts its result summary back to the PR. Without this the default
+# token is read-only and that step fails with 403 even when the tests pass.
+permissions:
+  contents: read
+  pull-requests: write
+
 env:
   NODE_ENV: development
   NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -86,19 +92,32 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Build Next.js
-        run: |
-          # Remove Sentry config files — their presence activates @sentry/nextjs
-          # webpack plugin which creates pages-router error pages that fail prerendering.
-          # Vercel deploys independently with Sentry DSN; CI doesn't need Sentry.
-          rm -f sentry.client.config.ts sentry.server.config.ts sentry.edge.config.ts
-          npm run build
+        run: npm run build
         env:
+          # Must override the workflow-level NODE_ENV=development. Building with
+          # NODE_ENV=development makes Next emit the pages-router error shells
+          # and prerendering then dies with "<Html> should not be imported
+          # outside of pages/_document" across /404, /500 and every static page.
+          # That was previously misread as a Sentry problem, and the workaround
+          # (deleting sentry.*.config.ts) broke the build a second way, since
+          # src/instrumentation.ts imports those files. Between the two, this
+          # step had never once succeeded and the E2E suite below never ran.
+          #
+          # Only the build needs production here: Playwright starts its own dev
+          # server and sets NODE_ENV=development itself, so _dev_otp still works
+          # for the vendor portal login test.
+          NODE_ENV: production
           # Build needs these for Supabase client init
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Run E2E tests
-        run: npx playwright test --reporter=github,html,json
+        # No --reporter flag: it replaces the whole reporter array from
+        # playwright.config.ts, including the json reporter's
+        # outputFile: 'e2e-results.json'. Without that file the summary step
+        # below can only report "Could not parse test results". The config
+        # already selects github + html + json when CI is set.
+        run: npx playwright test
         env:
           CI: true
 
@@ -143,13 +162,26 @@ jobs:
 
               if (failed > 0) {
                 summary += '### Failed Tests\n\n';
-                for (const suite of results.suites || []) {
-                  for (const spec of suite.specs || []) {
-                    for (const test of spec.tests || []) {
-                      if (test.status === 'unexpected') {
-                        summary += `- ❌ \`${spec.title}\` → ${test.results?.[0]?.error?.message?.slice(0, 100) || 'Unknown error'}\n`;
-                      }
-                    }
+                // Specs nest arbitrarily deep, so walk the tree rather than
+                // only reading the top level -- a failure inside a nested
+                // describe was previously invisible here.
+                const walk = (node, out) => {
+                  for (const spec of node.specs || []) out.push(spec);
+                  for (const child of node.suites || []) walk(child, out);
+                  return out;
+                };
+                const allSpecs = walk({ suites: results.suites || [] }, []);
+                for (const spec of allSpecs) {
+                  for (const test of spec.tests || []) {
+                    if (test.status !== 'unexpected') continue;
+                    // 100 characters truncated every message before it reached
+                    // the useful part. These messages carry the browser errors
+                    // and failed requests that explain the failure, so give
+                    // them room and keep the line breaks readable.
+                    const raw = test.results?.[0]?.error?.message || 'Unknown error';
+                    const message = raw.replace(/\u001b\[[0-9;]*m/g, '').trim().slice(0, 1500);
+                    summary += `<details><summary>❌ <code>${spec.title}</code></summary>\n\n`;
+                    summary += '```\n' + message + '\n```\n\n</details>\n\n';
                   }
                 }
               }

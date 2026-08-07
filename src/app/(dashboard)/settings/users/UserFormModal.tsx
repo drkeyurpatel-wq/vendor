@@ -27,9 +27,13 @@ interface UserFormModalProps {
   } | null
 }
 
+// 'vendor' is deliberately absent: vendors sign in by phone OTP at /vendor/*
+// and have no Supabase account, so a staff user carrying that role would be
+// redirected straight back out of the dashboard. The value stays in UserRole
+// because existing rows and the database enum may still reference it.
 const ROLES: UserRole[] = [
   'group_admin', 'group_cao', 'unit_cao',
-  'unit_purchase_manager', 'store_staff', 'finance_staff', 'vendor',
+  'unit_purchase_manager', 'store_staff', 'finance_staff',
 ]
 
 export default function UserFormModal({ centres, editUser }: UserFormModalProps) {

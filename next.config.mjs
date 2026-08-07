@@ -1,3 +1,17 @@
+// Deliberately an explicit === 'development' rather than !== 'production': an
+// unset or unexpected NODE_ENV must fall through to the strict policy, not the
+// relaxed one.
+const isDev = process.env.NODE_ENV === 'development'
+
+// Next's dev server compiles with eval-based source maps and React Refresh, so
+// `next dev` needs 'unsafe-eval' to run its own bundle at all. Without it the
+// scripts are blocked, React never hydrates, and every page renders as inert
+// markup -- forms fall through to a native GET and no button does anything.
+// Production must never carry this, so it is added only outside production.
+const scriptSrc = isDev
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+  : "script-src 'self' 'unsafe-inline'"
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
@@ -10,7 +24,7 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              scriptSrc,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://dwukvdtacwvnudqjlwrb.supabase.co",
               "font-src 'self' data:",

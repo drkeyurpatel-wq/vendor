@@ -7,35 +7,29 @@ import { cn } from '@/lib/utils'
 import { UserProfile } from '@/types/database'
 import {
   LayoutDashboard, Users, Package, ShoppingCart, ClipboardList,
-  FileText, CreditCard, BarChart2, Settings, ChevronDown,
-  Building2, LogOut, TrendingDown, Warehouse, AlertTriangle,
+  CreditCard, BarChart2, Settings, ChevronDown,
+  Building2, LogOut, TrendingDown, Warehouse,
   X, PanelLeftClose, PanelLeftOpen, Search, Heart,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from '@/hooks/useTranslation'
 
 interface NavItem {
   label: string
+  /** Translation key; falls back to `label` when the key is not yet translated. */
+  labelKey?: string
   href?: string
   icon: React.ReactNode
-  children?: { label: string; href: string }[]
+  children?: { label: string; labelKey?: string; href: string }[]
   roles?: string[]
 }
 
-const VENDOR_NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/vendor-portal', icon: <LayoutDashboard size={18} /> },
-  { label: 'Purchase Orders', href: '/vendor-portal/orders', icon: <ShoppingCart size={18} /> },
-  { label: 'Upload Invoice', href: '/vendor-portal/invoices/upload', icon: <FileText size={18} /> },
-  { label: 'Invoices', href: '/vendor-portal/invoices', icon: <CreditCard size={18} /> },
-  { label: 'Payments', href: '/vendor-portal/payments', icon: <CreditCard size={18} /> },
-  { label: 'Outstanding', href: '/vendor-portal/outstanding', icon: <AlertTriangle size={18} /> },
-]
-
 const NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/', icon: <LayoutDashboard size={18} /> },
+  { label: 'Dashboard', labelKey: 'nav.dashboard', href: '/', icon: <LayoutDashboard size={18} /> },
   {
-    label: 'Vendors', icon: <Users size={18} />,
+    label: 'Vendors', labelKey: 'nav.vendors', icon: <Users size={18} />,
     children: [
       { label: 'Vendor Master', href: '/vendors' },
       { label: 'Add Vendor', href: '/vendors/new' },
@@ -43,50 +37,51 @@ const NAV: NavItem[] = [
     ]
   },
   {
-    label: 'Items / SKUs', icon: <Package size={18} />,
+    label: 'Items / SKUs', labelKey: 'nav.items', icon: <Package size={18} />,
     children: [
       { label: 'Item Master', href: '/items' },
       { label: 'Add Item', href: '/items/new' },
       { label: 'Categories', href: '/items/categories' },
-      { label: 'Stock Levels', href: '/items/stock' },
-      { label: 'Consumption Report', href: '/items/consumption' },
+      { label: 'Stock Levels', labelKey: 'nav.stockLevels', href: '/items/stock' },
+      { label: 'Consumption Report', labelKey: 'nav.consumption', href: '/items/consumption' },
       { label: 'Upload Consumption', href: '/items/consumption/upload' },
     ]
   },
   {
-    label: 'Purchase', icon: <ShoppingCart size={18} />,
+    label: 'Purchase', labelKey: 'nav.purchaseOrders', icon: <ShoppingCart size={18} />,
     children: [
       { label: 'Purchase Orders', href: '/purchase-orders' },
       { label: 'New PO', href: '/purchase-orders/new' },
-      { label: 'Indents', href: '/purchase-orders/indents' },
+      { label: 'Indents', labelKey: 'nav.indents', href: '/purchase-orders/indents' },
+      { label: 'RFQs', href: '/purchase-orders/rfqs' },
     ]
   },
   {
-    label: 'GRN', icon: <ClipboardList size={18} />,
+    label: 'GRN', labelKey: 'nav.grn', icon: <ClipboardList size={18} />,
     children: [
       { label: 'All GRNs', href: '/grn' },
       { label: 'New GRN', href: '/grn/new' },
     ]
   },
   {
-    label: 'Finance', icon: <CreditCard size={18} />,
+    label: 'Finance', labelKey: 'nav.finance', icon: <CreditCard size={18} />,
     children: [
-      { label: 'Invoices', href: '/finance/invoices' },
+      { label: 'Invoices', labelKey: 'nav.invoices', href: '/finance/invoices' },
       { label: 'New Invoice', href: '/finance/invoices/new' },
-      { label: 'Credit Period', href: '/finance/credit' },
+      { label: 'Credit Period', labelKey: 'nav.credit', href: '/finance/credit' },
       { label: 'Payment Batches', href: '/finance/payments' },
       { label: 'Payment Schedule', href: '/finance/payments/schedule' },
       { label: 'New Batch', href: '/finance/payments/new' },
-      { label: 'Debit Notes', href: '/finance/debit-notes' },
+      { label: 'Debit Notes', labelKey: 'nav.debitNotes', href: '/finance/debit-notes' },
     ]
   },
   {
-    label: 'Inventory', icon: <Warehouse size={18} />,
+    label: 'Inventory', labelKey: 'nav.inventory', icon: <Warehouse size={18} />,
     children: [
-      { label: 'Stock Levels', href: '/items/stock' },
-      { label: 'Transfers', href: '/inventory/transfers' },
+      { label: 'Stock Levels', labelKey: 'nav.stockLevels', href: '/items/stock' },
+      { label: 'Transfers', labelKey: 'nav.transfers', href: '/inventory/transfers' },
       { label: 'Reorder Engine', href: '/inventory/reorder' },
-      { label: 'Expiry Alerts', href: '/inventory/expiry-alerts' },
+      { label: 'Expiry Alerts', labelKey: 'nav.expiryAlerts', href: '/inventory/expiry-alerts' },
       { label: 'Forecasting', href: '/inventory/forecasting' },
     ]
   },
@@ -100,10 +95,10 @@ const NAV: NavItem[] = [
     ]
   },
   {
-    label: 'Reports', icon: <BarChart2 size={18} />,
+    label: 'Reports', labelKey: 'nav.reports', icon: <BarChart2 size={18} />,
     children: [
       { label: 'Overview', href: '/reports' },
-      { label: 'Analytics', href: '/analytics' },
+      { label: 'Analytics', labelKey: 'nav.analytics', href: '/analytics' },
       { label: 'Vendor Overdue', href: '/reports/vendor-overdue' },
       { label: 'GST Summary', href: '/reports/gst-summary' },
       { label: 'Centre Spend', href: '/reports/centre-wise-spend' },
@@ -113,18 +108,19 @@ const NAV: NavItem[] = [
     ]
   },
   {
-    label: 'Settings', icon: <Settings size={18} />,
+    label: 'Settings', labelKey: 'nav.settings', icon: <Settings size={18} />,
     roles: ['group_admin', 'group_cao'],
     children: [
-      { label: 'Centres', href: '/settings/centres' },
-      { label: 'Users', href: '/settings/users' },
-      { label: 'Approval Matrix', href: '/settings/approvals' },
+      { label: 'Overview', href: '/settings' },
+      { label: 'Centres', labelKey: 'nav.centres', href: '/settings/centres' },
+      { label: 'Users', labelKey: 'nav.users', href: '/settings/users' },
+      { label: 'Approval Matrix', labelKey: 'nav.approvals', href: '/settings/approvals' },
       { label: 'Delegations', href: '/settings/delegations' },
-      { label: 'Rate Contracts', href: '/settings/rate-contracts' },
-      { label: 'Data Import', href: '/settings/data-import' },
+      { label: 'Rate Contracts', labelKey: 'nav.rateContracts', href: '/settings/rate-contracts' },
+      { label: 'Data Import', labelKey: 'nav.dataImport', href: '/settings/data-import' },
       { label: 'Tally Sync', href: '/settings/tally' },
       { label: 'Document Alerts', href: '/settings/document-alerts' },
-      { label: 'Audit Log', href: '/settings/audit-log' },
+      { label: 'Audit Log', labelKey: 'nav.auditLog', href: '/settings/audit-log' },
       { label: 'Audit Trail', href: '/settings/audit-trail' },
       { label: 'API Docs', href: '/settings/api-docs' },
     ]
@@ -143,7 +139,16 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const { t } = useTranslation()
   const [openGroups, setOpenGroups] = useState<string[]>(['Purchase', 'Vendors'])
+
+  // Falls back to the English label so an entry without a translation key stays
+  // readable rather than rendering the raw key.
+  const label = (item: { label: string; labelKey?: string }) => {
+    if (!item.labelKey) return item.label
+    const translated = t(item.labelKey)
+    return translated === item.labelKey ? item.label : translated
+  }
 
   // Auto-expand group containing active route
   useEffect(() => {
@@ -169,8 +174,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
     router.push('/login')
   }
 
-  const baseNav = user.role === 'vendor' ? VENDOR_NAV : NAV
-  const filteredNav = baseNav.filter(item =>
+  const filteredNav = NAV.filter(item =>
     !item.roles || item.roles.includes(user.role)
   )
 
@@ -262,7 +266,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                   <Link
                     href={item.href}
                     aria-current={active ? 'page' : undefined}
-                    title={collapsed ? item.label : undefined}
+                    title={collapsed ? label(item) : undefined}
                     className={cn(
                       'flex items-center gap-3 rounded-xl text-[13px] transition-all duration-200',
                       collapsed ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5',
@@ -272,7 +276,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                     )}
                   >
                     <span className={cn('flex-shrink-0 transition-colors', active ? 'text-teal-500' : '')}>{item.icon}</span>
-                    {!collapsed && <span>{item.label}</span>}
+                    {!collapsed && <span>{label(item)}</span>}
                   </Link>
                   </motion.div>
                 )
@@ -292,7 +296,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                         toggleGroup(item.label)
                       }
                     }}
-                    title={collapsed ? item.label : undefined}
+                    title={collapsed ? label(item) : undefined}
                     aria-expanded={isOpen}
                     className={cn(
                       'w-full flex items-center gap-3 rounded-xl text-[13px] transition-all duration-200 text-left',
@@ -305,7 +309,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                     <span className="flex-shrink-0">{item.icon}</span>
                     {!collapsed && (
                       <>
-                        <span className="flex-1">{item.label}</span>
+                        <span className="flex-1">{label(item)}</span>
                         <span className={cn('transition-transform duration-200', isOpen ? 'rotate-0' : '-rotate-90')}>
                           <ChevronDown size={14} aria-hidden="true" />
                         </span>
@@ -336,7 +340,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                                   : 'text-blue-300/60 hover:bg-white/[0.06] hover:text-blue-100'
                               )}
                             >
-                              {child.label}
+                              {label(child)}
                             </Link>
                           )
                         })}

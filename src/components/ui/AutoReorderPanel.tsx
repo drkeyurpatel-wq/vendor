@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { RefreshCw, ShoppingCart, AlertTriangle, CheckCircle2, Loader2, Package, ChevronDown } from 'lucide-react'
 import { formatCurrency, formatLakhs } from '@/lib/utils'
 import toast from 'react-hot-toast'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 interface Draft {
   vendor_code: string
@@ -27,6 +28,7 @@ interface GenerateResult {
 
 export default function AutoReorderPanel() {
   const router = useRouter()
+  const confirm = useConfirm()
   const [checking, setChecking] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [result, setResult] = useState<CheckResult | null>(null)
@@ -48,7 +50,14 @@ export default function AutoReorderPanel() {
   }
 
   async function runGenerate() {
-    if (!confirm(`This will create ${result?.summary.draft_pos} draft POs. Continue?`)) return
+    const count = result?.summary.draft_pos ?? 0
+    const proceed = await confirm({
+      title: `Create ${count} draft PO${count === 1 ? '' : 's'}?`,
+      description: 'Draft purchase orders will be generated for every item below its reorder level. Each still needs approval before it reaches a vendor.',
+      confirmLabel: 'Create drafts',
+      confirmVariant: 'primary',
+    })
+    if (!proceed) return
     setGenerating(true)
     try {
       const res = await fetch('/api/reorder', { method: 'POST' })

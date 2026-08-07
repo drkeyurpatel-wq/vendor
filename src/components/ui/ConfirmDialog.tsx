@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useId, useState } from 'react'
 import { AlertTriangle, Loader2, X } from 'lucide-react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 interface Props {
   open: boolean
@@ -23,14 +24,17 @@ export default function ConfirmDialog({
   showCommentBox, comment, onCommentChange, requireComment
 }: Props) {
   const [loading, setLoading] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const titleId = useId()
+  const descriptionId = useId()
 
-  useEffect(() => {
-    if (!open) return
-    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape' && !loading) onClose() }
-    document.addEventListener('keydown', handleEsc)
-    return () => document.removeEventListener('keydown', handleEsc)
-  }, [open, loading, onClose])
+  // Traps Tab inside the dialog, focuses it on open, handles Escape, and
+  // returns focus to whatever opened it. Without this a keyboard user can Tab
+  // straight out onto the page behind the overlay and confirm a destructive
+  // action they can no longer see.
+  const ref = useFocusTrap({
+    active: open,
+    onEscape: () => { if (!loading) onClose() },
+  })
 
   if (!open) return null
 
@@ -48,19 +52,25 @@ export default function ConfirmDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
+    >
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={loading ? undefined : onClose} />
       <div ref={ref} className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-scale-in">
-        <button onClick={onClose} disabled={loading} className="absolute top-4 right-4 text-gray-500 hover:text-gray-600">
-          <X size={18} />
+        <button onClick={onClose} disabled={loading} aria-label="Close dialog" className="absolute top-4 right-4 text-gray-500 hover:text-gray-600 cursor-pointer">
+          <X size={18} aria-hidden="true" />
         </button>
         <div className="flex items-start gap-3 mb-4">
           <div className={`p-2 rounded-xl ${confirmVariant === 'danger' ? 'bg-red-100' : confirmVariant === 'warning' ? 'bg-amber-100' : 'bg-teal-100'}`}>
-            <AlertTriangle size={20} className={confirmVariant === 'danger' ? 'text-red-600' : confirmVariant === 'warning' ? 'text-amber-600' : 'text-teal-600'} />
+            <AlertTriangle size={20} aria-hidden="true" className={confirmVariant === 'danger' ? 'text-red-600' : confirmVariant === 'warning' ? 'text-amber-600' : 'text-teal-600'} />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-            <p className="text-sm text-gray-500 mt-1">{description}</p>
+            <h3 id={titleId} className="text-base font-semibold text-gray-900">{title}</h3>
+            <p id={descriptionId} className="text-sm text-gray-500 mt-1">{description}</p>
           </div>
         </div>
 

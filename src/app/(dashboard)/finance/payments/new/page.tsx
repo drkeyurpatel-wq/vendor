@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Loader2, Building2, CreditCard, IndianRupee, AlertTria
 import toast from 'react-hot-toast'
 import { cn, formatCurrency } from '@/lib/utils'
 import { format } from 'date-fns'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 interface InvoiceRow {
   id: string; invoice_ref: string; vendor_invoice_no: string | null; vendor_invoice_date: string | null
@@ -42,6 +43,7 @@ interface LineItem {
 export default function NewPaymentPage() {
   const router = useRouter()
   const supabase = createClient()
+  const confirm = useConfirm()
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
   const [invoices, setInvoices] = useState<InvoiceRow[]>([])
@@ -130,7 +132,12 @@ export default function NewPaymentPage() {
     if (selectedLines.length === 0) { toast.error('Select at least one invoice'); return }
     if (selectedLines.some(l => !l.vendorAccountNo && paymentMode !== 'cash' && paymentMode !== 'upi')) {
       const missing = selectedLines.filter(l => !l.vendorAccountNo).map(l => l.vendorName)
-      const proceed = window.confirm(`Bank details missing for: ${missing.join(', ')}.\n\nContinue anyway?`)
+      const proceed = await confirm({
+        title: 'Bank details missing',
+        description: `No account number on file for ${missing.join(', ')}. The batch can still be created, but these lines cannot be paid by ${paymentMode.toUpperCase()} until bank details are added. Continue anyway?`,
+        confirmLabel: 'Continue',
+        confirmVariant: 'warning',
+      })
       if (!proceed) return
     }
 
