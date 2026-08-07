@@ -49,7 +49,11 @@ setup('authenticate staff user', async ({ page }) => {
   // rather than sitting here until the timeout. Waiting on the URL alone turns
   // "Invalid login credentials" into a bare 15s TimeoutError, which says
   // nothing about why the whole suite is about to skip.
-  const loginError = page.getByRole('alert')
+  // Scoped to the form: the page carries a second, empty [role="alert"] node
+  // (the dev overlay's portal container), and a bare getByRole('alert') hits a
+  // strict-mode violation whose rejection is easy to swallow into an empty
+  // message — which is exactly what hid the real reason for one CI run.
+  const loginError = page.locator('form [role="alert"]')
   const outcome = await Promise.race([
     page.waitForURL('/', { timeout: 15_000 }).then(() => 'ok' as const),
     loginError
@@ -59,10 +63,19 @@ setup('authenticate staff user', async ({ page }) => {
   ]).catch(() => 'timeout' as const)
 
   if (outcome === 'rejected') {
-    const message = (await loginError.innerText().catch(() => '')).trim()
+    // Report a failure to read the message distinctly from an empty one, so a
+    // locator problem here is never mistaken for a credentials problem.
+    let message: string
+    try {
+      message = (await loginError.innerText()).trim()
+    } catch (err) {
+      message = `<could not read the error element: ${(err as Error).message.split('\n')[0]}>`
+    }
     throw new Error(
-      `Sign-in was rejected for E2E_USER_EMAIL: ${message || 'no message shown'}. ` +
-        'Check that the E2E_USER_EMAIL and E2E_USER_PASSWORD secrets point at a real staff account.'
+      `Sign-in was rejected: ${message || '<the error element was empty>'}\n` +
+        'Supabase returned this rather than signing the user in. "Invalid login credentials" ' +
+        'means the E2E_USER_EMAIL/E2E_USER_PASSWORD secrets need updating; anything else is ' +
+        'a connectivity or configuration problem.'
     )
   }
 
