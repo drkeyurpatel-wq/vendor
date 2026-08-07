@@ -18,7 +18,10 @@ const DASHBOARD_MAP: Record<UserRole, React.ComponentType<{ profile: any }>> = {
   unit_purchase_manager: PurchaseManagerDashboard,
   store_staff: StoreStaffDashboard,
   finance_staff: FinanceStaffDashboard,
-  vendor: () => null, // Vendors use /vendor-portal
+  // Unreachable: the dashboard layout redirects role 'vendor' to /vendor/login
+  // before this map is consulted. Kept so the Record stays exhaustive over
+  // UserRole, which still carries the value for legacy rows.
+  vendor: () => null,
 }
 
 export default async function DashboardPage() {

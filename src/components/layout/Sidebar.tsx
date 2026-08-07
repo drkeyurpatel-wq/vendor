@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils'
 import { UserProfile } from '@/types/database'
 import {
   LayoutDashboard, Users, Package, ShoppingCart, ClipboardList,
-  FileText, CreditCard, BarChart2, Settings, ChevronDown,
-  Building2, LogOut, TrendingDown, Warehouse, AlertTriangle,
+  CreditCard, BarChart2, Settings, ChevronDown,
+  Building2, LogOut, TrendingDown, Warehouse,
   X, PanelLeftClose, PanelLeftOpen, Search, Heart,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -25,15 +25,6 @@ interface NavItem {
   children?: { label: string; labelKey?: string; href: string }[]
   roles?: string[]
 }
-
-const VENDOR_NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/vendor-portal', icon: <LayoutDashboard size={18} /> },
-  { label: 'Purchase Orders', href: '/vendor-portal/orders', icon: <ShoppingCart size={18} /> },
-  { label: 'Upload Invoice', href: '/vendor-portal/invoices/upload', icon: <FileText size={18} /> },
-  { label: 'Invoices', href: '/vendor-portal/invoices', icon: <CreditCard size={18} /> },
-  { label: 'Payments', href: '/vendor-portal/payments', icon: <CreditCard size={18} /> },
-  { label: 'Outstanding', href: '/vendor-portal/outstanding', icon: <AlertTriangle size={18} /> },
-]
 
 const NAV: NavItem[] = [
   { label: 'Dashboard', labelKey: 'nav.dashboard', href: '/', icon: <LayoutDashboard size={18} /> },
@@ -182,8 +173,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
     router.push('/login')
   }
 
-  const baseNav = user.role === 'vendor' ? VENDOR_NAV : NAV
-  const filteredNav = baseNav.filter(item =>
+  const filteredNav = NAV.filter(item =>
     !item.roles || item.roles.includes(user.role)
   )
 
