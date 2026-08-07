@@ -18,29 +18,39 @@ export function useFocusTrap({ active, onEscape }: UseFocusTrapOptions) {
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLElement | null>(null)
 
-  // Capture the element that was focused before the trap activated
+  // Capture the element that was focused before the trap activated, move focus
+  // inside, and put it back afterwards.
+  //
+  // Restoration lives in this effect's cleanup rather than in an `active ===
+  // false` branch so it also runs when the trapped component unmounts. Modals
+  // are commonly rendered conditionally ({open && <Dialog />}), which unmounts
+  // the hook outright and would otherwise drop focus onto <body>.
   useEffect(() => {
-    if (active) {
-      triggerRef.current = document.activeElement as HTMLElement
-      // Focus the first focusable element inside the container
-      const timer = setTimeout(() => {
-        if (containerRef.current) {
-          const focusable = getFocusableElements(containerRef.current)
-          if (focusable.length > 0) {
-            focusable[0].focus()
-          } else {
-            // If no focusable children, focus the container itself
-            containerRef.current.setAttribute('tabindex', '-1')
-            containerRef.current.focus()
-          }
+    if (!active) return
+
+    triggerRef.current = document.activeElement as HTMLElement
+
+    const timer = setTimeout(() => {
+      if (containerRef.current) {
+        const focusable = getFocusableElements(containerRef.current)
+        if (focusable.length > 0) {
+          focusable[0].focus()
+        } else {
+          // If no focusable children, focus the container itself
+          containerRef.current.setAttribute('tabindex', '-1')
+          containerRef.current.focus()
         }
-      }, 0)
-      return () => clearTimeout(timer)
-    } else {
-      // Restore focus to the trigger element when trap deactivates
-      if (triggerRef.current && typeof triggerRef.current.focus === 'function') {
-        triggerRef.current.focus()
-        triggerRef.current = null
+      }
+    }, 0)
+
+    return () => {
+      clearTimeout(timer)
+      const trigger = triggerRef.current
+      triggerRef.current = null
+      // Skip a trigger that has since left the DOM — focusing a detached node
+      // silently sends focus to <body>.
+      if (trigger && typeof trigger.focus === 'function' && document.contains(trigger)) {
+        trigger.focus()
       }
     }
   }, [active])
@@ -104,9 +114,18 @@ function getFocusableElements(container: HTMLElement): HTMLElement[] {
     '[contenteditable="true"]',
   ].join(', ')
 
-  return Array.from(container.querySelectorAll<HTMLElement>(selector)).filter(
-    (el) => !el.hasAttribute('disabled') && el.offsetParent !== null
-  )
+  return Array.from(container.querySelectorAll<HTMLElement>(selector)).filter(el => {
+    if (el.hasAttribute('disabled')) return false
+    if (el.getAttribute('aria-hidden') === 'true') return false
+    if (el.hidden) return false
+    // Visibility is checked through computed style rather than offsetParent:
+    // offsetParent is always null under jsdom, which would make the trap look
+    // empty in tests, and it is also null for any position:fixed element --
+    // exactly what a modal is.
+    const style = typeof window !== 'undefined' ? window.getComputedStyle(el) : null
+    if (style && (style.display === 'none' || style.visibility === 'hidden')) return false
+    return true
+  })
 }
 
 export default useFocusTrap
