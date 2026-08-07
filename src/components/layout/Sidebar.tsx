@@ -116,6 +116,7 @@ const NAV: NavItem[] = [
     label: 'Settings', icon: <Settings size={18} />,
     roles: ['group_admin', 'group_cao'],
     children: [
+      { label: 'Overview', href: '/settings' },
       { label: 'Centres', href: '/settings/centres' },
       { label: 'Users', href: '/settings/users' },
       { label: 'Approval Matrix', href: '/settings/approvals' },
