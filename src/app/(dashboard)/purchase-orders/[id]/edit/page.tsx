@@ -8,12 +8,15 @@ import { ArrowLeft, Save, Loader2, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import POLineItems, { LineItem } from '@/components/ui/POLineItems'
 import VendorSearch from '@/components/ui/VendorSearch'
+import { formatCurrency } from '@/lib/utils'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 export default function EditPOPage() {
   const router = useRouter()
   const params = useParams()
   const id = params.id as string
   const supabase = createClient()
+  const confirm = useConfirm()
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -163,11 +166,15 @@ export default function EditPOPage() {
         }))
 
         if (rateViolations.length > 0) {
-          const proceed = window.confirm(
-            `${rateViolations.length} item(s) deviate from contract rate (>±0.5%).\n` +
-            rateViolations.map(v => `${v.generic_name}: ₹${v.rate} vs contract ₹${v.contract_rate}`).join('\n') +
-            `\n\nThis PO will need higher-level approval. Continue?`
-          )
+          const detail = rateViolations
+            .map(v => `${v.generic_name} at ${formatCurrency(v.rate)} vs contract ${formatCurrency(v.contract_rate ?? 0)}`)
+            .join('; ')
+          const proceed = await confirm({
+            title: 'Rates deviate from contract',
+            description: `${detail}. This PO will need higher-level approval. Continue?`,
+            confirmLabel: 'Continue',
+            confirmVariant: 'warning',
+          })
           if (!proceed) { setSaving(false); return }
         }
       }
@@ -182,9 +189,12 @@ export default function EditPOPage() {
         .single()
 
       if (vendorData?.minimum_order_value && total_amount < vendorData.minimum_order_value) {
-        const proceed = window.confirm(
-          `PO total ₹${total_amount.toLocaleString()} is below vendor minimum order ₹${vendorData.minimum_order_value.toLocaleString()}.\n\nContinue anyway?`
-        )
+        const proceed = await confirm({
+          title: 'Below vendor minimum order value',
+          description: `This PO totals ${formatCurrency(total_amount)}, below the vendor's minimum of ${formatCurrency(vendorData.minimum_order_value)}. Save it anyway?`,
+          confirmLabel: 'Save anyway',
+          confirmVariant: 'warning',
+        })
         if (!proceed) { setSaving(false); return }
       }
 
@@ -196,9 +206,13 @@ export default function EditPOPage() {
           .neq('payment_status', 'paid')
         const outstanding = (outstandingInv ?? []).reduce((s, i: any) => s + (i.total_amount - (i.paid_amount || 0)), 0)
         if (outstanding + total_amount > vendorData.credit_limit) {
-          const proceed = window.confirm(
-            `CREDIT LIMIT WARNING\n\nOutstanding: ₹${outstanding.toLocaleString()}\nThis PO: ₹${total_amount.toLocaleString()}\nTotal: ₹${(outstanding + total_amount).toLocaleString()}\nCredit Limit: ₹${vendorData.credit_limit.toLocaleString()}\n\nExceeds limit by ₹${(outstanding + total_amount - vendorData.credit_limit).toLocaleString()}. Continue?`
-          )
+          const excess = outstanding + total_amount - vendorData.credit_limit
+          const proceed = await confirm({
+            title: 'Credit limit would be exceeded',
+            description: `Outstanding ${formatCurrency(outstanding)} plus this PO ${formatCurrency(total_amount)} comes to ${formatCurrency(outstanding + total_amount)}, which is ${formatCurrency(excess)} over the ${formatCurrency(vendorData.credit_limit)} credit limit. Save it anyway?`,
+            confirmLabel: 'Save anyway',
+            confirmVariant: 'danger',
+          })
           if (!proceed) { setSaving(false); return }
         }
       }
@@ -308,7 +322,13 @@ export default function EditPOPage() {
   }
 
   async function handleDelete() {
-    if (!window.confirm('Are you sure you want to delete this draft PO? This action cannot be undone.')) return
+    const proceed = await confirm({
+      title: 'Delete this draft PO?',
+      description: 'The purchase order will be removed from all lists and reports. This cannot be undone.',
+      confirmLabel: 'Delete PO',
+      confirmVariant: 'danger',
+    })
+    if (!proceed) return
 
     setDeleting(true)
 

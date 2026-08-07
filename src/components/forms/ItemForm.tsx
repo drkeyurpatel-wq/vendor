@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
 import toast from 'react-hot-toast'
 import FieldError from '@/components/ui/FieldError'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 const DEPARTMENTS = ['Medical', 'Surgical', 'Dental', 'Lab', 'Radiology', 'Dietary', 'Housekeeping', 'Engineering', 'IT', 'General']
 const ITEM_TYPES = [
@@ -52,6 +53,7 @@ function Req() { return <span className="text-red-500 font-bold ml-0.5">*</span>
 export default function ItemForm({ mode = 'create', initialData }: { mode?: 'create' | 'edit'; initialData?: Record<string, any> }) {
   const router = useRouter()
   const supabase = createClient()
+  const confirm = useConfirm()
   const [loading, setLoading] = useState(false)
   const [categories, setCategories] = useState<any[]>([])
   const [form, setForm] = useState<FormState>({ ...defaultForm, ...initialData } as FormState)
@@ -112,7 +114,15 @@ export default function ItemForm({ mode = 'create', initialData }: { mode?: 'cre
     }
     if (form.default_rate && form.mrp) {
       const m = (1 - parseFloat(form.default_rate) / parseFloat(form.mrp)) * 100
-      if (m < 10 && !window.confirm(`Margin is ${m.toFixed(1)}% (below 10%). Continue?`)) return
+      if (m < 10) {
+        const proceed = await confirm({
+          title: 'Margin below 10%',
+          description: `This purchase rate leaves a ${m.toFixed(1)}% margin against MRP. Save the item anyway?`,
+          confirmLabel: 'Save anyway',
+          confirmVariant: 'warning',
+        })
+        if (!proceed) return
+      }
     }
     setLoading(true)
     try {

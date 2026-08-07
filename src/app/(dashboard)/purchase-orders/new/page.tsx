@@ -9,12 +9,14 @@ import toast from 'react-hot-toast'
 import VendorSearch from '@/components/ui/VendorSearch'
 import POLineItems, { LineItem } from '@/components/ui/POLineItems'
 import { notifyAll } from '@/lib/notify'
-import { generatePONumber } from '@/lib/utils'
+import { generatePONumber, formatCurrency } from '@/lib/utils'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 export default function NewPOPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
+  const confirm = useConfirm()
 
   const [loading, setLoading] = useState(false)
   const [centres, setCentres] = useState<any[]>([])
@@ -107,9 +109,12 @@ export default function NewPOPage() {
 
     // B10: Minimum Order Value check
     if (vendor.minimum_order_value && poTotal < vendor.minimum_order_value) {
-      const proceed = window.confirm(
-        `PO total ₹${poTotal.toLocaleString()} is below vendor's minimum order value ₹${vendor.minimum_order_value.toLocaleString()}.\n\nContinue anyway?`
-      )
+      const proceed = await confirm({
+        title: 'Below vendor minimum order value',
+        description: `This PO totals ${formatCurrency(poTotal)}, below ${vendor.legal_name || 'the vendor'}'s minimum of ${formatCurrency(vendor.minimum_order_value)}. Create it anyway?`,
+        confirmLabel: 'Create anyway',
+        confirmVariant: 'warning',
+      })
       if (!proceed) return
     }
 
@@ -123,9 +128,13 @@ export default function NewPOPage() {
           .neq('payment_status', 'paid')
         const outstanding = unpaidInvoices?.reduce((s, i: any) => s + ((i.total_amount || 0) - (i.paid_amount || 0)), 0) ?? 0
         if (outstanding + poTotal > vendor.credit_limit) {
-          const proceed = window.confirm(
-            `⚠️ CREDIT LIMIT WARNING\n\nOutstanding: ₹${outstanding.toLocaleString()}\nThis PO: ₹${poTotal.toLocaleString()}\nTotal: ₹${(outstanding + poTotal).toLocaleString()}\nCredit Limit: ₹${vendor.credit_limit.toLocaleString()}\n\nExceeds limit by ₹${(outstanding + poTotal - vendor.credit_limit).toLocaleString()}. Continue?`
-          )
+          const excess = outstanding + poTotal - vendor.credit_limit
+          const proceed = await confirm({
+            title: 'Credit limit would be exceeded',
+            description: `Outstanding ${formatCurrency(outstanding)} plus this PO ${formatCurrency(poTotal)} comes to ${formatCurrency(outstanding + poTotal)}, which is ${formatCurrency(excess)} over the ${formatCurrency(vendor.credit_limit)} credit limit. Create it anyway?`,
+            confirmLabel: 'Create anyway',
+            confirmVariant: 'danger',
+          })
           if (!proceed) return
         }
       } catch { /* non-critical */ }
@@ -144,18 +153,24 @@ export default function NewPOPage() {
 
       if (existingPOs && existingPOs.length > 0) {
         const poNums = existingPOs.map(po => `${po.po_number} (${(po.status ?? 'unknown').replace(/_/g, ' ')})`).join(', ')
-        const proceed = window.confirm(
-          `Note: ${existingPOs.length} open PO(s) exist for this vendor:\n${poNums}\n\nContinue creating new PO?`
-        )
+        const proceed = await confirm({
+          title: `${existingPOs.length} open PO${existingPOs.length === 1 ? '' : 's'} for this vendor`,
+          description: `${poNums}. Create another PO as well?`,
+          confirmLabel: 'Create anyway',
+          confirmVariant: 'warning',
+        })
         if (!proceed) return
       }
     } catch { /* non-critical — proceed with PO creation */ }
 
     const rateViolations = items.filter(i => i.rate_warning)
     if (rateViolations.length > 0) {
-      const proceed = window.confirm(
-        `${rateViolations.length} item(s) deviate from contract rate (>±0.5%).\nThis PO will need higher-level approval. Continue?`
-      )
+      const proceed = await confirm({
+        title: 'Rates deviate from contract',
+        description: `${rateViolations.length} item${rateViolations.length === 1 ? '' : 's'} deviate from the contracted rate by more than ±0.5%, so this PO will need higher-level approval. Continue?`,
+        confirmLabel: 'Continue',
+        confirmVariant: 'warning',
+      })
       if (!proceed) return
     }
 

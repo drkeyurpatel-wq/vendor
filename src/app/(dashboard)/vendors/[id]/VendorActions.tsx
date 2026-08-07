@@ -7,6 +7,7 @@ import { Loader2, ShieldCheck, ShieldBan, ShieldAlert, Power } from 'lucide-reac
 import toast from 'react-hot-toast'
 import type { UserRole, VendorStatus } from '@/types/database'
 import type { TablesUpdate } from '@/types/supabase'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 interface Props {
   vendorId: string
@@ -20,6 +21,7 @@ const BLACKLIST_ROLES: UserRole[] = ['group_admin']
 export default function VendorActions({ vendorId, currentStatus, userRole }: Props) {
   const router = useRouter()
   const supabase = createClient()
+  const confirm = useConfirm()
   const [loading, setLoading] = useState(false)
   const [showBlacklistForm, setShowBlacklistForm] = useState(false)
   const [blacklistReason, setBlacklistReason] = useState('')
@@ -63,8 +65,14 @@ export default function VendorActions({ vendorId, currentStatus, userRole }: Pro
     updateStatus('active')
   }
 
-  function handleDeactivate() {
-    if (!confirm('Are you sure you want to deactivate this vendor? They will no longer appear in vendor selection for new POs.')) return
+  async function handleDeactivate() {
+    const proceed = await confirm({
+      title: 'Deactivate this vendor?',
+      description: 'They will stop appearing in vendor selection for new purchase orders. Existing POs and invoices are unaffected.',
+      confirmLabel: 'Deactivate',
+      confirmVariant: 'danger',
+    })
+    if (!proceed) return
     updateStatus('inactive')
   }
 
@@ -80,8 +88,14 @@ export default function VendorActions({ vendorId, currentStatus, userRole }: Pro
     updateStatus('blacklisted', { blacklist_reason: blacklistReason.trim() })
   }
 
-  function handleReactivate() {
-    if (!confirm('Are you sure you want to reactivate this blacklisted vendor?')) return
+  async function handleReactivate() {
+    const proceed = await confirm({
+      title: 'Reactivate this blacklisted vendor?',
+      description: 'They will become selectable for new purchase orders again and the blacklist reason will be cleared.',
+      confirmLabel: 'Reactivate',
+      confirmVariant: 'warning',
+    })
+    if (!proceed) return
     updateStatus('active', { blacklist_reason: null })
   }
 

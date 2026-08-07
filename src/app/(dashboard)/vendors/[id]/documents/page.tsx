@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, Upload, FileText, Download, CheckCircle, Clock, Loader2, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { formatDate } from '@/lib/utils'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 const DOCUMENT_TYPES = [
   { value: 'gstin_certificate', label: 'GSTIN Certificate' },
@@ -34,6 +35,7 @@ export default function VendorDocumentsPage() {
   const params = useParams<{ id: string }>()
   const vendorId = params.id
   const supabase = createClient()
+  const confirm = useConfirm()
 
   const [documents, setDocuments] = useState<VendorDocument[]>([])
   const [loading, setLoading] = useState(true)
@@ -146,7 +148,13 @@ export default function VendorDocumentsPage() {
   }
 
   async function handleDelete(doc: VendorDocument) {
-    if (!confirm(`Delete "${doc.file_name}"? This action cannot be undone.`)) return
+    const proceed = await confirm({
+      title: 'Delete this document?',
+      description: `"${doc.file_name}" will be permanently removed from storage. This cannot be undone.`,
+      confirmLabel: 'Delete',
+      confirmVariant: 'danger',
+    })
+    if (!proceed) return
 
     try {
       const { error: storageError } = await supabase.storage
