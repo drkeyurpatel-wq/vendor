@@ -1,8 +1,5 @@
 import { test, expect } from '@playwright/test'
-import {
-  navigateAndWait,
-  expectNoErrors,
-} from '../../helpers/page-utils'
+import { expectNoErrors } from '../../helpers/page-utils'
 
 test.describe('Vendor Portal', () => {
   // Vendor portal uses its own cookie-based auth, not Supabase session
@@ -99,29 +96,9 @@ test.describe('Vendor Portal', () => {
     }
   })
 
-  test.describe('Portal Internal Views (via dashboard auth)', () => {
-    // These are the admin-side vendor portal management pages
-    // They use staff auth, not vendor auth
-    test.use({ storageState: 'e2e/.auth/staff.json' })
-
-    test('vendor portal admin — orders list loads', async ({ page }) => {
-      await navigateAndWait(page, '/vendor-portal/orders')
-      await expectNoErrors(page)
-    })
-
-    test('vendor portal admin — invoices list loads', async ({ page }) => {
-      await navigateAndWait(page, '/vendor-portal/invoices')
-      await expectNoErrors(page)
-    })
-
-    test('vendor portal admin — payments list loads', async ({ page }) => {
-      await navigateAndWait(page, '/vendor-portal/payments')
-      await expectNoErrors(page)
-    })
-
-    test('vendor portal admin — outstanding list loads', async ({ page }) => {
-      await navigateAndWait(page, '/vendor-portal/outstanding')
-      await expectNoErrors(page)
-    })
-  })
+  // The /vendor-portal/* pages these specs covered have been removed. Their
+  // comment claimed they ran "via dashboard auth", but every one of those pages
+  // gated on role 'vendor' and showed staff a "only accessible to vendor users"
+  // notice — so with staff.json they exercised nothing. Vendor-facing coverage
+  // lives in the vendor-auth specs above, against the live /vendor/* portal.
 })
