@@ -11,6 +11,12 @@ concurrency:
   group: e2e-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
+# The e2e job posts its result summary back to the PR. Without this the default
+# token is read-only and that step fails with 403 even when the tests pass.
+permissions:
+  contents: read
+  pull-requests: write
+
 env:
   NODE_ENV: development
   NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -86,13 +92,21 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Build Next.js
-        run: |
-          # Remove Sentry config files — their presence activates @sentry/nextjs
-          # webpack plugin which creates pages-router error pages that fail prerendering.
-          # Vercel deploys independently with Sentry DSN; CI doesn't need Sentry.
-          rm -f sentry.client.config.ts sentry.server.config.ts sentry.edge.config.ts
-          npm run build
+        run: npm run build
         env:
+          # Must override the workflow-level NODE_ENV=development. Building with
+          # NODE_ENV=development makes Next emit the pages-router error shells
+          # and prerendering then dies with "<Html> should not be imported
+          # outside of pages/_document" across /404, /500 and every static page.
+          # That was previously misread as a Sentry problem, and the workaround
+          # (deleting sentry.*.config.ts) broke the build a second way, since
+          # src/instrumentation.ts imports those files. Between the two, this
+          # step had never once succeeded and the E2E suite below never ran.
+          #
+          # Only the build needs production here: Playwright starts its own dev
+          # server and sets NODE_ENV=development itself, so _dev_otp still works
+          # for the vendor portal login test.
+          NODE_ENV: production
           # Build needs these for Supabase client init
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
