@@ -53,6 +53,7 @@ const NAV: NavItem[] = [
       { label: 'Purchase Orders', href: '/purchase-orders' },
       { label: 'New PO', href: '/purchase-orders/new' },
       { label: 'Indents', labelKey: 'nav.indents', href: '/purchase-orders/indents' },
+      { label: 'RFQs', href: '/purchase-orders/rfqs' },
     ]
   },
   {

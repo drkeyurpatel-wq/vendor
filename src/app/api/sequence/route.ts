@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
     indent: 'indent_number_seq',
     invoice: 'invoice_ref_seq',
     batch: 'batch_number_seq',
+    rfq: 'rfq_number_seq',
   }
 
   const seqName = sequenceMap[type]
@@ -59,10 +60,12 @@ export async function GET(req: NextRequest) {
     const tableMap: Record<string, string> = {
       vendor: 'vendors', item: 'items', po: 'purchase_orders',
       grn: 'grns', indent: 'purchase_indents', invoice: 'invoices', batch: 'payment_batches',
+      rfq: 'rfqs',
     }
     const codeCol: Record<string, string> = {
       vendor: 'vendor_code', item: 'item_code', po: 'po_number',
       grn: 'grn_number', indent: 'indent_number', invoice: 'invoice_ref', batch: 'batch_number',
+      rfq: 'rfq_number',
     }
     const table = tableMap[type]
     const col = codeCol[type]
@@ -88,6 +91,7 @@ export async function GET(req: NextRequest) {
       indent: `H1-${centreCode}-IND-${ym}-${String(seq).padStart(3, '0')}`,
       invoice: `H1-${centreCode}-INV-${ym}-${String(seq).padStart(3, '0')}`,
       batch: `H1-PAY-${ym}-${String(seq).padStart(3, '0')}`,
+      rfq: `H1-${centreCode}-RFQ-${ym}-${String(seq).padStart(3, '0')}`,
     }
 
     const number = formatMap[type]
