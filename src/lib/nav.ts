@@ -16,6 +16,7 @@ export type NavIconName =
   | 'po' | 'vendors' | 'contracts' | 'invoices' | 'schedule'
   | 'payments' | 'debit' | 'overdue' | 'spend' | 'analytics'
   | 'items' | 'inventory' | 'consignment' | 'reports' | 'settings'
+  | 'approvals'
 
 export interface NavLink {
   label: string
@@ -35,6 +36,7 @@ export const isNavGroup = (e: NavEntry): e is NavGroup =>
   (e as NavGroup).children !== undefined
 
 const DASHBOARD: NavLink = { label: 'Dashboard', href: '/', icon: 'dashboard' }
+const APPROVALS: NavLink = { label: 'Approvals', href: '/approvals', icon: 'approvals' }
 
 /** Primary navigation per role. Flat lists — no nesting, no discovery cost. */
 const PRIMARY: Record<UserRole, NavLink[]> = {
@@ -48,6 +50,7 @@ const PRIMARY: Record<UserRole, NavLink[]> = {
 
   unit_purchase_manager: [
     DASHBOARD,
+    APPROVALS,
     { label: 'Indents', href: '/purchase-orders/indents', icon: 'indent' },
     { label: 'Purchase Orders', href: '/purchase-orders', icon: 'po' },
     { label: 'Vendors', href: '/vendors', icon: 'vendors' },
@@ -66,6 +69,7 @@ const PRIMARY: Record<UserRole, NavLink[]> = {
 
   unit_cao: [
     DASHBOARD,
+    APPROVALS,
     { label: 'Purchase Orders', href: '/purchase-orders', icon: 'po' },
     { label: 'Invoices', href: '/finance/invoices', icon: 'invoices' },
     { label: 'Centre Spend', href: '/reports/centre-wise-spend', icon: 'spend' },
@@ -74,6 +78,7 @@ const PRIMARY: Record<UserRole, NavLink[]> = {
 
   group_cao: [
     DASHBOARD,
+    APPROVALS,
     { label: 'Purchase Orders', href: '/purchase-orders', icon: 'po' },
     { label: 'Payments', href: '/finance/payments', icon: 'payments' },
     { label: 'Vendor Outstanding', href: '/reports/vendor-overdue', icon: 'overdue' },
@@ -83,6 +88,7 @@ const PRIMARY: Record<UserRole, NavLink[]> = {
 
   group_admin: [
     DASHBOARD,
+    APPROVALS,
     { label: 'Purchase Orders', href: '/purchase-orders', icon: 'po' },
     { label: 'Payments', href: '/finance/payments', icon: 'payments' },
     { label: 'Vendor Outstanding', href: '/reports/vendor-overdue', icon: 'overdue' },

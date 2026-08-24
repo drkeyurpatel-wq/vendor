@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, ClipboardList, Boxes, AlertTriangle, ShoppingCart,
   Users, FileSignature, FileText, CalendarClock, CreditCard, Receipt,
-  TrendingDown, PieChart, BarChart2, Package, Warehouse, Heart, Settings,
+  TrendingDown, PieChart, BarChart2, Package, Warehouse, Heart, Settings, ShieldCheck,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { mobileNavFor, type NavIconName } from '@/lib/nav'
@@ -33,6 +33,7 @@ const ICONS: Record<NavIconName, LucideIcon> = {
   consignment: Heart,
   reports: BarChart2,
   settings: Settings,
+  approvals: ShieldCheck,
 }
 
 export default function MobileBottomNav({ role }: { role: UserRole }) {

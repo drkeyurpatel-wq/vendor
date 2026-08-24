@@ -12,7 +12,7 @@ import {
   FileText, CreditCard, BarChart2, Settings, ChevronDown,
   Building2, LogOut, TrendingDown, Warehouse, AlertTriangle,
   X, PanelLeftClose, PanelLeftOpen, Search, Heart,
-  Boxes, CalendarClock, Receipt, PieChart, FileSignature,
+  Boxes, CalendarClock, Receipt, PieChart, FileSignature, ShieldCheck,
 } from 'lucide-react'
 import {
   primaryNavFor, manageNavFor, isNavGroup,
@@ -40,6 +40,7 @@ const ICONS: Record<NavIconName, React.ReactNode> = {
   consignment: <Heart size={18} />,
   reports: <BarChart2 size={18} />,
   settings: <Settings size={18} />,
+  approvals: <ShieldCheck size={18} />,
 }
 interface SidebarProps {
   user: UserProfile
