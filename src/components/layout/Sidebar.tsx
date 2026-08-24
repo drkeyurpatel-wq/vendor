@@ -1,136 +1,46 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { UserProfile } from '@/types/database'
+import { UserProfile, type UserRole } from '@/types/database'
 import {
   LayoutDashboard, Users, Package, ShoppingCart, ClipboardList,
   FileText, CreditCard, BarChart2, Settings, ChevronDown,
   Building2, LogOut, TrendingDown, Warehouse, AlertTriangle,
   X, PanelLeftClose, PanelLeftOpen, Search, Heart,
+  Boxes, CalendarClock, Receipt, PieChart, FileSignature,
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import {
+  primaryNavFor, manageNavFor, isNavGroup,
+  type NavIconName, type NavEntry,
+} from '@/lib/nav'
 
-interface NavItem {
-  label: string
-  href?: string
-  icon: React.ReactNode
-  children?: { label: string; href: string }[]
-  roles?: string[]
+const ICONS: Record<NavIconName, React.ReactNode> = {
+  dashboard: <LayoutDashboard size={18} />,
+  indent: <ClipboardList size={18} />,
+  grn: <ClipboardList size={18} />,
+  stock: <Boxes size={18} />,
+  expiry: <AlertTriangle size={18} />,
+  po: <ShoppingCart size={18} />,
+  vendors: <Users size={18} />,
+  contracts: <FileSignature size={18} />,
+  invoices: <FileText size={18} />,
+  schedule: <CalendarClock size={18} />,
+  payments: <CreditCard size={18} />,
+  debit: <Receipt size={18} />,
+  overdue: <TrendingDown size={18} />,
+  spend: <PieChart size={18} />,
+  analytics: <BarChart2 size={18} />,
+  items: <Package size={18} />,
+  inventory: <Warehouse size={18} />,
+  consignment: <Heart size={18} />,
+  reports: <BarChart2 size={18} />,
+  settings: <Settings size={18} />,
 }
-
-const VENDOR_NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/vendor-portal', icon: <LayoutDashboard size={18} /> },
-  { label: 'Purchase Orders', href: '/vendor-portal/orders', icon: <ShoppingCart size={18} /> },
-  { label: 'Upload Invoice', href: '/vendor-portal/invoices/upload', icon: <FileText size={18} /> },
-  { label: 'Invoices', href: '/vendor-portal/invoices', icon: <CreditCard size={18} /> },
-  { label: 'Payments', href: '/vendor-portal/payments', icon: <CreditCard size={18} /> },
-  { label: 'Outstanding', href: '/vendor-portal/outstanding', icon: <AlertTriangle size={18} /> },
-]
-
-const NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/', icon: <LayoutDashboard size={18} /> },
-  {
-    label: 'Vendors', icon: <Users size={18} />,
-    children: [
-      { label: 'Vendor Master', href: '/vendors' },
-      { label: 'Add Vendor', href: '/vendors/new' },
-      { label: 'Categories', href: '/vendors/categories' },
-    ]
-  },
-  {
-    label: 'Items / SKUs', icon: <Package size={18} />,
-    children: [
-      { label: 'Item Master', href: '/items' },
-      { label: 'Add Item', href: '/items/new' },
-      { label: 'Categories', href: '/items/categories' },
-      { label: 'Stock Levels', href: '/items/stock' },
-      { label: 'Consumption Report', href: '/items/consumption' },
-      { label: 'Upload Consumption', href: '/items/consumption/upload' },
-    ]
-  },
-  {
-    label: 'Purchase', icon: <ShoppingCart size={18} />,
-    children: [
-      { label: 'Purchase Orders', href: '/purchase-orders' },
-      { label: 'New PO', href: '/purchase-orders/new' },
-      { label: 'Indents', href: '/purchase-orders/indents' },
-    ]
-  },
-  {
-    label: 'GRN', icon: <ClipboardList size={18} />,
-    children: [
-      { label: 'All GRNs', href: '/grn' },
-      { label: 'New GRN', href: '/grn/new' },
-    ]
-  },
-  {
-    label: 'Finance', icon: <CreditCard size={18} />,
-    children: [
-      { label: 'Invoices', href: '/finance/invoices' },
-      { label: 'New Invoice', href: '/finance/invoices/new' },
-      { label: 'Credit Period', href: '/finance/credit' },
-      { label: 'Payment Batches', href: '/finance/payments' },
-      { label: 'Payment Schedule', href: '/finance/payments/schedule' },
-      { label: 'New Batch', href: '/finance/payments/new' },
-      { label: 'Debit Notes', href: '/finance/debit-notes' },
-    ]
-  },
-  {
-    label: 'Inventory', icon: <Warehouse size={18} />,
-    children: [
-      { label: 'Stock Levels', href: '/items/stock' },
-      { label: 'Transfers', href: '/inventory/transfers' },
-      { label: 'Reorder Engine', href: '/inventory/reorder' },
-      { label: 'Expiry Alerts', href: '/inventory/expiry-alerts' },
-      { label: 'Forecasting', href: '/inventory/forecasting' },
-    ]
-  },
-  {
-    label: 'Consignment', icon: <Heart size={18} />,
-    children: [
-      { label: 'Dashboard', href: '/consignment' },
-      { label: 'Receive Challan', href: '/consignment/deposits/new' },
-      { label: 'Stock View', href: '/consignment/stock' },
-      { label: 'Usage Log', href: '/consignment/usage' },
-    ]
-  },
-  {
-    label: 'Reports', icon: <BarChart2 size={18} />,
-    children: [
-      { label: 'Overview', href: '/reports' },
-      { label: 'Analytics', href: '/analytics' },
-      { label: 'Vendor Overdue', href: '/reports/vendor-overdue' },
-      { label: 'GST Summary', href: '/reports/gst-summary' },
-      { label: 'Centre Spend', href: '/reports/centre-wise-spend' },
-      { label: 'PO Aging', href: '/reports/po-aging' },
-      { label: 'Item Purchase History', href: '/reports/item-purchase-history' },
-      { label: 'Vendor Performance', href: '/reports/vendor-performance' },
-    ]
-  },
-  {
-    label: 'Settings', icon: <Settings size={18} />,
-    roles: ['group_admin', 'group_cao'],
-    children: [
-      { label: 'Centres', href: '/settings/centres' },
-      { label: 'Users', href: '/settings/users' },
-      { label: 'Approval Matrix', href: '/settings/approvals' },
-      { label: 'Delegations', href: '/settings/delegations' },
-      { label: 'Rate Contracts', href: '/settings/rate-contracts' },
-      { label: 'Data Import', href: '/settings/data-import' },
-      { label: 'Tally Sync', href: '/settings/tally' },
-      { label: 'Document Alerts', href: '/settings/document-alerts' },
-      { label: 'Audit Log', href: '/settings/audit-log' },
-      { label: 'Audit Trail', href: '/settings/audit-trail' },
-      { label: 'API Docs', href: '/settings/api-docs' },
-    ]
-  },
-]
-
 interface SidebarProps {
   user: UserProfile
   collapsed?: boolean
@@ -143,11 +53,16 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
-  const [openGroups, setOpenGroups] = useState<string[]>(['Purchase', 'Vendors'])
+  const [openGroups, setOpenGroups] = useState<string[]>([])
 
-  // Auto-expand group containing active route
+  const role = user.role as UserRole
+  const primary = primaryNavFor(role)
+  const manage = manageNavFor(role)
+  const filteredNav: NavEntry[] = [...primary, ...manage]
+
+  // Auto-expand the Manage group containing the active route
   useEffect(() => {
-    const activeNav = NAV.find(item => item.children?.some(c => pathname.startsWith(c.href)))
+    const activeNav = manage.find(item => item.children.some(c => pathname.startsWith(c.href)))
     if (activeNav && !openGroups.includes(activeNav.label)) {
       setOpenGroups(prev => [...prev, activeNav.label])
     }
@@ -168,11 +83,6 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
     await supabase.auth.signOut()
     router.push('/login')
   }
-
-  const baseNav = user.role === 'vendor' ? VENDOR_NAV : NAV
-  const filteredNav = baseNav.filter(item =>
-    !item.roles || item.roles.includes(user.role)
-  )
 
   return (
     <>
@@ -255,7 +165,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
           <div className="space-y-0.5">
             {filteredNav.map(item => {
               // Direct link item
-              if (item.href) {
+              if (!isNavGroup(item)) {
                 const active = pathname === item.href
                 return (
                   <motion.div key={item.href} whileHover={{ x: 2 }} transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
@@ -271,7 +181,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                         : 'text-blue-200/80 hover:bg-white/[0.08] hover:text-white'
                     )}
                   >
-                    <span className={cn('flex-shrink-0 transition-colors', active ? 'text-teal-500' : '')}>{item.icon}</span>
+                    <span className={cn('flex-shrink-0 transition-colors', active ? 'text-teal-500' : '')}>{ICONS[item.icon]}</span>
                     {!collapsed && <span>{item.label}</span>}
                   </Link>
                   </motion.div>
@@ -280,13 +190,13 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
 
               // Group item
               const isOpen = openGroups.includes(item.label) && !collapsed
-              const hasActiveChild = item.children?.some(c => pathname.startsWith(c.href))
+              const hasActiveChild = item.children.some(c => pathname.startsWith(c.href))
 
               return (
                 <div key={item.label}>
                   <button
                     onClick={() => {
-                      if (collapsed && item.children?.[0]) {
+                      if (collapsed && item.children[0]) {
                         router.push(item.children[0].href)
                       } else {
                         toggleGroup(item.label)
@@ -302,7 +212,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                         : 'text-blue-200/80 hover:bg-white/[0.08] hover:text-white'
                     )}
                   >
-                    <span className="flex-shrink-0">{item.icon}</span>
+                    <span className="flex-shrink-0">{ICONS[item.icon]}</span>
                     {!collapsed && (
                       <>
                         <span className="flex-1">{item.label}</span>
@@ -322,7 +232,7 @@ export default function Sidebar({ user, collapsed = false, onToggleCollapse, mob
                       )}
                     >
                       <div className="ml-5 mt-1 mb-1 space-y-0.5 border-l-2 border-white/[0.08] pl-3">
-                        {item.children?.map(child => {
+                        {item.children.map(child => {
                           const active = pathname === child.href
                           return (
                             <Link

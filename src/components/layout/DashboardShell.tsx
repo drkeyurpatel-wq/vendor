@@ -6,7 +6,7 @@ import TopBar from './TopBar'
 import OfflineIndicator from '@/components/ui/OfflineIndicator'
 import CommandPalette from '@/components/ui/CommandPalette'
 import MobileBottomNav from './MobileBottomNav'
-import { UserProfile } from '@/types/database'
+import { UserProfile, type UserRole } from '@/types/database'
 import { registerServiceWorker, syncOfflineQueue } from '@/lib/service-worker'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { Toaster } from 'react-hot-toast'
@@ -81,7 +81,7 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
 
       {/* Command Palette — available everywhere */}
       <CommandPalette />
-      <MobileBottomNav />
+      <MobileBottomNav role={user.role as UserRole} />
       <Toaster position="top-right" toastOptions={{ duration: 4000, style: { fontSize: '14px' } }} />
     </div>
   )
